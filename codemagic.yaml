@@ -76,7 +76,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - user@example.com
+          - jenever.shishiwu@gmail.com
         notify:
           success: true
           failure: true
