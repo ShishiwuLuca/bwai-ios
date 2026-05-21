@@ -22,7 +22,7 @@ workflows:
         XCODE_SCHEME: App
         XCODE_PROJECT: ios/App/App.xcodeproj
         # 可选：App Store Connect → 应用 → App 信息 → Apple ID（纯数字），用于自动递增 Build 号
-        # APP_STORE_APPLE_ID: "0000000000"
+        APP_STORE_APPLE_ID: "6771700743"
       node: 22
       xcode: latest
 
