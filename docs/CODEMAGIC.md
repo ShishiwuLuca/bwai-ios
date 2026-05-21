@@ -90,6 +90,14 @@
 - Key 权限是否含 App Manager  
 - Bundle ID `com.bwai.io` 是否已在 Developer 后台创建  
 
+### `No matching profiles found for bundle identifier ... app_store`
+
+`codemagic.yaml` 里配置了 **`ios_signing`**，但 **Codemagic → Code signing identities** 里没有上传匹配的 App Store 描述文件。
+
+**处理：** 使用本仓库当前配置（已去掉 `ios_signing`，改由 `fetch-signing-files` 自动创建证书与描述文件）。若仍报错，请确认 Apple **Identifiers** 中已注册 **`com.bwai.io`**。
+
+参考：[Codemagic Common iOS issues](https://docs.codemagic.io/troubleshooting/common-ios-issues/)
+
 ### `Cannot save Signing Certificates without certificate private key`
 
 Apple 开发者后台里已有 **Distribution 证书**（例如在 Xcode 或其他 Mac 上创建的），Codemagic **拿不到对应私钥**。

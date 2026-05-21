@@ -12,11 +12,9 @@ workflows:
       app_store_connect: bwai_asc
 
     environment:
-      # 与 Codemagic「Code signing identities」中已上传/生成的证书匹配时可二选一；
-      # 当前脚本用 --create + 临时私钥新建证书，见 Fetch signing files 步骤。
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.bwai.io
+      # 勿在此处配置 ios_signing：未在 Codemagic 上传描述文件时会报
+      # No matching profiles found for bundle identifier ... app_store
+      # 签名由下方 fetch-signing-files + use-profiles 自动完成。
       vars:
         BUNDLE_ID: com.bwai.io
         XCODE_SCHEME: App
@@ -52,14 +50,21 @@ workflows:
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create \
+            --strict-match-identifier \
+            --delete-stale-profiles \
             --certificate-key=@file:/tmp/cm_distribution_key.pem
           rm -f /tmp/cm_distribution_key.pem
+          echo "Provisioning profiles downloaded:"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" 2>/dev/null || true
 
       - name: Add certificates to keychain
         script: keychain add-certificates
 
       - name: Apply provisioning profiles to Xcode project
-        script: xcode-project use-profiles
+        script: |
+          xcode-project use-profiles \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --archive-method app-store
 
       - name: Set iOS build number
         script: |
