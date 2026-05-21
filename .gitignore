@@ -1,0 +1,59 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+
+# 密钥与本地签名（勿提交）
+android/fundex.jks
+android/keystore.properties
+.env.local
+
+dist
+dist-ssr
+output
+coverage
+*.local
+OTA
+PackageAndroid
+PackageIOS
+android/app/build
+ios/build
+ios/signing.properties
+ios/App/build
+ios/App/App/public
+android/app/src/main/assets/public
+android/app/release
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
+
+.eslintcache
+
+# Cypress
+/cypress/videos/
+/cypress/screenshots/
+
+# Vitest
+__screenshots__/
+
+# Vite
+*.timestamp-*-*.mjs
+
+# Locale sync script cache
+scripts/.locale-translate-cache.json
+scripts/.locale-repair-en-cache.json
+scripts/.locale-en-to-target-cache.json

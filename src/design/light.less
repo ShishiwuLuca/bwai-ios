@@ -1,0 +1,21 @@
+// light 白天模式配置（与 dark.less 对应，保证日夜切换兼容）
+html[data-theme='light'] {
+  // body 背景色
+  --van-background: #f5f6fa;
+  --van-background-2: var(--van-background);
+
+  // card 背景色
+  --van-card-background: #ffffff;
+
+  // card 渐变背景色
+  --van-card-linear-background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%);
+
+  // 边框颜色
+  --van-border-color: #e5e7eb;
+
+  // 输入框背景色
+  --van-field-background: #f0f2f5;
+
+  // TabBar 渐变背景色
+  --van-tabbar-linear-background: linear-gradient(180deg, #ffffff 0%, #f8f9fc 100%);
+}

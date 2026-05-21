@@ -1,0 +1,97 @@
+apply plugin: 'com.android.application'
+
+import java.text.SimpleDateFormat
+
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def resolveAppName = {
+    try {
+        def stringsXml = file('src/main/res/values/strings.xml')
+        if (!stringsXml.exists()) return 'BWAI'
+        def xml = new groovy.xml.XmlSlurper().parse(stringsXml)
+        def appNameNode = xml.string.find { it.@name?.text() == 'app_name' }
+        def appName = appNameNode?.text()?.trim()
+        return appName ? appName : 'BWAI'
+    } catch (Exception ignored) {
+        return 'BWAI'
+    }
+}
+
+android {
+    namespace = "com.bwai.io"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.bwai.io"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0.1"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.release
+            }
+        }
+    }
+
+    // 生产 APK 命名：App名称-V版本号-release-年月日时分秒.apk
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == 'release') {
+            variant.outputs.all { output ->
+                def version = variant.versionName ?: defaultConfig.versionName ?: "1.0.0"
+                def timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
+                def appName = resolveAppName()
+                outputFileName = "${appName}-V${version}-release-${timestamp}.apk"
+            }
+        }
+    }
+}
+
+dependencies {
+    // 本地 jar/aar：避免 flatDir（AGP 会告警且不支持元数据解析）
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation fileTree(dir: '../capacitor-cordova-android-plugins/src/main/libs', include: ['*.jar', '*.aar'])
+    implementation "androidx.activity:activity:$androidxActivityVersion"
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception ignored) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

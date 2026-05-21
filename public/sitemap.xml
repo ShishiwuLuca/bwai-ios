@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- 首页 -->
+  <url>
+    <loc>https://h5.daobit.com</loc>
+    <lastmod>2025-08-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 主要功能页面 -->
+  <url>
+    <loc>https://h5.daobit.com/Collect</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Contract</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Blindbox</loc>
+    <lastmod>2025-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Welfare</loc>
+    <lastmod>2025-08-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 交易相关页面 -->
+  <url>
+    <loc>https://h5.daobit.com/ContractMarket/BTCUSDT</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/ContractMarket/ETHUSDT</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/ContractMarket/BNBUSDT</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/LeverMarket/BTCUSDT</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/SpittoonsMarket/BTCUSDT</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/GridMarket/BTCUSDT</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 市场行情页面 -->
+  <url>
+    <loc>https://h5.daobit.com/MarketLine/BTC</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/MarketLine/ETH</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/MarketLine/BNB</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 用户相关页面 -->
+  <url>
+    <loc>https://h5.daobit.com/Login</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/register</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/ForgetPwd</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/UserCenter</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Personal</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 资产和财务页面 -->
+  <url>
+    <loc>https://h5.daobit.com/Assets</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/deposit</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/withdraw</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/transfer</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 安全设置页面 -->
+  <url>
+    <loc>https://h5.daobit.com/Security</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Authentication</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 邀请和推广页面 -->
+  <url>
+    <loc>https://h5.daobit.com/my_invite</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/InviteList</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 工具和帮助页面 -->
+  <url>
+    <loc>https://h5.daobit.com/ContractCalculator</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/ContractRight</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/ContractInformation</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 信息页面 -->
+  <url>
+    <loc>https://h5.daobit.com/NoticeList</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Article</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Message</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 搜索和导航 -->
+  <url>
+    <loc>https://h5.daobit.com/Search</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Optional</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 快捷功能 -->
+  <url>
+    <loc>https://h5.daobit.com/quick_buy_crypto</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/CryptoDocument</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- 其他重要页面 -->
+  <url>
+    <loc>https://h5.daobit.com/ContactUs</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/about</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Download</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Settings</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- 借贷相关 -->
+  <url>
+    <loc>https://h5.daobit.com/LoanMoney/BTC</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/LoanMoney/ETH</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 交割相关 -->
+  <url>
+    <loc>https://h5.daobit.com/Delivery/BTCUSDT</loc>
+      <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://h5.daobit.com/Delivery/ETHUSDT</loc>
+    <lastmod>2025-08-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>

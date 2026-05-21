@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path name="my_images" path="." />
+    <cache-path name="my_cache_images" path="." />
+    <!-- APK 整包更新：存于 getFilesDir() 子目录，供 FileProvider 暴露给安装器 / Play 扫描 -->
+    <files-path name="internal_files" path="." />
+</paths>

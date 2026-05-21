@@ -1,0 +1,6 @@
+# 复制为 ios/signing.properties 并填写（该文件勿提交仓库）
+# Team ID：Apple Developer → Membership → Team ID（10 位字母数字）
+teamId=XQK44YQFW8
+
+# 导出方式：app-store（上架用，默认）| ad-hoc | development | enterprise
+exportMethod=app-store

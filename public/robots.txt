@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# 允许爬取所有页面
+# 不设置任何Disallow规则，允许搜索引擎爬取所有内容
+
+# 爬取延迟（秒）
+Crawl-delay: 1
+
+# Sitemap位置
+Sitemap: https://h5.daobit.com/sitemap.xml

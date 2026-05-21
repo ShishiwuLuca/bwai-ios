@@ -1,0 +1,82 @@
+# BWAI / fundex — Codemagic iOS 云打包（产出 .ipa）
+# 控制台配置说明见 docs/CODEMAGIC.md
+# 将 integrations.app_store_connect 的名称改为你团队在 Codemagic 里创建的 API Key 名称
+
+workflows:
+  bwai-ios-release:
+    name: BWAI iOS Release (.ipa)
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: bwai_asc
+
+    environment:
+      vars:
+        BUNDLE_ID: com.bwai.io
+        XCODE_SCHEME: App
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        # 可选：App Store Connect → 应用 → App 信息 → Apple ID（纯数字），用于自动递增 Build 号
+        # APP_STORE_APPLE_ID: "0000000000"
+      node: 22
+      xcode: latest
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          set -e
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+          pnpm install --frozen-lockfile
+
+      - name: Build web (app mode)
+        script: pnpm run build-only:app
+
+      - name: Capacitor sync iOS
+        script: npx cap sync ios
+
+      - name: Set up keychain
+        script: keychain initialize
+
+      - name: Fetch signing files (App Store)
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+
+      - name: Apply provisioning profiles to Xcode project
+        script: xcode-project use-profiles
+
+      - name: Set iOS build number
+        script: |
+          set -e
+          cd ios/App
+          if [ -n "${APP_STORE_APPLE_ID:-}" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
+            LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo "")
+            if [ -n "$LATEST" ]; then
+              agvtool new-version -all $(($LATEST + 1))
+              exit 0
+            fi
+          fi
+          agvtool new-version -all "$BUILD_NUMBER"
+
+      - name: Build ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+        notify:
+          success: true
+          failure: true

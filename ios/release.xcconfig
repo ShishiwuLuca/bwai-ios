@@ -1,0 +1,2 @@
+// Release：上架包关闭 Capacitor 调试注入，避免带调试开关归档
+CAPACITOR_DEBUG = false
