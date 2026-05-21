@@ -90,6 +90,16 @@
 - Key 权限是否含 App Manager  
 - Bundle ID `com.bwai.io` 是否已在 Developer 后台创建  
 
+### `Cannot save Signing Certificates without certificate private key`
+
+Apple 开发者后台里已有 **Distribution 证书**（例如在 Xcode 或其他 Mac 上创建的），Codemagic **拿不到对应私钥**。
+
+**处理方式（任选其一）：**
+
+1. **重新构建**（推荐）：仓库 `codemagic.yaml` 已改为 `--create` 时自动生成临时私钥并创建新证书；若仍失败，见下条。  
+2. **删掉旧分发证书**：打开 [Certificates](https://developer.apple.com/account/resources/certificates/list) → 撤销不用的 **Apple Distribution**（最多保留 3 个）→ 再 **Start new build**。  
+3. **在 Codemagic 手动生成证书**：**Settings** → **Code signing identities** → **iOS certificates** → **Generate certificate**（选 Distribution，API Key 选 `bwai_asc`）→ 按提示上传 `.p12` → 再构建。
+
 ### 证书数量已满
 
 Apple 分发证书上限 3 个。在 [Developer Certificates](https://developer.apple.com/account/resources/certificates/list) 删除旧 **Apple Distribution** 证书后重试，或在 Codemagic **Code signing identities** 上传已有 `.p12`。

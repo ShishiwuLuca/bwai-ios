@@ -12,6 +12,11 @@ workflows:
       app_store_connect: bwai_asc
 
     environment:
+      # 与 Codemagic「Code signing identities」中已上传/生成的证书匹配时可二选一；
+      # 当前脚本用 --create + 临时私钥新建证书，见 Fetch signing files 步骤。
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.bwai.io
       vars:
         BUNDLE_ID: com.bwai.io
         XCODE_SCHEME: App
@@ -40,9 +45,15 @@ workflows:
 
       - name: Fetch signing files (App Store)
         script: |
+          set -e
+          # 必须为 --create 提供私钥，否则会尝试复用 Apple 上旧证书（无私钥）并报错：
+          # Cannot save Signing Certificates without certificate private key
+          openssl genrsa -out /tmp/cm_distribution_key.pem 2048
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --certificate-key=@file:/tmp/cm_distribution_key.pem
+          rm -f /tmp/cm_distribution_key.pem
 
       - name: Add certificates to keychain
         script: keychain add-certificates
