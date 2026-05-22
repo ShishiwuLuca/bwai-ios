@@ -14,6 +14,8 @@ node_modules
 android/fundex.jks
 android/keystore.properties
 .env.local
+*.p8
+AuthKey_*.p8
 
 dist
 dist-ssr
