@@ -95,13 +95,10 @@
   import { ref, computed, onBeforeMount, watch } from 'vue';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { Tab, Tabs, Cell, Badge, Divider, PullRefresh, List, Empty, BackTop } from 'vant';
-  import { syncAppIconBadgeWithUnreadCount } from '/@/utils/appIconBadge';
-  import { applyAppIconBadgeFromMessageUnreadCount } from '/@/utils/appNativeNotify';
   import {
     getNoticePage,
     getMyMessage,
     updateMessageReadStatus,
-    getMyMessageUnreadCount,
     updateNoticeReadStatus
   } from '/@/service/Notice';
 
@@ -321,12 +318,7 @@
       return;
     }
 
-    updateMessageReadStatus({ ids: ShowData }).then((res) => {
-      const { code } = res;
-      if (Number(code) === 0) {
-        void syncAppIconBadgeWithUnreadCount();
-      }
-    });
+    updateMessageReadStatus({ ids: ShowData }).then(() => {});
   };
 
   // 更新公告已读状态
@@ -349,24 +341,9 @@
     });
   };
 
-  // 获取我的消息未读数量
-
-  /** 提示与弹窗：getMyMessageUnreadCountData */
-  const getMyMessageUnreadCountData = (): void => {
-    if (!UserStore.getToken) return;
-    getMyMessageUnreadCount().then((res) => {
-      const { code, data } = res;
-      if (Number(code) === 0) {
-        NoticeTypeList.value[1].badge = data;
-        void applyAppIconBadgeFromMessageUnreadCount(data);
-      }
-    });
-  };
-
   // 初始化
   onBeforeMount((): void => {
     getNoticeList();
-    getMyMessageUnreadCountData();
   });
 </script>
 

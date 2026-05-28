@@ -14,7 +14,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppCardLinear: typeof import('./src/components/AppCardLinear/AppCardLinear.vue')['default']
     AppTabBar: typeof import('./src/components/AppTabBar/AppTabBar.vue')['default']
-    AppUpdateDialog: typeof import('./src/components/AppUpdateDialog/AppUpdateDialog.vue')['default']
     CheckUpdate: typeof import('./src/components/CheckUpdate.vue')['default']
     CountryPicker: typeof import('./src/components/CountryPicker/CountryPicker.vue')['default']
     Loading: typeof import('./src/components/Loading.vue')['default']
@@ -30,7 +29,6 @@ declare module 'vue' {
 declare global {
   const AppCardLinear: typeof import('./src/components/AppCardLinear/AppCardLinear.vue')['default']
   const AppTabBar: typeof import('./src/components/AppTabBar/AppTabBar.vue')['default']
-  const AppUpdateDialog: typeof import('./src/components/AppUpdateDialog/AppUpdateDialog.vue')['default']
   const CheckUpdate: typeof import('./src/components/CheckUpdate.vue')['default']
   const CountryPicker: typeof import('./src/components/CountryPicker/CountryPicker.vue')['default']
   const Loading: typeof import('./src/components/Loading.vue')['default']

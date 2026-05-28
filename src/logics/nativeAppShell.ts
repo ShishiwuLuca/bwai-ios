@@ -1,6 +1,5 @@
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { initAppUpdateInstallLifecycleListeners, notifyAppReady } from '/@/utils/appUpdate';
 // 与页面中 `--safe-area-inset-*` 配套的兜底值（底栏勿写死，避免与 Tabbar+env 叠加过高）
 
 /** BOTTOM_SAFE_AREA_FALLBACK_PX */
@@ -25,7 +24,6 @@ export const applyNativeSafeArea = (): void => {
 /** initNativeShell */
 export const initNativeShell = (): void => {
   if (!Capacitor.isNativePlatform()) return;
-  initAppUpdateInstallLifecycleListeners();
   try {
     // 沉浸式状态栏：内容延伸至状态栏下
     void StatusBar.setOverlaysWebView({ overlay: true });
@@ -34,7 +32,6 @@ export const initNativeShell = (): void => {
   } catch (e) {
     console.warn('[initNativeShell] StatusBar:', e);
   }
-  void notifyAppReady().catch((e) => console.warn('[initNativeShell] notifyAppReady:', e));
 };
 
 /** 方法：hideSplashScreenIfNative */

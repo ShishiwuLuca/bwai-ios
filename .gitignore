@@ -12,6 +12,7 @@ node_modules
 
 # 密钥与本地签名（勿提交）
 android/fundex.jks
+android/*.keystore
 android/keystore.properties
 .env.local
 *.p8

@@ -41,7 +41,6 @@ export interface BWAIAppControlPlugin {
   openApkInstaller(options: { filePath: string }): Promise<{ ok?: boolean; via?: string }>;
   /**
    * Android：在主线程延迟后结束当前进程（不自动重启）。
-   * 须在调用 `CapacitorUpdater.set` **之前**调用，否则 `set` 重载 WebView 后 JS 定时器可能无法执行。
    */
   scheduleProcessExit(options?: { delayMs?: number }): Promise<void>;
 

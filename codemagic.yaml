@@ -1,6 +1,6 @@
-# BWAI / fundex — Codemagic iOS 云打包（产出 .ipa）
+# BWAI / fundex — Codemagic iOS 云打包（产出 .ipa 并自动上传 TestFlight）
 # 控制台配置说明见 docs/CODEMAGIC.md
-# 将 integrations.app_store_connect 的名称改为你团队在 Codemagic 里创建的 API Key 名称
+# integrations.app_store_connect 须与 Codemagic → Team integrations 里 API Key 名称一致（默认 bwai_asc）
 
 workflows:
   bwai-ios-release:
@@ -96,3 +96,13 @@ workflows:
         notify:
           success: true
           failure: true
+      # 构建成功后 post-processing：上传 ipa → App Store Connect → TestFlight Beta 审核
+      # 详见 https://docs.codemagic.io/yaml-publishing/app-store-connect/
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
+        submit_to_app_store: false
+        # 外部测试组名（须与 App Store Connect → TestFlight 里组名完全一致），按需取消注释：
+        # beta_groups:
+        #   - 你的外部测试组名称

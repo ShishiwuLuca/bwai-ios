@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * OTA：{@link #scheduleProcessExit}；安装包：{@link #openApkInstaller} 优先 {@link PackageInstaller.Session}（避免
+ * 安装包：{@link #openApkInstaller} 优先 {@link PackageInstaller.Session}（避免
  * Play Verify 对第三方 content 路径报 {@code DOWNLOAD_FILE_NOT_FOUND}），失败则回退 Intent。
  */
 @CapacitorPlugin(name = "BWAIAppControl")

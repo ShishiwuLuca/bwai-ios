@@ -49,9 +49,6 @@ enum NoticeApi {
   // 更新消息已读状态
   UpdateMessageReadStatus = '/system/user-message/read',
 
-  // 我的消息未读数量
-  GetMyMessageUnreadCount = '/system/user-message/unread-count',
-
   // 更新公告已读状态
   UpdateNoticeReadStatus = '/marketing/notice/batch-mark-as-read'
 }
@@ -84,14 +81,6 @@ export const getMyMessage = (params: any) => {
  */
 export const updateMessageReadStatus = (data: any) => {
   return defHttp.post({ url: NoticeApi.UpdateMessageReadStatus, data });
-};
-
-/**
- * 获取我的消息未读数量
- * GET /system/user-message/unread-count
- */
-export const getMyMessageUnreadCount = () => {
-  return defHttp.get<NoticeScalarResult<number>>({ url: NoticeApi.GetMyMessageUnreadCount });
 };
 
 /**

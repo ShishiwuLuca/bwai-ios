@@ -43,7 +43,7 @@ English: [README.en.md](./README.en.md)
 - **主题**：亮 / 暗模式；Vant `ConfigProvider` 与 Less 变量（`src/design/`）；原生状态栏与安全区（`viewport-fit=cover`）
 - **布局**：`index.html` 内 **rem** 根字号脚本，适配窄屏
 - **国际化**：`LocaleModal`；`src/locales/lang/` 下约 **39 种** JSON + Vant 语言包；可选 RTL
-- **更新**：`CheckUpdates`、`AppUpdateDialog`；原生启动后 **HTTP 版本检测**（`serverAppVersionCheck`）、Capgo OTA、商店更新、Android APK 安装（**不再通过 WebSocket 推送更新**）
+- **更新**：`CheckUpdates`（H5 静态资源轮询，默认关闭）；应用内升级弹窗已移除
 - **角标**：未读与桌面角标（`@capawesome/capacitor-badge`）
 - **埋点**：启动日志（`recordStartupLog`）
 - **404**：通配路由与 `EmptyView`
@@ -61,21 +61,15 @@ English: [README.en.md](./README.en.md)
 
 ---
 
-## 三、更新与安装包策略（`src/utils/appUpdate.ts` 等）
+## 三、原生能力
 
-| 类型 | 行为摘要 |
-| --- | --- |
-| **OTA（资源包）** | 服务端下发 zip，走 `CapacitorUpdater`；`set` 成功后再清理旧 bundle |
-| **APK（安装包）** | Session 安装优先，失败走 Intent；安装成功后再删本地 APK |
-| **版本检测** | 原生冷启动约 2s 后调用 `checkServerAppVersion`（HTTP），用户也可通过更新弹窗触发 |
-
-自定义原生插件：**`BWAIAppControl`** — ROM 信息、APK 安装、进程退出调度等。
+自定义原生插件：**`BWAIAppControl`** — ROM 信息、设备上报等（APK 侧载安装能力保留在原生层，前端未再接入升级弹窗）。
 
 ---
 
 ## 四、Capacitor 与原生插件
 
-Web 资源目录：`dist`。`capacitor.config.ts` 含 **CapacitorHttp**、Splash、StatusBar、Badge、Capgo Updater、FileTransfer、Filesystem 等。
+Web 资源目录：`dist`。`capacitor.config.ts` 含 **CapacitorHttp**、Splash、StatusBar、Badge、FileTransfer、Filesystem 等。
 
 ---
 
@@ -138,7 +132,6 @@ pnpm preview
 | --- | --- |
 | `pnpm cap:sync` | 同步 Web 产物到原生 |
 | `pnpm cap:android` / `pnpm cap:ios` | 同步并打开 IDE |
-| `pnpm build:ota` | app 模式构建 + OTA zip |
 | `pnpm build:android` / `pnpm build:android:release` | 构建 + Gradle → APK（`PackageAndroid/`） |
 | `pnpm build:ios:release` | app 构建 + sync + **Mac 上** 导出 `.ipa`（`PackageIOS/`） |
 | `pnpm build:ios:ipa` | 仅导出 `.ipa`（需已 `cap sync ios`，**仅 macOS**） |

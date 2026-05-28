@@ -22,7 +22,6 @@ import AppTabBarComp from './AppTabBar/AppTabBar.vue';
 import CountryPickerComp from './CountryPicker/CountryPicker.vue';
 
 // APP 更新弹窗
-import AppUpdateDialogComp from './AppUpdateDialog/AppUpdateDialog.vue';
 
 // 语言选择弹窗
 import LocaleModalComp from './LocaleModal.vue';
@@ -47,9 +46,6 @@ export const AppTabBar = withInstall(AppTabBarComp);
 
 /** CountryPicker */
 export const CountryPicker = withInstall(CountryPickerComp);
-
-/** AppUpdateDialog */
-export const AppUpdateDialog = withInstall(AppUpdateDialogComp);
 
 /** LocaleModal */
 export const LocaleModal = withInstall(LocaleModalComp);

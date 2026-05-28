@@ -32,9 +32,6 @@ import { setupRouter, router } from '/@/router';
 // 国际化
 import { setupI18n } from '/@/locales/setupI18n';
 
-// 原生：启动后通知应用已准备好
-import { notifyAppReady } from '/@/utils/appUpdate';
-
 // 初始化应用配置
 import { initAppConfigStore } from '/@/logics/initAppConfig';
 
@@ -49,9 +46,6 @@ import { applyNativeStatusBarForTheme } from '/@/hooks/AppStatusBarUtils';
 
 // 原生邀请码 deep link
 import { setupNativeInviteDeepLink } from '/@/logics/nativeInviteDeepLink';
-
-// 原生：启动后服务端版本检测（checkVersion）
-import { scheduleNativePostBootUpdates } from '/@/logics/nativePostBootUpdates';
 
 // 马甲包配置（冷启动路由判断用）
 import { ensureVestConfigLoaded } from '/@/utils/vestConfig';
@@ -112,10 +106,7 @@ const bootstrapApp = async () => {
   // 原生环境：Vue 挂载完成后再隐藏启动图，避免启动图和首屏内容之间出现白屏
   await hideSplashScreenIfNative();
 
-  // 启动图关闭后再 ack 一次：Capgo OTA reload 后 native 侧可能在 WebView 首帧后才挂好「等 notifyAppReady」，
-  // 仅 initNativeShell 里过早调用可能被错过，导致超时回滚与黑屏。
   if (Capacitor.isNativePlatform()) {
-    void notifyAppReady();
     void applyNativeStatusBarForTheme(useSystemStoreWithOut().getDarkMode);
   }
 };
@@ -128,6 +119,3 @@ initNativeShell();
 
 // 启动应用
 void bootstrapApp();
-
-// 启动后检查服务端版本（仅原生环境，懒加载避免启动时插件异常闪退）
-scheduleNativePostBootUpdates();

@@ -163,8 +163,6 @@ enum SystemApi {
   MultipartUpload = '/infra/file/multipart/upload',
   /** 分片上传：合并完成 */
   MultipartComplete = '/infra/file/multipart/complete',
-  // 获取法币汇率
-  GetFiatExchangeRate = '/system/exchange-rate/get',
   // 获取充值/提币/网络类型
   GetWithdrawalNetworkType = '/system/asset-selector/options'
 }
@@ -281,16 +279,6 @@ export const completeMultipartUpload = (
     { url: SystemApi.MultipartComplete, data, timeout: 0, ...axiosConfig },
     { errorMessageMode: 'none' }
   );
-};
-/**
- * 获取法币汇率
- * GET /system/exchange-rate/get
- */
-export const getFiatExchangeRate = (params: any) => {
-  return defHttp.post<SystemCommonResult<any[]>>({
-    url: SystemApi.GetFiatExchangeRate,
-    data: params
-  });
 };
 /**
  * 获取充值/提币/网络类型

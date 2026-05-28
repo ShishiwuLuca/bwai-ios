@@ -155,7 +155,6 @@ export const useUserStore = defineStore(StoreKeyName, {
     LoginOut(): void {
       this.Token = null;
       this.UserInfo = {};
-      void import('/@/utils/appNativeNotify').then((m) => m.resetNativeUpdateReminderOnLogout());
       void import('/@/utils/appIconBadge').then((m) => {
         void m.clearAppIconBadge().catch(() => {});
       });

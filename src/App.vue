@@ -12,7 +12,6 @@
     <Loading />
   </ConfigProvider>
   <CheckUpdates v-if="isOpenDefaultCheckUpdate" />
-  <AppUpdateDialog @update="onAppUpdateDialogPerformUpdate" />
 </template>
 
 <script setup lang="ts">
@@ -26,9 +25,9 @@
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
-  import { CheckUpdates, Loading, AppUpdateDialog, LocaleModal } from '/@/components';
+  import { CheckUpdates, Loading, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
-  import { initAppNativeIntegrationWatchers, onAppUpdateDialogPerformUpdate, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
+  import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
 
   /** 用户：UserStore */
   const UserStore = useUserStoreWithOut();
@@ -172,9 +171,6 @@
     // 获取国家区号列表
     SystemStore.setCountryList();
 
-    // 获取法币汇率
-    SystemStore.setFiatExchangeRate();
-
     SystemStore.setLoading(true);
 
     // 如果已登录则获取用户信息
@@ -196,7 +192,7 @@
     // 厂商 / 型号 / 定制 UI（供启动日志、版本检测与 HTTP 头复用）
     await ensureDeviceClientReportFields();
 
-    await runAppNativePostMountTasks(!!isLogin.value);
+    await runAppNativePostMountTasks();
   });
 </script>
 

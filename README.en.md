@@ -36,7 +36,7 @@ This workspace (`fundex`) is a **community + account** slice: feed and profile a
 ### 1.5 Shell & globals
 
 - Light/dark theme, i18n (~39 locales), RTL
-- Updates via **HTTP version check**, Capgo OTA, store / APK flows (**not** WebSocket push)
+- H5 update check via `CheckUpdates` (off by default); in-app upgrade dialog removed
 - App icon badge, startup telemetry, `EmptyView` 404
 
 ---

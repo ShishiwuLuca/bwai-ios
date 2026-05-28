@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
 import { isHiddenHomeEntryEnabled } from '/@/utils/hiddenHomeEntry';
-import { ensureVestConfigLoaded } from '/@/utils/vestConfig';
+import { ensureVestConfigLoaded, isVestHomeMode } from '/@/utils/vestConfig';
 
 // 路由树
 
@@ -212,8 +212,8 @@ router.beforeEach(async (_to, _from) => {
     _to.path === '/' || _to.path === '/Community' || _to.name === 'Community';
 
   if (isInitialNavigation && isCommunityEntry) {
-    const vest = await ensureVestConfigLoaded();
-    if (vest?.status === 1) {
+    await ensureVestConfigLoaded();
+    if (isVestHomeMode()) {
       return { name: 'Home', replace: true };
     }
   }

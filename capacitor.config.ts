@@ -41,25 +41,6 @@ const config: CapacitorConfig = {
       backgroundColor: '#00000000',
       style: 'DARK'
     },
-    /**
-     * 应用更新：使用 Capgo 云时在 Capgo 后台配置；自托管时填 channelUrl，例如：
-     * channelUrl: 'https://your-server.com/api/channel_self',
-     * 应用就绪超时（毫秒），超时未调用 notifyAppReady 可能触发回滚
-     * appReadyTimeout: 20000
-     */
-    CapacitorUpdater: {
-      // 关闭原生轮询 getLatest：本应用由服务端 `/app-api/.../version-check` 下发 OTA 直链并走
-      // `downloadAndApplyOTAFromUrl`（见 `serverAppVersionCheck`）。与 autoUpdate 并行会反复请求
-      // Capgo，开发期频繁冷启动时易 429（rate_limit_exceeded）。若你**仅**依赖 Capgo Channel、
-      // 从不走服务端直链，再把此项改回 true。
-      autoUpdate: false,
-      /** 成功切换 bundle 后由原生删旧包（与 `appUpdate.ts` 中 set 前 JS 侧 `delete` 互补） */
-      autoDeletePrevious: true,
-      // 关闭统计上报，减轻对 plugin.capgo.app 的请求量（与 429 无关但可略减负载）
-      statsUrl: '',
-      // 应用就绪超时（毫秒），超时未调用 notifyAppReady 可能触发回滚（首包较大 / GC 卡顿时适当放宽）
-      appReadyTimeout: 60000
-    },
     // 文件传输插件
     FileTransfer: {
       // 是否启用文件传输

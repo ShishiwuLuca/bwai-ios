@@ -83,9 +83,6 @@ interface LocalNotificationsPlugin {
   }>;
 }
 
-/** 新版本提醒专用 ID：重复检测时先取消再发，避免通知栏堆叠多条 */
-const APP_UPDATE_LOCAL_NOTIFICATION_ID = 200182001;
-
 /** 拉取接口数据（loadLocalNotificationsPlugin） */
 const loadLocalNotificationsPlugin = async (): Promise<LocalNotificationsPlugin | null> => {
   if (!isNative) return null;
@@ -95,44 +92,6 @@ const loadLocalNotificationsPlugin = async (): Promise<LocalNotificationsPlugin 
     LocalNotifications: LocalNotificationsPlugin;
   } | null;
   return mod?.LocalNotifications ?? null;
-};
-
-/** 方法：notifyAppUpdateAvailableNative */
-export const notifyAppUpdateAvailableNative = async (
-  title: string,
-  body: string
-): Promise<void> => {
-  const plugin = await loadLocalNotificationsPlugin();
-  if (!plugin) return;
-  let status = (await plugin.checkPermissions().catch(() => ({ display: 'denied' }))).display;
-  if (status !== 'granted') {
-    status = (await plugin.requestPermissions().catch(() => ({ display: 'denied' }))).display;
-  }
-  if (status !== 'granted') return;
-  const safeBody = body.trim().slice(0, 500);
-  await plugin
-    .cancel({ notifications: [{ id: APP_UPDATE_LOCAL_NOTIFICATION_ID }] })
-    .catch(() => {});
-  await plugin.schedule({
-    notifications: [
-      {
-        id: APP_UPDATE_LOCAL_NOTIFICATION_ID,
-        title: title.trim().slice(0, 120),
-        body: safeBody || title.trim().slice(0, 120),
-        extra: { kind: 'app_version_update' },
-        schedule: { at: new Date(Date.now() + 400) }
-      }
-    ]
-  });
-};
-
-/** 方法：cancelAppUpdateAvailableNativeNotification */
-export const cancelAppUpdateAvailableNativeNotification = async (): Promise<void> => {
-  const plugin = await loadLocalNotificationsPlugin();
-  if (!plugin) return;
-  await plugin
-    .cancel({ notifications: [{ id: APP_UPDATE_LOCAL_NOTIFICATION_ID }] })
-    .catch(() => {});
 };
 
 /** useAppNotification */
