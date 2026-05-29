@@ -109,19 +109,31 @@
 
 参考：[Codemagic Common iOS issues](https://docs.codemagic.io/troubleshooting/common-ios-issues/)
 
-### `Cannot save Signing Certificates without certificate private key`
+### `Cannot save Signing Certificates without certificate private key` / `409 ... already have a current Distribution certificate`
 
-Apple 开发者后台里已有 **Distribution 证书**（例如在 Xcode 或其他 Mac 上创建的），Codemagic **拿不到对应私钥**。
+Apple 上已有 **Distribution 证书**（Xcode、其他 Mac 或历史 Codemagic 构建创建），但 Codemagic **没有对应私钥**。构建会尝试 `--create` 新证书，若账号已有 3 张分发证书则报 **409**。
 
-**处理方式（任选其一）：**
+**一次性配置（推荐，与当前 `codemagic.yaml` 一致）：**
 
-1. **重新构建**（推荐）：仓库 `codemagic.yaml` 已改为 `--create` 时自动生成临时私钥并创建新证书；若仍失败，见下条。  
-2. **删掉旧分发证书**：打开 [Certificates](https://developer.apple.com/account/resources/certificates/list) → 撤销不用的 **Apple Distribution**（最多保留 3 个）→ 再 **Start new build**。  
-3. **在 Codemagic 手动生成证书**：**Settings** → **Code signing identities** → **iOS certificates** → **Generate certificate**（选 Distribution，API Key 选 `bwai_asc`）→ 按提示上传 `.p12` → 再构建。
+1. **生成分发私钥**（本地任意终端，只做一次）：
+   ```bash
+   openssl genrsa 2048
+   ```
+   复制完整输出（含 `-----BEGIN RSA PRIVATE KEY-----` / `-----END RSA PRIVATE KEY-----`）。
 
-### 证书数量已满
+2. **写入 Codemagic 安全变量**  
+   Codemagic → 本应用 → **Environment variables** → **Add variable**  
+   - **Variable name**：`CERTIFICATE_PRIVATE_KEY`  
+   - **Value**：上一步 PEM 全文  
+   - 勾选 **Secure**（密钥标记）
 
-Apple 分发证书上限 3 个。在 [Developer Certificates](https://developer.apple.com/account/resources/certificates/list) 删除旧 **Apple Distribution** 证书后重试，或在 Codemagic **Code signing identities** 上传已有 `.p12`。
+3. **清理 Apple 旧证书（若报 409）**  
+   打开 [Certificates](https://developer.apple.com/account/resources/certificates/list) → 撤销**不再使用**的 **Apple Distribution**（账号最多 3 张；保留仍在 Xcode/其他环境使用的证书）。
+
+4. **Push 最新 `codemagic.yaml` 并重新 Start new build**  
+   首次成功后会用 `CERTIFICATE_PRIVATE_KEY` 创建一张新 Distribution 证书；之后构建自动复用，无需再改私钥。
+
+**备选：** Codemagic → **Code signing identities** → **iOS certificates** → **Generate certificate**（Distribution，API Key `bwai_asc`）→ 下载 `.p12` 并上传；此时需改 yaml 使用 `ios_signing` 引用证书，与当前 `fetch-signing-files` 流程不同。
 
 ### Build 号冲突（上传 Transporter 时报已存在）
 
