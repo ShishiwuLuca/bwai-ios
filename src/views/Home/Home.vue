@@ -4,7 +4,7 @@
     <iframe
       class="home-page__webview"
       :src="HOME_WEB_URL"
-      title="BWAI"
+      title="BGAI"
       frameborder="0"
       allowfullscreen
       allow="fullscreen; geolocation; microphone; camera"

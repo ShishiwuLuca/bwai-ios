@@ -10,6 +10,12 @@ import {
   showNotify,
   closeToast
 } from 'vant';
+import { isIOSNativeWebView, nudgeIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
+
+/** 同文案短时只弹一次，减轻 iOS WKWebView 上 Toast 合成层堆积 */
+const FAIL_TOAST_THROTTLE_MS = 1500;
+let lastFailToastMessage = '';
+let lastFailToastAt = 0;
 
 // 处理参数
 
@@ -50,7 +56,25 @@ const CreateSuccessToast = (message: string) => {
 
 /** 提示与弹窗：CreateErrorToast */
 const CreateErrorToast = (message: string) => {
-  return showFailToast(message);
+  const now = Date.now();
+  if (message === lastFailToastMessage && now - lastFailToastAt < FAIL_TOAST_THROTTLE_MS) {
+    return;
+  }
+  lastFailToastMessage = message;
+  lastFailToastAt = now;
+
+  if (isIOSNativeWebView()) {
+    closeToast(true);
+  }
+
+  return showFailToast({
+    message,
+    onClose: () => {
+      if (isIOSNativeWebView()) {
+        nudgeIOSWebViewRepaint();
+      }
+    }
+  });
 };
 
 // 加载提示（支持文案或 Vant Toast 配置，便于 forbidClick / duration 等与官方一致）

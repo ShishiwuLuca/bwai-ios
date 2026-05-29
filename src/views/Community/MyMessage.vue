@@ -166,6 +166,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
+  import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
   import defaultAvatar from '/@/assets/avatar.png';
 
   /** 从 useI18n 解构的文案与能力 */
@@ -325,8 +326,8 @@
       } else {
         CreateErrorToast(res?.msg || t('od_op_fail'));
       }
-    } catch {
-      CreateErrorToast(t('apiRequestFailed'));
+    } catch (e: unknown) {
+      notifyApiRequestFailed(e);
     }
   };
 
@@ -445,10 +446,10 @@
         (!reset && mapped.length > 0 && added === 0);
       feedFinished.value = noMore;
       if (!noMore) feedPageNo.value += 1;
-    } catch {
+    } catch (e: unknown) {
       feedFinished.value = true;
       if (reset) list.value = [];
-      CreateErrorToast(t('apiRequestFailed'));
+      notifyApiRequestFailed(e);
     } finally {
       if (myGeneration === listFetchGeneration.value) {
         if (!reset) appendInFlight.value = false;
@@ -492,8 +493,8 @@
       } else {
         CreateErrorToast(res?.msg || t('od_op_fail'));
       }
-    } catch {
-      CreateErrorToast(t('apiRequestFailed'));
+    } catch (e: unknown) {
+      notifyApiRequestFailed(e);
     }
   };
   const onDeleteConversation = async (item: MessageRow) => {

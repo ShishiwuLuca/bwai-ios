@@ -3,7 +3,9 @@
  */
 import { watch } from 'vue';
 import { usePageVisibility } from '@vant/use';
+import { closeToast } from 'vant';
 import { Capacitor } from '@capacitor/core';
+import { isIOSNativeWebView, nudgeIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
 import { recordStartupLog } from '/@/service/AppClient';
 import { getNavigatorNetworkTypeLabel } from '/@/utils/networkType';
@@ -84,6 +86,10 @@ export const initAppNativeIntegrationWatchers = (_t: AppRootTranslate): void => 
     (newVal: string) => {
       if (newVal === 'visible' && Capacitor.isNativePlatform()) {
         scheduleNativeNavBarTopInsetSync();
+        if (isIOSNativeWebView()) {
+          closeToast(true);
+          nudgeIOSWebViewRepaint();
+        }
       }
     },
     { deep: true }

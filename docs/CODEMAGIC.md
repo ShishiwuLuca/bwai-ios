@@ -1,6 +1,16 @@
 # Codemagic 云打包 iOS（.ipa）
 
-在 **Windows** 上开发，用 [Codemagic](https://codemagic.io/) 的 macOS 机构建 **BWAI**（`com.bwai.io`）。构建成功后会 **自动上传至 App Store Connect / TestFlight**（见 `codemagic.yaml` 的 `publishing.app_store_connect`）；仍可从 **Artifacts** 下载 `.ipa` 备份。
+在 **Windows** 上开发，用 [Codemagic](https://codemagic.io/) 的 macOS 机构建 **BGAI**（显示名；包名 `com.bwai.io`）。构建成功后会 **自动上传至 App Store Connect / TestFlight**（见 `codemagic.yaml` 的 `publishing.app_store_connect`）；仍可从 **Artifacts** 下载 `.ipa` 备份。
+
+---
+
+## 零、每次 iOS 打包标准流程（开发机 / Cursor）
+
+1. **提交并 push** 到 Codemagic 已连接的远程仓库（如 `origin/main`）。未 push 的代码不会参与云构建。
+2. 打开 [Codemagic](https://codemagic.io/) → 本应用 → 工作流 **BWAI iOS Release (.ipa)** → 选择刚 push 的分支 → **Start new build**。
+3. 等待构建与 post-processing（约 10～25 分钟）；在 Connect **TestFlight** 或 **Artifacts** 查看结果。
+
+> Cursor Agent 规则：`.cursor/rules/ios-codemagic-build.mdc`（要求 iOS 打包时先 push，再提示使用 Codemagic）。
 
 ---
 

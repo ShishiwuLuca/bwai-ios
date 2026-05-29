@@ -11,13 +11,13 @@ if (keystorePropertiesFile.exists()) {
 def resolveAppName = {
     try {
         def stringsXml = file('src/main/res/values/strings.xml')
-        if (!stringsXml.exists()) return 'BWAI'
+        if (!stringsXml.exists()) return 'BGAI'
         def xml = new groovy.xml.XmlSlurper().parse(stringsXml)
         def appNameNode = xml.string.find { it.@name?.text() == 'app_name' }
         def appName = appNameNode?.text()?.trim()
-        return appName ? appName : 'BWAI'
+        return appName ? appName : 'BGAI'
     } catch (Exception ignored) {
-        return 'BWAI'
+        return 'BGAI'
     }
 }
 

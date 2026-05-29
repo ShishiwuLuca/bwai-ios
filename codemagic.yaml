@@ -87,7 +87,7 @@ workflows:
           VERSION=$(agvtool what-marketing-version -terse1 | tr -d '\r')
           BUILD=$(agvtool what-version -terse | tr -d '\r')
           cd "$CM_BUILD_DIR"
-          DEST="build/ios/ipa/BWAI-${VERSION}-${BUILD}.ipa"
+          DEST="build/ios/ipa/BGAI-${VERSION}-${BUILD}.ipa"
           cp build/ios/ipa/App.ipa "$DEST"
           echo "Artifact (download): $DEST"
           echo "Publish (TestFlight): build/ios/ipa/App.ipa"

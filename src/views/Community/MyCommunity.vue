@@ -99,6 +99,7 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
+  import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
   import CommunityPostSwipeRow from './CommunityPostSwipeRow.vue';
   import {
     mapPostToDisplay,
@@ -362,9 +363,9 @@
         (!reset && mapped.length > 0 && added === 0);
       feedFinished.value = noMore;
       if (!noMore) feedPageNo.value += 1;
-    } catch {
+    } catch (e: unknown) {
       feedFinished.value = true;
-      CreateErrorToast(t('apiRequestFailed'));
+      notifyApiRequestFailed(e);
     } finally {
       // 仅当前代次的请求能收尾，避免「后返回的旧请求」在整表重置后误关 loading
       if (myGeneration === listFetchGeneration.value) {

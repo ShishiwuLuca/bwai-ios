@@ -68,6 +68,7 @@ import {
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { isApiSuccess } from '/@/utils/apiResult';
+import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
 
 const router = useRouter();
 const UserStore = useUserStoreWithOut();
@@ -88,6 +89,7 @@ const feedPageNo = ref(1);
 const feedLoading = ref(false);
 const feedFinished = ref(false);
 const feedRefreshing = ref(false);
+const feedFetchInFlight = ref(false);
 const posts = ref<CommunityPostItem[]>([]);
 const bannerList = ref<{ imageUrl?: string }[]>([]);
 
@@ -115,6 +117,10 @@ const fetchPostPage = async (reset: boolean, skipListLoading = false) => {
     feedLoading.value = false;
     return;
   }
+  if (feedFetchInFlight.value) {
+    if (!skipListLoading) feedLoading.value = false;
+    return;
+  }
   if (reset) {
     feedPageNo.value = 1;
     posts.value = [];
@@ -123,6 +129,7 @@ const fetchPostPage = async (reset: boolean, skipListLoading = false) => {
   if (!skipListLoading) {
     feedLoading.value = true;
   }
+  feedFetchInFlight.value = true;
 
   const categoryId = parseCategoryIdFromTab(activeTab.value);
   const pageQuery: AppMarketingPostPageReqVO = {
@@ -149,10 +156,11 @@ const fetchPostPage = async (reset: boolean, skipListLoading = false) => {
     if (!noMore) {
       feedPageNo.value += 1;
     }
-  } catch {
+  } catch (e: unknown) {
     feedFinished.value = true;
-    CreateErrorToast(t('apiRequestFailed'));
+    notifyApiRequestFailed(e);
   } finally {
+    feedFetchInFlight.value = false;
     if (!skipListLoading) {
       feedLoading.value = false;
     }
