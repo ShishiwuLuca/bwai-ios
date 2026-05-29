@@ -48,7 +48,7 @@
 | 项 | 说明 |
 | --- | --- |
 | `integrations.app_store_connect` | 默认 `bwai_asc`，与上一步 Key 名称一致 |
-| `APP_STORE_APPLE_ID` | 在 `environment.vars` 里取消注释并填 Connect 里应用的 **Apple ID**（纯数字），可自动在 TestFlight 最新 Build 号上 +1 |
+| `APP_STORE_APPLE_ID` | Connect 里应用的 **Apple ID**（纯数字）。CI 会读 ASC **最高营销版本**，与工程 `MARKETING_VERSION` 取较大值后 **patch +0.0.1**（如 `1.0.0`→`1.0.1`），并在该版本下 **Build +1**（见 `scripts/codemagic-set-ios-versions.sh`） |
 | `publishing.email.recipients` | 改成你的邮箱，构建成功/失败会通知 |
 | `publishing.app_store_connect` | 已开启：`submit_to_testflight: true`（自动上传并提交 Beta 审核）；`submit_to_app_store: false`（不自动提正式上架） |
 | `beta_groups` | 可选：在 yaml 里取消注释并填写 Connect 里**外部测试组**的准确名称，Beta 审核通过后自动分发给该组 |
@@ -76,6 +76,7 @@
 | 前端生产包 | `pnpm run build-only:app`（`.env.app`） |
 | 同步原生 | `npx cap sync ios` |
 | 签名 | `fetch-signing-files` + `xcode-project use-profiles` |
+| 版本号 | `scripts/codemagic-set-ios-versions.sh`（ASC 最高版本 patch +1 + Build +1） |
 | 打 ipa | `xcode-project build-ipa`（工程 `ios/App/App.xcodeproj`，Scheme `App`） |
 
 本地 Mac 仍可使用 `pnpm run build:ios:release`（输出到 `PackageIOS/`）；Codemagic 使用官方 CLI，产物路径为 `build/ios/ipa/`。

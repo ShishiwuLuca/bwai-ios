@@ -66,24 +66,32 @@ workflows:
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --archive-method app-store
 
-      - name: Set iOS build number
+      # 营销版本：ASC 最高版本与工程取 max 后 patch +0.0.1；Build 在该版本下 +1（见 scripts/codemagic-set-ios-versions.sh）
+      - name: Set iOS marketing version and build number
         script: |
           set -e
-          cd ios/App
-          if [ -n "${APP_STORE_APPLE_ID:-}" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
-            LATEST=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" || echo "")
-            if [ -n "$LATEST" ]; then
-              agvtool new-version -all $(($LATEST + 1))
-              exit 0
-            fi
-          fi
-          agvtool new-version -all "$BUILD_NUMBER"
+          chmod +x scripts/codemagic-set-ios-versions.sh
+          ./scripts/codemagic-set-ios-versions.sh
 
       - name: Build ipa
         script: |
           xcode-project build-ipa \
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
+
+      # 复制一份带版本号的 ipa 供 Artifacts 下载；保留 App.ipa 供 TestFlight 上传
+      - name: Rename ipa with version
+        script: |
+          set -e
+          cd ios/App
+          VERSION=$(agvtool what-marketing-version -terse1 | tr -d '\r')
+          BUILD=$(agvtool what-version -terse | tr -d '\r')
+          cd "$CM_BUILD_DIR"
+          DEST="build/ios/ipa/BWAI-${VERSION}-${BUILD}.ipa"
+          cp build/ios/ipa/App.ipa "$DEST"
+          echo "Artifact (download): $DEST"
+          echo "Publish (TestFlight): build/ios/ipa/App.ipa"
+          ls -la build/ios/ipa/
 
     artifacts:
       - build/ios/ipa/*.ipa
