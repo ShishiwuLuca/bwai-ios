@@ -92,10 +92,9 @@ workflows:
       - name: Rename ipa with version
         script: |
           set -e
-          cd ios/App
-          VERSION=$(agvtool what-marketing-version -terse1 | tr -d '\r')
-          BUILD=$(agvtool what-version -terse | tr -d '\r')
-          cd "$CM_BUILD_DIR"
+          PBXPROJ="$CM_BUILD_DIR/ios/App/App.xcodeproj/project.pbxproj"
+          VERSION=$(grep -m1 'MARKETING_VERSION = ' "$PBXPROJ" | sed -E 's/.*MARKETING_VERSION = ([^;]+);/\1/' | tr -d ' \r')
+          BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION = ' "$PBXPROJ" | sed -E 's/.*CURRENT_PROJECT_VERSION = ([^;]+);/\1/' | tr -d ' \r')
           DEST="build/ios/ipa/BGAI-${VERSION}-${BUILD}.ipa"
           cp build/ios/ipa/App.ipa "$DEST"
           echo "Artifact (download): $DEST"

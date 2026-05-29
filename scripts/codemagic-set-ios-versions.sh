@@ -1,12 +1,26 @@
 #!/usr/bin/env bash
 # Codemagic：读取 App Store Connect 最高营销版本，patch +0.0.1，并递增 Build 号。
+# 版本写在 project.pbxproj（Info.plist 使用 $(MARKETING_VERSION)，agvtool 不适用）。
 # 依赖：ios/App 已 cap sync；环境变量 APP_STORE_APPLE_ID（可选）、BUILD_NUMBER（兜底）。
 set -euo pipefail
 
 IOS_APP_DIR="${IOS_APP_DIR:-ios/App}"
 APP_STORE_APPLE_ID="${APP_STORE_APPLE_ID:-}"
+PBXPROJ="App.xcodeproj/project.pbxproj"
 
 cd "$CM_BUILD_DIR/$IOS_APP_DIR"
+
+read_pbxproj_value() {
+  local key="$1"
+  grep -m1 "${key} = " "$PBXPROJ" | sed -E "s/.*${key} = ([^;]+);/\\1/" | tr -d ' "'\''\r'
+}
+
+set_pbxproj_versions() {
+  local marketing="$1"
+  local build="$2"
+  sed -i '' -E "s/MARKETING_VERSION = [^;]+;/MARKETING_VERSION = ${marketing};/g" "$PBXPROJ"
+  sed -i '' -E "s/CURRENT_PROJECT_VERSION = [^;]+;/CURRENT_PROJECT_VERSION = ${build};/g" "$PBXPROJ"
+}
 
 # ---------- semver：取较大者，patch +1 ----------
 bump_patch() {
@@ -38,7 +52,10 @@ process.stdout.write(cmp(pa, pb) >= 0 ? pa.join(".") : pb.join("."));
 ' "$1" "$2"
 }
 
-LOCAL_VERSION="$(agvtool what-marketing-version -terse1 2>/dev/null | tr -d '\r' || echo "1.0.0")"
+LOCAL_VERSION="$(read_pbxproj_value MARKETING_VERSION)"
+if [ -z "$LOCAL_VERSION" ] || [[ "$LOCAL_VERSION" == *'$('* ]]; then
+  LOCAL_VERSION="1.0.0"
+fi
 ASC_VERSION=""
 
 if [ -n "$APP_STORE_APPLE_ID" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
@@ -71,9 +88,6 @@ fi
 
 NEW_MARKETING="$(bump_patch "$BASE_VERSION")"
 echo "[ios-version] Local marketing version: $LOCAL_VERSION → $NEW_MARKETING"
-agvtool new-marketing-version -all "$NEW_MARKETING" >/dev/null
-
-# ---------- Build 号：在 NEW_MARKETING 下取该版本最新 build +1 ----------
 NEXT_BUILD=""
 if [ -n "$APP_STORE_APPLE_ID" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
   LATEST_BUILD="$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" \
@@ -94,11 +108,14 @@ if [ -z "$NEXT_BUILD" ]; then
     if [ -n "${BUILD_NUMBER:-}" ]; then
       NEXT_BUILD="$BUILD_NUMBER"
     else
-      CURRENT="$(agvtool what-version -terse 2>/dev/null | tr -d '\r' || echo "0")"
+      CURRENT="$(read_pbxproj_value CURRENT_PROJECT_VERSION)"
+      if ! [[ "$CURRENT" =~ ^[0-9]+$ ]]; then
+        CURRENT=0
+      fi
       NEXT_BUILD=$((CURRENT + 1))
     fi
   fi
 fi
 
 echo "[ios-version] Build number → $NEXT_BUILD (marketing $NEW_MARKETING)"
-agvtool new-version -all "$NEXT_BUILD" >/dev/null
+set_pbxproj_versions "$NEW_MARKETING" "$NEXT_BUILD"
