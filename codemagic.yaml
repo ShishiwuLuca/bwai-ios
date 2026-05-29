@@ -12,6 +12,9 @@ workflows:
       app_store_connect: bwai_asc
 
     environment:
+      # CERTIFICATE_PRIVATE_KEY 须在 Codemagic UI 中放入变量组 ios_signing，并勾选 Secret
+      groups:
+        - ios_signing
       # 勿在此处配置 ios_signing：未在 Codemagic 上传描述文件时会报
       # No matching profiles found for bundle identifier ... app_store
       # 签名由下方 fetch-signing-files + use-profiles 自动完成。
@@ -48,9 +51,9 @@ workflows:
           # fetch-signing-files --create 会默认读取该变量；无匹配证书时用此私钥创建，后续构建复用同一证书。
           if [ -z "${CERTIFICATE_PRIVATE_KEY:-}" ]; then
             echo "ERROR: 未设置 CERTIFICATE_PRIVATE_KEY。"
-            echo "Codemagic → 本应用 → Environment variables → 添加 Secure variable："
-            echo "  名称: CERTIFICATE_PRIVATE_KEY"
-            echo "  值: openssl genrsa 2048 输出的完整 PEM（含 BEGIN/END 行）"
+            echo "Codemagic → 本应用 → Environment variables："
+            echo "  1. 添加变量 名称 CERTIFICATE_PRIVATE_KEY，值 PEM 全文，勾选 Secret"
+            echo "  2. 变量必须归入组 ios_signing（与 codemagic.yaml environment.groups 一致）"
             echo "若 Apple 已有 3 张 Distribution 证书，须先在 Developer 后台撤销不用的旧证书。"
             echo "详见 docs/CODEMAGIC.md"
             exit 1

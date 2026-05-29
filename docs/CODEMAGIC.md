@@ -121,11 +121,14 @@ Apple 上已有 **Distribution 证书**（Xcode、其他 Mac 或历史 Codemagic
    ```
    复制完整输出（含 `-----BEGIN RSA PRIVATE KEY-----` / `-----END RSA PRIVATE KEY-----`）。
 
-2. **写入 Codemagic 安全变量**  
+2. **写入 Codemagic 安全变量（须归入变量组）**  
    Codemagic → 本应用 → **Environment variables** → **Add variable**  
    - **Variable name**：`CERTIFICATE_PRIVATE_KEY`  
    - **Value**：上一步 PEM 全文  
-   - 勾选 **Secure**（密钥标记）
+   - **Group**：`ios_signing`（与 `codemagic.yaml` 里 `environment.groups` 一致；无则新建该组）  
+   - 勾选 **Secret**（密钥标记）
+
+   > **重要**：Codemagic 要求变量必须放在组里，且 yaml 中 `groups: - ios_signing` 才会注入构建机。只添加变量但未归入 `ios_signing` 组会导致构建报「未设置 CERTIFICATE_PRIVATE_KEY」。
 
 3. **清理 Apple 旧证书（若报 409）**  
    打开 [Certificates](https://developer.apple.com/account/resources/certificates/list) → 撤销**不再使用**的 **Apple Distribution**（账号最多 3 张；保留仍在 Xcode/其他环境使用的证书）。
