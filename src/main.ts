@@ -59,6 +59,7 @@ import {
   initNativeShell,
   hideSplashScreenIfNative
 } from '/@/logics/nativeAppShell';
+import { initIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
 // 创建并启动 Vue 应用
 
@@ -119,6 +120,9 @@ applyNativeSafeArea();
 
 // 初始化原生 shell
 initNativeShell();
+
+// iOS：回前台后强制触发 WebView 重绘，修复偶发透明不可见
+initIOSWebViewRepaint();
 
 // 启动应用
 void bootstrapApp();

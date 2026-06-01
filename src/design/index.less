@@ -44,29 +44,29 @@ body {
 /* 原生 APP：沉浸式状态栏；根节点与底部占位与安全区底色与主题一致，避免底部白条 */
 html.cap-native {
   padding-top: 0 !important;
-  background-color: var(--van-background);
+  background-color: var(--van-background, #090d20);
   min-height: 100%;
 }
 html.cap-native body {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  background-color: var(--van-background);
+  background-color: var(--van-background, #090d20);
 }
 html.cap-native #app {
   padding-top: 0 !important;
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
   min-height: 100%;
   box-sizing: border-box;
-  background-color: var(--van-background);
+  background-color: var(--van-background, #090d20);
 }
 
 html.cap-native .van-tabbar__placeholder {
-  background-color: var(--van-background) !important;
+  background-color: var(--van-background, #090d20) !important;
 }
 
 html.cap-native .van-config-provider {
   min-height: 100%;
-  background-color: var(--van-background);
+  background-color: var(--van-background, #090d20);
 }
 
 /*
