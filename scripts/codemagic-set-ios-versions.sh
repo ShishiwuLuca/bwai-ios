@@ -57,8 +57,32 @@ if [ -z "$LOCAL_VERSION" ] || [[ "$LOCAL_VERSION" == *'$('* ]]; then
   LOCAL_VERSION="1.0.0"
 fi
 ASC_VERSION=""
+TF_VERSION=""
 
 if [ -n "$APP_STORE_APPLE_ID" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
+  TF_JSON="$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" \
+    --include-version --json -s 2>/dev/null || true)"
+  if [ -n "$TF_JSON" ]; then
+    TF_VERSION="$(node -e '
+const raw = process.argv[1];
+try {
+  const j = JSON.parse(raw);
+  const v =
+    j.version ??
+    j.version_string ??
+    j.pre_release_version ??
+    j.attributes?.version ??
+    "";
+  if (v) process.stdout.write(String(v).trim());
+} catch {
+  /* ignore */
+}
+' "$TF_JSON")"
+    if [ -n "$TF_VERSION" ]; then
+      echo "[ios-version] TestFlight latest pre-release version: $TF_VERSION"
+    fi
+  fi
+
   JSON_OUT="$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" \
     --include-version --json -s 2>/dev/null || true)"
   if [ -n "$JSON_OUT" ]; then
@@ -80,14 +104,22 @@ try {
   fi
 fi
 
-BASE_VERSION="$LOCAL_VERSION"
+BASE_VERSION="$(max_semver "$LOCAL_VERSION" "${ASC_VERSION:-1.0.0}")"
+if [ -n "$TF_VERSION" ]; then
+  BASE_VERSION="$(max_semver "$BASE_VERSION" "$TF_VERSION")"
+fi
 if [ -n "$ASC_VERSION" ]; then
-  BASE_VERSION="$(max_semver "$LOCAL_VERSION" "$ASC_VERSION")"
   echo "[ios-version] App Store latest marketing version: $ASC_VERSION"
 fi
 
-NEW_MARKETING="$(bump_patch "$BASE_VERSION")"
-echo "[ios-version] Local marketing version: $LOCAL_VERSION → $NEW_MARKETING"
+# 已有 TestFlight / ASC 版本时沿用该营销版本只递增 Build；首次发包才 patch +1
+if [ -n "$TF_VERSION" ] || [ -n "$ASC_VERSION" ]; then
+  NEW_MARKETING="$BASE_VERSION"
+  echo "[ios-version] Marketing version (continue): $NEW_MARKETING"
+else
+  NEW_MARKETING="$(bump_patch "$LOCAL_VERSION")"
+  echo "[ios-version] Marketing version (first release): $LOCAL_VERSION → $NEW_MARKETING"
+fi
 
 # Build 号：取 TestFlight / App Store / 全局最高值 +1，避免仅查 app-store 版本时漏掉已上传的 TestFlight build（如 duplicate build 5）
 max_int() {
