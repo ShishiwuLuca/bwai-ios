@@ -5,7 +5,7 @@ import { watch } from 'vue';
 import { usePageVisibility } from '@vant/use';
 import { closeToast } from 'vant';
 import { Capacitor } from '@capacitor/core';
-import { isIOSNativeWebView, repairIOSWebViewLayers } from '/@/utils/iosWebViewRepaint';
+import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
 import { recordStartupLog } from '/@/service/AppClient';
 import { getNavigatorNetworkTypeLabel } from '/@/utils/networkType';
@@ -17,9 +17,6 @@ import {
   scheduleNativeNavBarTopInsetSync
 } from '/@/hooks/AppStatusBarUtils';
 import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-
-/** 与 `useI18n().t` 一致：至少支持单 key */
-export type AppRootTranslate = (key: string) => string;
 
 /** 方法：recordStartupLogAsync */
 const recordStartupLogAsync = async (): Promise<void> => {
@@ -77,7 +74,7 @@ const recordStartupLogAsync = async (): Promise<void> => {
 };
 
 /** 原生壳：状态栏主题、页面回到前台时同步 safe-area */
-export const initAppNativeIntegrationWatchers = (_t: AppRootTranslate): void => {
+export const initAppNativeIntegrationWatchers = (): void => {
   const SystemStore = useSystemStoreWithOut();
   const PageVisibility = usePageVisibility();
 
@@ -88,7 +85,7 @@ export const initAppNativeIntegrationWatchers = (_t: AppRootTranslate): void => 
         scheduleNativeNavBarTopInsetSync();
         if (isIOSNativeWebView()) {
           closeToast(true);
-          repairIOSWebViewLayers();
+          scheduleIOSWebViewRepaint();
         }
       }
     },

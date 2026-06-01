@@ -18,7 +18,11 @@ export const initIOSNetworkChangeRepair = (): void => {
   };
 
   void import('@capacitor/network')
-    .then(({ Network }) => Network.addListener('networkStatusChange', repair))
+    .then(({ Network }) =>
+      Network.addListener('networkStatusChange', ({ connected }) => {
+        if (connected) repair();
+      })
+    )
     .catch(() => {
       /* 插件不可用时忽略 */
     });
@@ -35,6 +39,5 @@ export const initIOSNetworkChangeRepair = (): void => {
 
   if (Capacitor.isNativePlatform()) {
     window.addEventListener('online', repair);
-    window.addEventListener('offline', repair);
   }
 };

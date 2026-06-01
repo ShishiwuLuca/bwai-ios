@@ -3,7 +3,7 @@
     <RouterView v-slot="{ Component, route }">
       <!-- <Transition :name="transitionName" mode="out-in" appear> -->
       <KeepAlive v-if="route.meta.keepAlive">
-        <component :is="Component" :key="route.fullPath" />
+        <component :is="Component" :key="String(route.name ?? route.path)" />
       </KeepAlive>
       <component :is="Component" :key="route.fullPath" v-else />
       <!-- </Transition> -->
@@ -17,17 +17,15 @@
   import { parse } from 'tldts';
   // import VConsole from 'vconsole';
   import { RouterView } from 'vue-router';
-  import { useI18n } from '/@/hooks/web/useI18n';
   import { getAppEnvConfig, isProdMode } from '/@/utils/env';
   import { getClientDeviceIdAsync } from '/@/utils/clientDeviceId';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { computed, onBeforeMount, onMounted, watch, nextTick, ref } from 'vue';
+  import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
   import { CheckUpdates, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
   import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
-  import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
   /** 用户：UserStore */
   const UserStore = useUserStoreWithOut();
@@ -35,10 +33,7 @@
   /** SystemStore */
   const SystemStore = useSystemStoreWithOut();
 
-  /** 从 useI18n 解构的文案与能力 */
-  const { t } = useI18n();
-
-  initAppNativeIntegrationWatchers(t);
+  initAppNativeIntegrationWatchers();
 
   /** 解构赋值：组合式 API 返回的一组方法或状态 */
   const { VITE_GLOB_SYSTEM_VERSION } = getAppEnvConfig();
@@ -193,12 +188,6 @@
     await runAppNativePostMountTasks();
   });
 
-  onMounted(() => {
-    if (!isIOSNativeWebView()) return;
-    void nextTick(() => {
-      scheduleIOSWebViewRepaint();
-    });
-  });
 </script>
 
 <style>

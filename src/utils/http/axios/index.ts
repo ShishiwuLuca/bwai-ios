@@ -19,7 +19,7 @@ import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { buildHttpClientTraceHeaders } from '/@/utils/http/buildHttpClientTraceHeaders';
-import { isIOSNativeWebView, repairIOSWebViewLayers, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
+import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
 /** globSetting */
 const globSetting = useGlobSetting();
@@ -227,9 +227,8 @@ const transform: AxiosTransform = {
         if (errorMessageMode === 'modal') {
           CreateAlertDialog({ title: t('common_title_text'), message: errMessage });
         } else if (errorMessageMode === 'message' && errMessage !== '') {
-          // iOS：VPN 切换后 Fail Toast 易触发 WKWebView 整页不可见，改用顶部 Notify
+          // iOS：网络抖动时仅走一次节流重绘，避免 repair/notify/repaint 叠加触发合成层竞态
           if (isIOSNativeWebView()) {
-            repairIOSWebViewLayers();
             CreateErrorNotify(errMessage);
             scheduleIOSWebViewRepaint();
           } else {

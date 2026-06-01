@@ -7,22 +7,21 @@ export const isIOSNativeWebView = (): boolean =>
 
 const repaintTargets = (): HTMLElement[] => {
   if (typeof document === 'undefined') return [];
-  return [document.documentElement, document.body, document.getElementById('app')].filter(
+  return [document.documentElement, document.body].filter(
     (el): el is HTMLElement => el instanceof HTMLElement
   );
 };
 
-/** 仅清理 Toast / Dialog / Notify 与残留 van-overlay，不触发 transform / opacity 重绘 */
+const REPAIR_DEBOUNCE_MS = 180;
+let repairTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** 仅通过 Vant API 清理浮层，不直接删除 overlay DOM，避免状态错位 */
 export const cleanupVantOverlayLayers = (): void => {
   if (!isIOSNativeWebView() || typeof document === 'undefined') return;
 
   closeToast(true);
   closeDialog();
   closeNotify();
-
-  document.querySelectorAll('.van-overlay').forEach((node) => {
-    node.parentElement?.removeChild(node);
-  });
 };
 
 /**
@@ -54,9 +53,13 @@ export const nudgeIOSWebViewRepaint = (): void => {
 /** 冷启动 / 网络恢复后单次 nudge，不在路由切换重复调用 */
 export const scheduleIOSWebViewRepaint = (): void => {
   if (!isIOSNativeWebView()) return;
-  cleanupVantOverlayLayers();
-  nudgeIOSWebViewRepaint();
-  requestAnimationFrame(() => nudgeIOSWebViewRepaint());
+  if (repairTimer) {
+    clearTimeout(repairTimer);
+  }
+  repairTimer = setTimeout(() => {
+    repairTimer = null;
+    repairIOSWebViewLayers();
+  }, REPAIR_DEBOUNCE_MS);
 };
 
 /** iOS 原生 Toast 默认关闭 overlay，避免全屏遮罩合成层导致整页不绘制 */

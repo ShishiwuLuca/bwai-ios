@@ -1,6 +1,6 @@
 <template>
   <div class="home-page-shell" :style="shellStyle">
-    <Loading v-if="webviewLoading" class="home-page__loading" vertical>{{ t('dt_loading') }}</Loading>
+    <Loading v-if="webviewLoading" class="home-page__loading" vertical>{{ loadingText }}</Loading>
     <iframe
       class="home-page__webview"
       :src="HOME_WEB_URL"
@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated } from 'vue';
+import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue';
 import { Capacitor } from '@capacitor/core';
 import { Loading } from 'vant';
 import { useI18n } from '/@/hooks/web/useI18n';
@@ -36,9 +36,12 @@ const HOME_WEB_URL = computed(() => {
 });
 
 const { t } = useI18n();
+const loadingText = computed(() => t('dt_loading'));
 
 const webviewLoading = ref(true);
 const nativeTopInsetPx = ref(0);
+const HOME_LOADING_MAX_MS = 10000;
+let homeLoadingTimer: ReturnType<typeof setTimeout> | null = null;
 
 const shellStyle = computed(() => {
   if (!Capacitor.isNativePlatform() || nativeTopInsetPx.value <= 0) {
@@ -57,15 +60,30 @@ const syncHomeTopInset = async () => {
 };
 
 const onWebviewLoad = () => {
+  if (homeLoadingTimer) {
+    clearTimeout(homeLoadingTimer);
+    homeLoadingTimer = null;
+  }
   webviewLoading.value = false;
 };
 
 onMounted(() => {
   void syncHomeTopInset();
+  homeLoadingTimer = setTimeout(() => {
+    webviewLoading.value = false;
+    homeLoadingTimer = null;
+  }, HOME_LOADING_MAX_MS);
 });
 
 onActivated(() => {
   void syncHomeTopInset();
+});
+
+onUnmounted(() => {
+  if (homeLoadingTimer) {
+    clearTimeout(homeLoadingTimer);
+    homeLoadingTimer = null;
+  }
 });
 </script>
 
