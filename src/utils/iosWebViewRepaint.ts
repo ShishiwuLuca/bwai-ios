@@ -12,11 +12,8 @@ const repaintTargets = (): HTMLElement[] => {
   );
 };
 
-/**
- * 清理 Toast/Dialog 残留遮罩并促发重绘。
- * iOS WKWebView 上 van-overlay 合成层异常时会出现「可点不可见」。
- */
-export const repairIOSWebViewLayers = (): void => {
+/** 仅清理 Toast / Dialog / Notify 与残留 van-overlay，不触发 transform / opacity 重绘 */
+export const cleanupVantOverlayLayers = (): void => {
   if (!isIOSNativeWebView() || typeof document === 'undefined') return;
 
   closeToast(true);
@@ -26,15 +23,17 @@ export const repairIOSWebViewLayers = (): void => {
   document.querySelectorAll('.van-overlay').forEach((node) => {
     node.parentElement?.removeChild(node);
   });
+};
 
-  const body = document.body;
-  const prevOpacity = body.style.opacity;
-  body.style.opacity = '0.99';
-  void body.offsetHeight;
-  requestAnimationFrame(() => {
-    body.style.opacity = prevOpacity;
-    nudgeIOSWebViewRepaint();
-  });
+/**
+ * 清理遮罩并轻量 nudge 重绘（网络异常等场景）。
+ * 勿在每次路由切换调用；勿使用 body opacity 0.99（易触发 WKWebView 整页不可见）。
+ */
+export const repairIOSWebViewLayers = (): void => {
+  if (!isIOSNativeWebView() || typeof document === 'undefined') return;
+
+  cleanupVantOverlayLayers();
+  nudgeIOSWebViewRepaint();
 };
 
 /**
@@ -52,18 +51,12 @@ export const nudgeIOSWebViewRepaint = (): void => {
   }
 };
 
-/** 启动 / 路由切换后多次修复合成层，缓解冷启动整页不可见 */
+/** 冷启动 / 网络恢复后单次 nudge，不在路由切换重复调用 */
 export const scheduleIOSWebViewRepaint = (): void => {
   if (!isIOSNativeWebView()) return;
-  const run = (): void => {
-    repairIOSWebViewLayers();
-  };
-  run();
-  requestAnimationFrame(run);
-  requestAnimationFrame(() => requestAnimationFrame(run));
-  window.setTimeout(run, 50);
-  window.setTimeout(run, 200);
-  window.setTimeout(run, 800);
+  cleanupVantOverlayLayers();
+  nudgeIOSWebViewRepaint();
+  requestAnimationFrame(() => nudgeIOSWebViewRepaint());
 };
 
 /** iOS 原生 Toast 默认关闭 overlay，避免全屏遮罩合成层导致整页不绘制 */

@@ -17,7 +17,7 @@
       <div class="text-[0.3rem]">{{ t('register_welcome_text') }}</div>
     </div>
     <div class="p-1 pb-3">
-      <Tabs v-model:active="ActiveTab" :line-height="0" swipeable shrink :border="false">
+      <Tabs v-model:active="ActiveTab" :line-height="0" :swipeable="iosNativeTabsSwipeable()" :animated="iosNativeTabsAnimated()" shrink :border="false">
         <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
       </Tabs>
       <div class="mt-1">
@@ -197,6 +197,7 @@
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { RegisterByPhone, RegisterByEmail, sendSmsCode } from '/@/service/Auth';
   import { Image as VanImage, Tab, Tabs, Field, Button, Icon, Checkbox } from 'vant';
+  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 

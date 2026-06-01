@@ -95,6 +95,28 @@ html.cap-native {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
+
+  /* Tabs / Swipe / Vue Transition：禁用 transform 切换动画，避免路由或 Tab 切换后整页不绘制 */
+  .van-tabs__track,
+  .van-tabs__content,
+  .van-tabs__content--animated,
+  .van-tab__panel-wrapper,
+  .van-swipe__track {
+    transition: none !important;
+    transition-duration: 0s !important;
+  }
+
+  .slide-left-enter-active,
+  .slide-right-enter-active,
+  .slide-left-leave-active,
+  .slide-right-leave-active,
+  .message-batch-bar-enter-active,
+  .message-batch-bar-leave-active {
+    transition: none !important;
+    transform: none !important;
+    position: static !important;
+    width: auto !important;
+  }
 }
 
 html.cap-native .van-tabbar__placeholder {

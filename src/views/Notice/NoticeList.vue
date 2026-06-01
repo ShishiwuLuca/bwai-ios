@@ -1,7 +1,7 @@
 <template>
   <NavBar :title="t('notice_list_title')" fixed placeholder :border="false" />
   <PageWrap class="notice-list-page">
-    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="!isRTL" swipeable>
+    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="noticeTabsAnimated" :swipeable="iosNativeTabsSwipeable()">
       <Tab
         :show-zero-badge="false"
         v-for="(item, index) in NoticeTypeList"
@@ -101,6 +101,7 @@
     updateMessageReadStatus,
     updateNoticeReadStatus
   } from '/@/service/Notice';
+  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   /** 从 useI18n 解构的文案与能力 */
   const { t } = useI18n();
@@ -164,6 +165,8 @@
   const isRTL = computed(() => {
     return SystemStore.localInfo.isRTL;
   });
+
+  const noticeTabsAnimated = computed(() => !isRTL.value && iosNativeTabsAnimated());
 
   // 监听Tab切换
 

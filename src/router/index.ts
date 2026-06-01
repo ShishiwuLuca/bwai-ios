@@ -4,7 +4,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
 import { isHiddenHomeEntryEnabled } from '/@/utils/hiddenHomeEntry';
 import { ensureVestConfigLoaded, isVestHomeMode } from '/@/utils/vestConfig';
-import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
 // 路由树
 
@@ -204,12 +203,6 @@ export const router = createRouter({
 export const setupRouter = (app: App): void => {
   app.use(router);
 };
-
-router.afterEach(() => {
-  if (isIOSNativeWebView()) {
-    scheduleIOSWebViewRepaint();
-  }
-});
 
 router.beforeEach(async (_to, _from) => {
   const UserStore = useUserStoreWithOut();

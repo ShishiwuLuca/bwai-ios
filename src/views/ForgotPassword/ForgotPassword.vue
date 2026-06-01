@@ -12,7 +12,7 @@
   </NavBar>
   <PageWrap>
     <div class="p-1">
-      <Tabs v-model:active="ActiveTab" :line-height="0" swipeable shrink :border="false">
+      <Tabs v-model:active="ActiveTab" :line-height="0" :swipeable="iosNativeTabsSwipeable()" :animated="iosNativeTabsAnimated()" shrink :border="false">
         <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
       </Tabs>
       <div class="mt-1">
@@ -152,6 +152,7 @@
   import { Tab, Tabs, Field, Button, Icon } from 'vant';
   import { NavBar, PageWrap, CountryPicker } from '/@/components';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
+  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 

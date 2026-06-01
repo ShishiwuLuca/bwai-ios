@@ -19,7 +19,8 @@
           </SwipeItem>
         </Swipe>
   
-        <Tabs v-model:active="activeTab" class="community-page__tabs" :line-width="lineWidthPx" :ellipsis="false">
+        <Tabs v-model:active="activeTab" class="community-page__tabs" :line-width="lineWidthPx" :ellipsis="false"
+          :animated="iosNativeTabsAnimated()">
           <Tab v-for="c in categories" :key="getCategoryTabName(c.id)" :title="c.categoryName"
             :name="getCategoryTabName(c.id)" />
           <Tab v-if="categoryTabsReady" :title="t('cm_tab_recommend')" :name="RECOMMEND_TAB" />
@@ -69,6 +70,7 @@ import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { isApiSuccess } from '/@/utils/apiResult';
 import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
+import { iosNativeTabsAnimated } from '/@/utils/iosUiAnimations';
 
 const router = useRouter();
 const UserStore = useUserStoreWithOut();

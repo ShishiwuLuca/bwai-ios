@@ -20,6 +20,7 @@
         v-model:active="mainTab"
         class="my-community-page__tabs my-community-page__tabs--main"
         color="#4db3ff"
+        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab
@@ -35,6 +36,7 @@
         v-model:active="statusTab"
         class="my-community-page__tabs my-community-page__tabs--status"
         color="#4db3ff"
+        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab :title="t('mc_status_all')" name="all" />
@@ -100,6 +102,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
   import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
+  import { iosNativeTabsAnimated } from '/@/utils/iosUiAnimations';
   import CommunityPostSwipeRow from './CommunityPostSwipeRow.vue';
   import {
     mapPostToDisplay,
