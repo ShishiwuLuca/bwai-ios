@@ -36,8 +36,6 @@ interface SystemState {
   projectConfig: ProjectConfig | any;
   // UI库主题变量配置
   themeVars: object;
-  // 加载动画状态
-  Loading: boolean;
   // 语言列表
   LocaleList: any[];
   // 所有币种
@@ -75,8 +73,6 @@ export const useSystemStore = defineStore(StoreKeyName, {
     projectConfig: {},
     // UI库主题变量配置
     themeVars: {},
-    // 加载动画状态
-    Loading: true,
     // 语言列表
     LocaleList: [],
     // 所有币种
@@ -130,10 +126,6 @@ export const useSystemStore = defineStore(StoreKeyName, {
     // 获取灰色模式状态
     getGrayMode(): boolean {
       return (this.projectConfig as ProjectConfig).grayMode || false;
-    },
-    // 获取加载动画状态
-    getLoading(): boolean {
-      return this.Loading || true;
     },
     // 获取语言列表
     getLocaleList(): any[] {
@@ -253,18 +245,6 @@ export const useSystemStore = defineStore(StoreKeyName, {
     setColorWeak(payload: boolean): void {
       (this.projectConfig as ProjectConfig).colorWeak = payload;
       updateColorWeak(payload);
-    },
-    // 保存加载动画状态
-    setLoading(payload: boolean): void {
-      // 如果是关闭
-      if (payload === false) {
-        // 延迟500毫秒关闭防止页面未渲染完成
-        setTimeout(() => {
-          this.Loading = payload;
-        }, 500);
-      } else {
-        this.Loading = payload;
-      }
     },
     // 保存语言列表
     async setLocaleList(payload: any[]): Promise<void> {

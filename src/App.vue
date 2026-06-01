@@ -9,7 +9,6 @@
       <!-- </Transition> -->
     </RouterView>
     <LocaleModal />
-    <Loading />
   </ConfigProvider>
   <CheckUpdates v-if="isOpenDefaultCheckUpdate" />
 </template>
@@ -25,7 +24,7 @@
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
-  import { CheckUpdates, Loading, LocaleModal } from '/@/components';
+  import { CheckUpdates, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
   import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
 
@@ -170,8 +169,6 @@
 
     // 获取国家区号列表
     SystemStore.setCountryList();
-
-    SystemStore.setLoading(true);
 
     // 如果已登录则获取用户信息
     if (isLogin.value) {

@@ -1,8 +1,5 @@
 import { withInstall } from '/@/utils';
 
-// 加载
-import AppLoading from './Loading.vue';
-
 // 更新检测
 import AppCheckUpdates from './CheckUpdate.vue';
 
@@ -25,9 +22,6 @@ import CountryPickerComp from './CountryPicker/CountryPicker.vue';
 
 // 语言选择弹窗
 import LocaleModalComp from './LocaleModal.vue';
-
-/** 加载中状态：Loading */
-export const Loading = withInstall(AppLoading);
 
 /** CheckUpdates */
 export const CheckUpdates = withInstall(AppCheckUpdates);
