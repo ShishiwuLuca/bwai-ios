@@ -3,6 +3,7 @@ import type { GlobConfig } from '/#/config';
 import { getAppEnvConfig } from '/@/utils/env';
 import projectSetting from '/@/settings/projectSetting';
 import { closeDialog, closeToast, closeNotify } from 'vant';
+import { isIOSNativeWebView, repairIOSWebViewLayers } from '/@/utils/iosWebViewRepaint';
 import { AxiosCanceler } from '/@/utils/http/axios/axiosCancel';
 
 /** useGlobSetting */
@@ -57,6 +58,9 @@ export const createMessageGuard = (router: Router): void => {
         closeToast(true);
         closeDialog();
         closeNotify();
+        if (isIOSNativeWebView()) {
+          repairIOSWebViewLayers();
+        }
       }
     } catch (error) {
       console.warn('message guard error:' + error);

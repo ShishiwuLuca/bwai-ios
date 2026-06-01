@@ -11,9 +11,6 @@ import 'virtual:uno.css';
 // Vant 样式
 import 'vant/lib/index.css';
 
-// Vant 触摸模拟
-import '@vant/touch-emulator';
-
 // 全局样式
 import '/@/design/index.less';
 
@@ -44,7 +41,6 @@ import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
 // 原生：应用状态栏主题适配
 import { applyNativeStatusBarForTheme } from '/@/hooks/AppStatusBarUtils';
 import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
-import { closeToast } from 'vant';
 
 // 原生邀请码 deep link
 import { setupNativeInviteDeepLink } from '/@/logics/nativeInviteDeepLink';
@@ -63,6 +59,10 @@ import {
 
 /** 方法：bootstrapApp */
 const bootstrapApp = async () => {
+  if (!Capacitor.isNativePlatform()) {
+    await import('@vant/touch-emulator');
+  }
+
   const app = createApp(App);
 
   // 全局错误处理
@@ -97,9 +97,9 @@ const bootstrapApp = async () => {
   // 切换界面的时候是否删除未关闭的 Dialog / Toast / Notify
   createMessageGuard(router);
 
-  // 注册 Vant 懒加载
+  // 注册 Vant 懒加载（iOS 原生关闭 lazyComponent，避免首屏合成层异常）
   app.use(Lazyload, {
-    lazyComponent: true
+    lazyComponent: !isIOSNativeWebView()
   });
 
   // 挂载应用
@@ -113,7 +113,6 @@ const bootstrapApp = async () => {
   }
 
   if (isIOSNativeWebView()) {
-    closeToast(true);
     scheduleIOSWebViewRepaint();
   }
 };

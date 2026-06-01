@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { useMessage } from '/@/hooks/web/useMessage';
-import { nudgeIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
+import { repairIOSWebViewLayers } from '/@/utils/iosWebViewRepaint';
 
 /** axios 响应拦截器已对网络/超时弹过 Toast 时，页面 catch 不再重复弹 */
 export const isAxiosNetworkOrTimeoutError = (error: unknown): boolean => {
@@ -17,7 +17,7 @@ export const isAxiosNetworkOrTimeoutError = (error: unknown): boolean => {
  */
 export const notifyApiRequestFailed = (error?: unknown): void => {
   if (isAxiosNetworkOrTimeoutError(error)) {
-    nudgeIOSWebViewRepaint();
+    repairIOSWebViewLayers();
     return;
   }
   const { t } = useI18n();

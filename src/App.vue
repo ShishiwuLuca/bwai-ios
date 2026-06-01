@@ -23,10 +23,11 @@
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
+  import { computed, onBeforeMount, onMounted, watch, nextTick, ref } from 'vue';
   import { CheckUpdates, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
   import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
+  import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
   /** 用户：UserStore */
   const UserStore = useUserStoreWithOut();
@@ -190,6 +191,13 @@
     await ensureDeviceClientReportFields();
 
     await runAppNativePostMountTasks();
+  });
+
+  onMounted(() => {
+    if (!isIOSNativeWebView()) return;
+    void nextTick(() => {
+      scheduleIOSWebViewRepaint();
+    });
   });
 </script>
 
