@@ -290,8 +290,7 @@ const createAxios = (opt?: Partial<CreateAxiosOptions>) => {
   // 基础接口地址
   if (isDevMode() === false) {
     // 生产环境
-    CreateOptions.baseURL = VITE_GLOB_API_URL ? VITE_GLOB_API_URL : window.location.origin; // 网页端
-    // CreateOptions.baseURL = VITE_GLOB_API_URL ? VITE_GLOB_API_URL : 'https://forwhale.com'; // 网页端
+    CreateOptions.baseURL = VITE_GLOB_API_URL ? VITE_GLOB_API_URL : 'https://forwhale.com'; // 网页端
   }
   return new VAxios(deepMerge(CreateOptions, opt || {}));
 };

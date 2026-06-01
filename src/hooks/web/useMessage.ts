@@ -17,7 +17,7 @@ import {
 } from '/@/utils/iosWebViewRepaint';
 
 /** 临时全局关闭 Toast / Notify 弹层（排查 iOS WKWebView 等）；恢复时改为 false */
-const TOAST_FEEDBACK_DISABLED = true;
+const TOAST_FEEDBACK_DISABLED = false;
 
 /** 同文案短时只弹一次，减轻 iOS WKWebView 上 Toast 合成层堆积 */
 const FAIL_TOAST_THROTTLE_MS = 1500;

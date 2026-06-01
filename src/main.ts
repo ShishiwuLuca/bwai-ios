@@ -45,9 +45,6 @@ import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebVi
 // 原生邀请码 deep link
 import { setupNativeInviteDeepLink } from '/@/logics/nativeInviteDeepLink';
 
-// 马甲包配置（冷启动路由判断用）
-import { ensureVestConfigLoaded } from '/@/utils/vestConfig';
-
 // 原生壳能力（safe-area / 状态栏 / splash hide 等）
 import {
   applyNativeSafeArea,
@@ -60,6 +57,12 @@ import { initIOSNetworkChangeRepair } from '/@/logics/iosNetworkRepair';
 
 /** 方法：bootstrapApp */
 const bootstrapApp = async () => {
+  const iosDebugForceVisible =
+    String(import.meta.env.VITE_IOS_DEBUG_FORCE_VISIBLE ?? 'true').toLowerCase() === 'true';
+  if (iosDebugForceVisible && isIOSNativeWebView() && typeof document !== 'undefined') {
+    document.documentElement.classList.add('ios-debug-force-visible');
+  }
+
   if (!Capacitor.isNativePlatform()) {
     await import('@vant/touch-emulator');
   }
@@ -82,9 +85,6 @@ const bootstrapApp = async () => {
 
   // 初始化路由
   setupRouter(app);
-
-  // 预拉马甲包配置，减少首屏路由守卫等待
-  void ensureVestConfigLoaded();
 
   // 初始化邀请码 deep link
   await router.isReady();

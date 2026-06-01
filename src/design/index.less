@@ -119,6 +119,25 @@ html.cap-native {
   }
 }
 
+/*
+ * iOS 诊断开关：强制可见基线（用于定位白屏/透明渲染问题）。
+ * 通过 VITE_IOS_DEBUG_FORCE_VISIBLE=true 启用（见 main.ts）。
+ */
+html.cap-native.ios-debug-force-visible {
+  color-scheme: light !important;
+  background: #ffffff !important;
+
+  body,
+  #app,
+  .van-config-provider {
+    background: #ffffff !important;
+    color: #111111 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    -webkit-text-fill-color: #111111 !important;
+  }
+}
+
 html.cap-native .van-tabbar__placeholder {
   background-color: var(--van-background) !important;
 }

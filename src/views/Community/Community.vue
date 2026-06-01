@@ -52,34 +52,18 @@ import Avatar from '/@/assets/images/avatar.png';
 import { Tabs, Tab, Swipe, SwipeItem, PullRefresh, List, Empty, Image as VanImage } from 'vant';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
 import { NavBar, PageWrap, AppTabBar } from '/@/components';
-import { getHomeData } from '/@/service/Home';
-import {
-  getRecommendPostPage,
-  getMarketingPostPage,
-  getMarketingPostCategoryList,
-  type AppMarketingPostPageReqVO,
-  type AppMarketingCategoryRespVO
-} from '/@/service/MarketingPost';
+import type { AppMarketingCategoryRespVO } from '/@/service/MarketingPost';
 import CommunityPostCard from './CommunityPostCard.vue';
-import {
-  mapPostToDisplay,
-  mergePostsUnique,
-  type CommunityPostItem
-} from './communityPostDisplay';
+import type { CommunityPostItem } from './communityPostDisplay';
 import { useI18n } from '/@/hooks/web/useI18n';
-import { useMessage } from '/@/hooks/web/useMessage';
-import { isApiSuccess } from '/@/utils/apiResult';
-import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
 import { iosNativeTabsAnimated } from '/@/utils/iosUiAnimations';
 
 const router = useRouter();
 const UserStore = useUserStoreWithOut();
 const { t } = useI18n();
-const { CreateErrorToast } = useMessage();
 
 const RECOMMEND_TAB = 'rec';
 const CATEGORY_TAB_PREFIX = 'cat-';
-const PAGE_SIZE = 10;
 const lineWidthPx = 18;
 
 type CommunityTabName = '' | typeof RECOMMEND_TAB | `${typeof CATEGORY_TAB_PREFIX}${number}`;
@@ -102,8 +86,6 @@ const parseCategoryIdFromTab = (tab: CommunityTabName): number | null => {
   return Number(tab.slice(CATEGORY_TAB_PREFIX.length));
 };
 
-const isRecommendTab = computed(() => activeTab.value === RECOMMEND_TAB);
-
 /** 与「我的」页一致：头像来自用户信息，无则默认图 */
 const userAvatarSrc = computed(() => {
   const userInfo = UserStore.getUserInfo as { avatar?: string } | null | undefined;
@@ -111,61 +93,15 @@ const userAvatarSrc = computed(() => {
 });
 
 const fetchPostPage = async (reset: boolean, skipListLoading = false) => {
-  if (!activeTab.value) {
-    feedLoading.value = false;
-    return;
-  }
-  if (!reset && feedFinished.value) {
-    feedLoading.value = false;
-    return;
-  }
-  if (feedFetchInFlight.value) {
-    if (!skipListLoading) feedLoading.value = false;
-    return;
-  }
   if (reset) {
     feedPageNo.value = 1;
     posts.value = [];
-    feedFinished.value = false;
   }
+  feedFetchInFlight.value = false;
+  feedFinished.value = true;
+  feedRefreshing.value = false;
   if (!skipListLoading) {
-    feedLoading.value = true;
-  }
-  feedFetchInFlight.value = true;
-
-  const categoryId = parseCategoryIdFromTab(activeTab.value);
-  const pageQuery: AppMarketingPostPageReqVO = {
-    pageNo: feedPageNo.value,
-    pageSize: PAGE_SIZE,
-    ...(categoryId != null ? { categoryId } : {})
-  };
-  try {
-    const res = isRecommendTab.value
-      ? await getRecommendPostPage(pageQuery)
-      : await getMarketingPostPage(pageQuery);
-    if (!isApiSuccess(res)) {
-      feedFinished.value = true;
-      if (res?.msg) CreateErrorToast(res.msg);
-      return;
-    }
-    const list = res.data.list ?? [];
-    const total = Number(res.data.total) || 0;
-    const mapped = list.map(mapPostToDisplay);
-    posts.value = mergePostsUnique(posts.value, mapped, reset);
-    const noMore =
-      list.length === 0 || list.length < PAGE_SIZE || (total > 0 && posts.value.length >= total);
-    feedFinished.value = noMore;
-    if (!noMore) {
-      feedPageNo.value += 1;
-    }
-  } catch (e: unknown) {
-    feedFinished.value = true;
-    notifyApiRequestFailed(e);
-  } finally {
-    feedFetchInFlight.value = false;
-    if (!skipListLoading) {
-      feedLoading.value = false;
-    }
+    feedLoading.value = false;
   }
 };
 
@@ -236,25 +172,7 @@ const onReport = (post: CommunityPostItem) => {
 };
 
 const loadBanners = () => {
-  getHomeData().then((res) => {
-    if (!isApiSuccess(res)) return;
-    const modules = res.data.modules as { moduleType?: string; data?: { imageUrl?: string }[] }[] | undefined;
-    if (!modules?.length) return;
-    modules.forEach((m) => {
-      if (m.moduleType === 'banner') {
-        bannerList.value = m.data ?? [];
-      }
-    });
-  });
-};
-
-const normalizeCategories = (list: AppMarketingCategoryRespVO[]): AppMarketingCategoryRespVO[] => {
-  return list
-    .map((item) => ({
-      id: Number(item.id),
-      categoryName: item.categoryName.trim()
-    }))
-    .filter((item) => item.id > 0 && item.categoryName.length > 0);
+  bannerList.value = [];
 };
 
 const setInitialActiveTab = () => {
@@ -262,23 +180,12 @@ const setInitialActiveTab = () => {
 };
 
 const loadCategoryTabs = async () => {
-  let nextCategories: AppMarketingCategoryRespVO[] = [];
-  try {
-    const res = await getMarketingPostCategoryList();
-    if (isApiSuccess(res)) {
-      nextCategories = normalizeCategories(res.data);
-    }
-  } catch {
-    nextCategories = [];
-  } finally {
-    categories.value = nextCategories;
-    categoryTabsReady.value = true;
-    setInitialActiveTab();
-  }
+  categories.value = [];
+  categoryTabsReady.value = true;
+  setInitialActiveTab();
 };
 
 onBeforeMount(() => {
-  UserStore.fetchUserInfo();
   loadBanners();
   UserStore.setActiveTab(0);
   void loadCategoryTabs();

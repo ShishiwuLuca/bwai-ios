@@ -22,10 +22,10 @@
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
+  import { computed, onBeforeMount, watch, ref } from 'vue';
   import { CheckUpdates, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
-  import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
+  import { initAppNativeIntegrationWatchers } from '/@/logics/appNativeIntegration';
 
   /** 用户：UserStore */
   const UserStore = useUserStoreWithOut();
@@ -45,13 +45,6 @@
 
   /** 响应式状态：isOpenDefaultCheckUpdate 相关 UI 或数据 */
   const isOpenDefaultCheckUpdate = ref<boolean>(false);
-
-  // 是否登录
-
-  /** 计算属性：由其它状态派生的展示或判断 */
-  const isLogin = computed(() => {
-    return UserStore.getToken;
-  });
 
   // 是否倒置组件
 
@@ -157,20 +150,6 @@
 
   // 初始化
   onBeforeMount(async (): Promise<void> => {
-    // 等待 i18n 初始化完成后再调用系统配置
-    await nextTick();
-
-    // 调用系统配置
-    SystemStore.setSystemConfigData();
-
-    // 获取国家区号列表
-    SystemStore.setCountryList();
-
-    // 如果已登录则获取用户信息
-    if (isLogin.value) {
-      UserStore.fetchUserInfo();
-    }
-
     setGoogleSearchMeta();
 
     OutInfo();
@@ -185,7 +164,7 @@
     // 厂商 / 型号 / 定制 UI（供启动日志、版本检测与 HTTP 头复用）
     await ensureDeviceClientReportFields();
 
-    await runAppNativePostMountTasks();
+    // 首次进入页面屏蔽接口请求：跳过启动日志上报
   });
 
 </script>
