@@ -16,6 +16,9 @@ import {
   repairIOSWebViewLayers
 } from '/@/utils/iosWebViewRepaint';
 
+/** 临时全局关闭 Toast / Notify 弹层（排查 iOS WKWebView 等）；恢复时改为 false */
+const TOAST_FEEDBACK_DISABLED = true;
+
 /** 同文案短时只弹一次，减轻 iOS WKWebView 上 Toast 合成层堆积 */
 const FAIL_TOAST_THROTTLE_MS = 1500;
 let lastFailToastMessage = '';
@@ -53,6 +56,7 @@ const CreateAlertDialog = (option: any) => {
 
 /** 提示与弹窗：CreateSuccessToast */
 const CreateSuccessToast = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   return showSuccessToast(
     iosNativeToastOptions({
       message,
@@ -67,6 +71,8 @@ const CreateSuccessToast = (message: string) => {
 
 /** 提示与弹窗：CreateErrorToast */
 const CreateErrorToast = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
+
   const now = Date.now();
   if (message === lastFailToastMessage && now - lastFailToastAt < FAIL_TOAST_THROTTLE_MS) {
     return;
@@ -103,6 +109,7 @@ const CreateErrorToast = (message: string) => {
 
 /** 加载中状态：CreateLoadingToast */
 const CreateLoadingToast = (message: string | ToastOptions) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   if (typeof message === 'string') {
     return showLoadingToast(iosNativeToastOptions({ message }));
   }
@@ -121,6 +128,7 @@ const CreateCloseToast = () => {
 
 /** 提示与弹窗：CreateToast */
 const CreateToast = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   return showToast(
     iosNativeToastOptions({
       message,
@@ -135,6 +143,7 @@ const CreateToast = (message: string) => {
 
 /** CreateConnectNotify */
 const CreateConnectNotify = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   return showNotify({
     message: message,
     color: '#ad0000',
@@ -147,6 +156,7 @@ const CreateConnectNotify = (message: string) => {
 
 /** CreateSuccessNotify */
 const CreateSuccessNotify = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   return showNotify({
     message: message,
     type: 'success',
@@ -158,6 +168,7 @@ const CreateSuccessNotify = (message: string) => {
 
 /** CreateErrorNotify */
 const CreateErrorNotify = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   if (isIOSNativeWebView()) {
     repairIOSWebViewLayers();
   }
@@ -175,6 +186,7 @@ const CreateErrorNotify = (message: string) => {
 
 /** CreateWarningNotify */
 const CreateWarningNotify = (message: string) => {
+  if (TOAST_FEEDBACK_DISABLED) return;
   return showNotify({
     message: message,
     type: 'warning',
