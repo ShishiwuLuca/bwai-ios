@@ -40,32 +40,60 @@ body {
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
 }
 
-/* 原生 APP：沉浸式状态栏；根节点与底部占位与安全区底色与主题一致，避免底部白条 */
+/*
+ * iOS WKWebView（Capacitor）：缓解「DOM 在、可点可复制、有底色但内容不绘制」。
+ * - 禁用易触发独立合成层的 transform / fixed 居中
+ * - 明确 dvh 高度链与文本色
+ * - 关闭 backdrop-filter / will-change 等页面级 GPU 层陷阱
+ */
 html.cap-native {
+  -webkit-text-size-adjust: 100%;
   padding-top: 0 !important;
   background-color: var(--van-background);
-  min-height: 100%;
-}
-html.cap-native body {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  background-color: var(--van-background);
-}
-html.cap-native #app {
-  padding-top: 0 !important;
-  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
-  min-height: 100%;
-  box-sizing: border-box;
-  background-color: var(--van-background);
+  min-height: 100dvh;
+
+  body {
+    text-rendering: auto;
+    color: var(--van-text-color, #ffffff);
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    background-color: var(--van-background);
+    min-height: 100dvh;
+  }
+
+  #app,
+  .van-config-provider {
+    padding-top: 0 !important;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    background-color: var(--van-background);
+    transform: none !important;
+    -webkit-transform: none !important;
+  }
+
+  #app {
+    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
+  }
+
+  .van-config-provider {
+    min-height: 100dvh;
+  }
+
+  .cps-row__front,
+  .msw-row__front {
+    will-change: auto !important;
+    isolation: auto !important;
+  }
+
+  [class*='message-page'] .van-nav-bar,
+  [class*='message-page'] .message-page__batch-bar {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
 }
 
 html.cap-native .van-tabbar__placeholder {
   background-color: var(--van-background) !important;
-}
-
-html.cap-native .van-config-provider {
-  min-height: 100%;
-  background-color: var(--van-background);
 }
 
 /*
@@ -155,6 +183,17 @@ a {
     margin: auto;
     border-top: 0;
     border-bottom: 0;
+  }
+
+  /* 原生 App 不用 H5 宽屏 fixed+transform 布局，避免 WKWebView 合成层整页不绘制 */
+  html.cap-native .van-config-provider {
+    max-width: none;
+    left: auto;
+    transform: none !important;
+    max-height: none;
+    overflow: visible;
+    position: static !important;
+    margin: 0;
   }
 
   .page-wrap {

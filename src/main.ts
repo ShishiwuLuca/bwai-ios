@@ -43,6 +43,8 @@ import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
 
 // 原生：应用状态栏主题适配
 import { applyNativeStatusBarForTheme } from '/@/hooks/AppStatusBarUtils';
+import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
+import { closeToast } from 'vant';
 
 // 原生邀请码 deep link
 import { setupNativeInviteDeepLink } from '/@/logics/nativeInviteDeepLink';
@@ -108,6 +110,11 @@ const bootstrapApp = async () => {
 
   if (Capacitor.isNativePlatform()) {
     void applyNativeStatusBarForTheme(useSystemStoreWithOut().getDarkMode);
+  }
+
+  if (isIOSNativeWebView()) {
+    closeToast(true);
+    scheduleIOSWebViewRepaint();
   }
 };
 
