@@ -76,6 +76,15 @@ const CreateErrorToast = (message: string) => {
 
   if (isIOSNativeWebView()) {
     closeToast(true);
+    repairIOSWebViewLayers();
+    return showNotify({
+      type: 'danger',
+      message,
+      duration: 3000,
+      onClose: () => {
+        repairIOSWebViewLayers();
+      }
+    });
   }
 
   return showFailToast(
@@ -149,10 +158,16 @@ const CreateSuccessNotify = (message: string) => {
 
 /** CreateErrorNotify */
 const CreateErrorNotify = (message: string) => {
+  if (isIOSNativeWebView()) {
+    repairIOSWebViewLayers();
+  }
   return showNotify({
     message: message,
     type: 'danger',
-    duration: 3000
+    duration: 3000,
+    onClose: () => {
+      if (isIOSNativeWebView()) repairIOSWebViewLayers();
+    }
   });
 };
 

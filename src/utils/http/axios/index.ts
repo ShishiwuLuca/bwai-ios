@@ -19,6 +19,7 @@ import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { buildHttpClientTraceHeaders } from '/@/utils/http/buildHttpClientTraceHeaders';
+import { isIOSNativeWebView, repairIOSWebViewLayers, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
 /** globSetting */
 const globSetting = useGlobSetting();
@@ -27,7 +28,7 @@ const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 
 /** 从 useMessage 解构的 Toast / Dialog 能力 */
-const { CreateErrorToast, CreateAlertDialog } = useMessage();
+const { CreateErrorToast, CreateErrorNotify, CreateAlertDialog } = useMessage();
 
 /** 解构赋值：组合式 API 返回的一组方法或状态 */
 const { VITE_GLOB_API_URL, VITE_GLOB_SYSTEM_VERSION } = getAppEnvConfig();
@@ -226,7 +227,14 @@ const transform: AxiosTransform = {
         if (errorMessageMode === 'modal') {
           CreateAlertDialog({ title: t('common_title_text'), message: errMessage });
         } else if (errorMessageMode === 'message' && errMessage !== '') {
-          CreateErrorToast(errMessage);
+          // iOS：VPN 切换后 Fail Toast 易触发 WKWebView 整页不可见，改用顶部 Notify
+          if (isIOSNativeWebView()) {
+            repairIOSWebViewLayers();
+            CreateErrorNotify(errMessage);
+            scheduleIOSWebViewRepaint();
+          } else {
+            CreateErrorToast(errMessage);
+          }
         }
         return Promise.reject(error);
       }

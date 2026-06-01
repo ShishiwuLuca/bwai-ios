@@ -54,6 +54,7 @@ import {
   initNativeShell,
   hideSplashScreenIfNative
 } from '/@/logics/nativeAppShell';
+import { initIOSNetworkChangeRepair } from '/@/logics/iosNetworkRepair';
 
 // 创建并启动 Vue 应用
 
@@ -122,6 +123,9 @@ applyNativeSafeArea();
 
 // 初始化原生 shell
 initNativeShell();
+
+// iOS：VPN / 网络切换后修复 WebView 合成层
+initIOSNetworkChangeRepair();
 
 // 启动应用
 void bootstrapApp();
