@@ -88,34 +88,55 @@ fi
 
 NEW_MARKETING="$(bump_patch "$BASE_VERSION")"
 echo "[ios-version] Local marketing version: $LOCAL_VERSION → $NEW_MARKETING"
-NEXT_BUILD=""
+
+# Build 号：取 TestFlight / App Store / 全局最高值 +1，避免仅查 app-store 版本时漏掉已上传的 TestFlight build（如 duplicate build 5）
+max_int() {
+  node -e '
+const nums = process.argv.slice(1).map((s) => parseInt(String(s), 10)).filter((n) => Number.isFinite(n));
+process.stdout.write(String(nums.length ? Math.max(...nums) : 0));
+' "$@"
+}
+
+bump_latest_build() {
+  local label="$1"
+  shift
+  local out
+  out="$("$@" -s 2>/dev/null || true)"
+  if [[ "$out" =~ ^[0-9]+$ ]]; then
+    echo "[ios-version] Latest build from $label: $out"
+    LATEST_BUILD="$(max_int "$LATEST_BUILD" "$out")"
+  fi
+}
+
+LATEST_BUILD=0
 if [ -n "$APP_STORE_APPLE_ID" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
-  LATEST_BUILD="$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" \
-    --version-string "$NEW_MARKETING" -s 2>/dev/null || echo "")"
-  if [ -n "$LATEST_BUILD" ] && [[ "$LATEST_BUILD" =~ ^[0-9]+$ ]]; then
-    NEXT_BUILD=$((LATEST_BUILD + 1))
+  bump_latest_build "TestFlight($NEW_MARKETING)" \
+    app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" \
+    --pre-release-version "$NEW_MARKETING" --platform IOS
+  bump_latest_build "TestFlight(global)" \
+    app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID" --platform IOS
+  bump_latest_build "AppStore($NEW_MARKETING)" \
+    app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" \
+    --version-string "$NEW_MARKETING"
+  bump_latest_build "AppStore(global)" \
+    app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID"
+  bump_latest_build "Build(global)" \
+    app-store-connect get-latest-build-number "$APP_STORE_APPLE_ID" --platform IOS
+fi
+
+CURRENT="$(read_pbxproj_value CURRENT_PROJECT_VERSION)"
+if ! [[ "$CURRENT" =~ ^[0-9]+$ ]]; then
+  CURRENT=0
+fi
+LATEST_BUILD="$(max_int "$LATEST_BUILD" "$CURRENT")"
+
+if [ -n "${BUILD_NUMBER:-}" ] && [[ "${BUILD_NUMBER}" =~ ^[0-9]+$ ]]; then
+  if [ "$BUILD_NUMBER" -gt "$LATEST_BUILD" ]; then
+    LATEST_BUILD="$BUILD_NUMBER"
   fi
 fi
 
-if [ -z "$NEXT_BUILD" ]; then
-  if [ -n "$APP_STORE_APPLE_ID" ] && [ "$APP_STORE_APPLE_ID" != "0000000000" ]; then
-    GLOBAL_BUILD="$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" -s 2>/dev/null || echo "")"
-    if [ -n "$GLOBAL_BUILD" ] && [[ "$GLOBAL_BUILD" =~ ^[0-9]+$ ]]; then
-      NEXT_BUILD=$((GLOBAL_BUILD + 1))
-    fi
-  fi
-  if [ -z "$NEXT_BUILD" ]; then
-    if [ -n "${BUILD_NUMBER:-}" ]; then
-      NEXT_BUILD="$BUILD_NUMBER"
-    else
-      CURRENT="$(read_pbxproj_value CURRENT_PROJECT_VERSION)"
-      if ! [[ "$CURRENT" =~ ^[0-9]+$ ]]; then
-        CURRENT=0
-      fi
-      NEXT_BUILD=$((CURRENT + 1))
-    fi
-  fi
-fi
+NEXT_BUILD=$((LATEST_BUILD + 1))
 
-echo "[ios-version] Build number → $NEXT_BUILD (marketing $NEW_MARKETING)"
+echo "[ios-version] Build number → $NEXT_BUILD (marketing $NEW_MARKETING, latest seen $LATEST_BUILD)"
 set_pbxproj_versions "$NEW_MARKETING" "$NEXT_BUILD"
