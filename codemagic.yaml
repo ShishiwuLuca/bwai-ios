@@ -88,23 +88,23 @@ workflows:
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --scheme "$XCODE_SCHEME"
 
-      # 带版本号的 ipa 仅作 Artifacts 下载；勿放在 build/ios/ipa/，否则 publishing 会上传两份相同 Build
-      - name: Copy versioned ipa for Artifacts
+      # 带版本号的备份仅打 zip 供 Artifacts 下载；勿再产出第二个 .ipa（Publishing 默认匹配 **/*.ipa 会重复上传）
+      - name: Package ipa for Artifacts download
         script: |
           set -e
           PBXPROJ="$CM_BUILD_DIR/ios/App/App.xcodeproj/project.pbxproj"
           VERSION=$(grep -m1 'MARKETING_VERSION = ' "$PBXPROJ" | sed -E 's/.*MARKETING_VERSION = ([^;]+);/\1/' | tr -d ' \r')
           BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION = ' "$PBXPROJ" | sed -E 's/.*CURRENT_PROJECT_VERSION = ([^;]+);/\1/' | tr -d ' \r')
           mkdir -p build/ios/artifacts
-          DEST="build/ios/artifacts/BGAI-${VERSION}-${BUILD}.ipa"
-          cp build/ios/ipa/App.ipa "$DEST"
+          DEST="build/ios/artifacts/BGAI-${VERSION}-${BUILD}.zip"
+          (cd build/ios/ipa && zip -q "../artifacts/BGAI-${VERSION}-${BUILD}.zip" App.ipa)
           echo "Artifact (download only): $DEST"
           echo "Publish (TestFlight): build/ios/ipa/App.ipa"
           ls -la build/ios/ipa/ build/ios/artifacts/
 
     artifacts:
       - build/ios/ipa/App.ipa
-      - build/ios/artifacts/*.ipa
+      - build/ios/artifacts/*.zip
       - /tmp/xcodebuild_logs/*.log
 
     publishing:
