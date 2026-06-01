@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">BWAI</string>
+    <string name="title_activity_main">BWAI</string>
+    <string name="package_name">com.bwai.io</string>
+    <string name="custom_url_scheme">com.bwai.io</string>
+</resources>

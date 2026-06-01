@@ -1,0 +1,39 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // 与 @capacitor/android 及各官方插件子模块的 buildscript（8.13.0）一致，避免 AGP 9 + 8.13 混用导致 ClassCast / kotlin 插件失败
+        classpath 'com.android.tools.build:gradle:9.1.1'
+        classpath 'com.google.gms:google-services:4.4.4'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// 第三方 Capacitor 库在 node_modules 下，部分版本在 lintVitalAnalyzeRelease 上与 Gradle 8 状态跟踪冲突；仅对 library 关闭 release lint，:app 仍可走完整 lint
+subprojects { subproject ->
+    subproject.afterEvaluate {
+        if (subproject.plugins.hasPlugin('com.android.library')) {
+            subproject.android.lint.checkReleaseBuilds = false
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

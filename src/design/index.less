@@ -1,0 +1,251 @@
+@import './dark.less';
+@import './light.less';
+@import './font.less';
+
+html,
+body {
+  // 色弱模式
+  &.color-weak {
+    filter: invert(80%);
+  }
+
+  // 网站灰色模式
+  &.gray-mode {
+    filter: grayscale(100%);
+    filter: progid:dximagetransform.microsoft.basicimage(grayscale=1);
+  }
+
+  // font-family: 'PowbitFont';
+
+  // background: var(--van-background);
+
+  // 避免 Safari 误触双击放大
+  touch-action: manipulation;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  position: relative;
+  font-weight: normal;
+}
+
+body {
+  line-height: 1.6;
+  font-size: 14px;
+  text-rendering: optimizeLegibility;
+  /* APP 端：仅保留底部安全区，头部安全区已移除 */
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
+}
+
+/* 原生 APP：沉浸式状态栏；根节点与底部占位与安全区底色与主题一致，避免底部白条 */
+html.cap-native {
+  padding-top: 0 !important;
+  background-color: var(--van-background);
+  min-height: 100%;
+}
+html.cap-native body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  background-color: var(--van-background);
+}
+html.cap-native #app {
+  padding-top: 0 !important;
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
+  min-height: 100%;
+  box-sizing: border-box;
+  background-color: var(--van-background);
+}
+
+html.cap-native .van-tabbar__placeholder {
+  background-color: var(--van-background) !important;
+}
+
+html.cap-native .van-config-provider {
+  min-height: 100%;
+  background-color: var(--van-background);
+}
+
+/*
+ * 原生端固定 NavBar：勿再强制 top:0（与「顶入状态栏」无关且会配合不当）。
+ * 顶部留白由 Vant safeAreaInsetTop + env / JS 变量 --safe-area-inset-top 控制（见 AppStatusBarUtils.syncNativeNavBarTopInset）。
+ */
+html.cap-native .van-nav-bar--fixed.van-safe-area-top {
+  box-sizing: border-box;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: max(0px, env(safe-area-inset-top), var(--safe-area-inset-top, 0px));
+}
+
+html.cap-native .van-nav-bar--fixed:not(.van-safe-area-top) {
+  box-sizing: border-box;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: max(0px, env(safe-area-inset-top), var(--safe-area-inset-top, 0px));
+}
+
+/* 原生 APP：TabBar 适配底部安全区，避免与手势条/Home 指示条重叠 */
+html.cap-native .van-tabbar {
+  padding-bottom: constant(safe-area-inset-bottom) !important;
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0)) !important;
+  box-sizing: content-box !important;
+}
+
+/*
+ * Popup 安全区：Vant 默认仅用 env(safe-area-inset-*)；APP WebView 顶栏 env 常为 0，
+ * 与 NavBar 一致叠加 AppStatusBarUtils 注入的 --safe-area-inset-*。
+ * 全屏 Popup 需同时设置 safe-area-inset-top / safe-area-inset-bottom。
+ */
+.van-popup.van-safe-area-top {
+  box-sizing: border-box;
+  padding-top: constant(safe-area-inset-top);
+  padding-top: max(0px, env(safe-area-inset-top), var(--safe-area-inset-top, 0px));
+}
+
+.van-popup.van-safe-area-bottom {
+  box-sizing: border-box;
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: max(0px, env(safe-area-inset-bottom), var(--safe-area-inset-bottom, 0px));
+}
+
+a {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+::-webkit-scrollbar-thumb {
+  width: 0;
+  display: none;
+}
+
+@media screen and (min-width: 600px) {
+  #app::-webkit-scrollbar {
+    width: 0px;
+  }
+  // ::-webkit-scrollbar-thumb {
+  //   width: 5px;
+  // }
+}
+
+@media screen and (min-width: 600px) {
+  // .page-wrap,
+  // .van-tabbar,
+  // .van-nav-bar {
+  //   max-width: 9rem;
+  //   left: 50%;
+  //   transform: translateX(-50%);
+  //   width: 100%;
+  //   max-height: 100vh;
+  //   overflow: auto;
+  //   position: fixed;
+  //   margin: auto;
+  //   border-top: 0;
+  //   border-bottom: 0;
+  // }
+
+  .van-config-provider {
+    max-width: 9rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-height: 100vh;
+    overflow: hidden;
+    position: fixed;
+    margin: auto;
+    border-top: 0;
+    border-bottom: 0;
+  }
+
+  .page-wrap {
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+    height: 100vh;
+    overflow: auto;
+  }
+
+  // .van-popup {
+  //   width: 9rem !important;
+  // }
+
+  .van-toast--text {
+    width: -webkit-fit-content !important;
+    width: fit-content !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .modal {
+    width: 100% !important;
+    max-width: none;
+  }
+}
+
+/* 适用于所有滚动容器 */
+* {
+  scrollbar-width: none; /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+::placeholder {
+  color: var(--van-background-2);
+}
+
+:where(audio, canvas, iframe, img, svg, video) {
+  vertical-align: middle;
+}
+
+.Loading {
+  opacity: 0;
+  animation: fadein 1.5s ease-in alternate infinite;
+  -webkit-tap-highlight-color: transparent;
+  will-change: opacity;
+  user-select: none;
+}
+
+@-webkit-keyframes fadein {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* 动画样式 */
+.slide-left-enter-active,
+.slide-right-enter-active,
+.slide-left-leave-active,
+.slide-right-leave-active {
+  transition: all 0.3s ease;
+  position: absolute;
+  width: 100%;
+}
+
+.slide-left-enter-from {
+  transform: translateX(100%);
+}
+.slide-left-leave-to {
+  transform: translateX(-100%);
+}
+
+.slide-right-enter-from {
+  transform: translateX(-100%);
+}
+.slide-right-leave-to {
+  transform: translateX(100%);
+}

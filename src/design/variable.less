@@ -1,0 +1,127 @@
+:root {
+  //
+  .van-icon-clear {
+    font-size: 20px;
+  }
+
+  // 底部菜单高度
+  --van-tabbar-height: 60px;
+
+  // 头部菜单高度
+  // --van-nav-bar-height: 60px;
+  --van-nav-bar-z-index: 1000;
+
+  // 公告栏高度
+  --van-notice-bar-height: 0.9rem;
+
+  // 下跌数字颜色
+  --van-down-color: #cf1313;
+
+  // 上涨数字颜色
+  --van-top-color: #13cf75;
+
+  // Popover
+  --van-popover-light-background: var(--van-background);
+
+  // toast图标大小
+  --van-toast-icon-size: 0.4rem;
+  --van-toast-default-width: 110px;
+
+  --van-button-primary-background: var(--van-primary-bg-color);
+  --van-button-default-color: var(--van-primary-color);
+
+  --van-floating-bubble-background: var(--van-primary-bg-color);
+
+  // Search
+  --van-search-background: var(--van-card-background);
+
+  .van-button--primary {
+    border: 0;
+  }
+
+  .van-button--plain {
+    color: var(--van-primary-color);
+    border: var(--van-button-border-width) solid var(--van-button-primary-border-color) !important;
+  }
+
+  .van-dialog {
+    .van-button--default {
+      background: var(--van-primary-bg-color);
+      color: var(--van-gray-1);
+    }
+    .van-action-bar-button--warning {
+      background: var(--van-danger-color);
+    }
+    .van-action-bar-button--danger {
+      background: var(--van-primary-bg-color);
+    }
+  }
+
+  .van-tab--card.van-tab--active {
+    background: var(--van-primary-bg-color);
+  }
+
+  .Selected {
+    background: var(--van-primary-bg-color) !important;
+  }
+
+  .themeColor {
+    color: var(--van-primary-color) !important;
+  }
+
+  .van-back-top {
+    background: var(--van-primary-bg-color);
+  }
+
+  .card {
+    background: var(--van-card-background) !important;
+  }
+
+  .card-linear {
+    background: var(--van-card-linear-background) !important;
+  }
+
+  .text-color {
+    color: var(--van-text-color);
+  }
+
+  .van-cell:after {
+    border-bottom: 1px dashed var(--van-cell-border-color) !important;
+  }
+}
+
+.van-cell__right-icon {
+  display: flex !important;
+  align-items: center !important;
+}
+
+// #app {
+//   margin-inline-start: 12px;
+// }
+
+body[dir='rtl'] {
+  .van-cell__value {
+    text-align: left;
+    // margin-left: 0.2rem;
+  }
+
+  .van-dropdown-item__content {
+    .van-cell__title {
+      text-align: right;
+    }
+  }
+
+  .van-action-bar-button--first {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: var(--van-radius-max);
+    border-bottom-right-radius: var(--van-radius-max);
+  }
+
+  .van-action-bar-button--last {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-top-left-radius: var(--van-radius-max);
+    border-bottom-left-radius: var(--van-radius-max);
+  }
+}

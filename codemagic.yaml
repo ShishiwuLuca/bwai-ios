@@ -1,0 +1,125 @@
+# BWAI / fundex2 — Codemagic iOS 云打包（产出 .ipa 并自动上传 TestFlight）
+# integrations.app_store_connect 须与 Codemagic → Team integrations 里 API Key 名称一致（默认 bwai_asc）
+
+workflows:
+  bwai-ios-release:
+    name: BWAI iOS Release (.ipa)
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+
+    integrations:
+      app_store_connect: bwai_asc
+
+    environment:
+      # CERTIFICATE_PRIVATE_KEY 须在 Codemagic UI 中放入变量组 bwai-ios-release，并勾选 Secret
+      groups:
+        - bwai-ios-release
+      # 勿在此处配置 ios_signing：未在 Codemagic 上传描述文件时会报
+      # No matching profiles found for bundle identifier ... app_store
+      # 签名由下方 fetch-signing-files + use-profiles 自动完成。
+      vars:
+        BUNDLE_ID: com.bwai.io
+        XCODE_SCHEME: App
+        XCODE_PROJECT: ios/App/App.xcodeproj
+        # 可选：App Store Connect → 应用 → App 信息 → Apple ID（纯数字），用于自动递增 Build 号
+        APP_STORE_APPLE_ID: "6771700743"
+      node: 22
+      xcode: latest
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          set -e
+          corepack enable
+          corepack prepare pnpm@10.33.0 --activate
+          pnpm install --frozen-lockfile
+
+      - name: Build web (app mode)
+        script: pnpm run build-only:app
+
+      - name: Capacitor sync iOS
+        script: npx cap sync ios
+
+      - name: Set up keychain
+        script: keychain initialize
+
+      - name: Fetch signing files (App Store)
+        script: |
+          set -e
+          # 私钥须持久化在 Codemagic 安全环境变量 CERTIFICATE_PRIVATE_KEY（勿每次构建临时生成）。
+          # fetch-signing-files --create 会默认读取该变量；无匹配证书时用此私钥创建，后续构建复用同一证书。
+          if [ -z "${CERTIFICATE_PRIVATE_KEY:-}" ]; then
+            echo "ERROR: 未设置 CERTIFICATE_PRIVATE_KEY。"
+            echo "Codemagic → 本应用 → Environment variables："
+            echo "  1. 添加变量 名称 CERTIFICATE_PRIVATE_KEY，值 PEM 全文，勾选 Secret"
+            echo "  2. 变量必须归入组 bwai-ios-release（与 codemagic.yaml environment.groups 一致）"
+            echo "若 Apple 已有 3 张 Distribution 证书，须先在 Developer 后台撤销不用的旧证书。"
+            echo "详见 docs/CODEMAGIC.md"
+            exit 1
+          fi
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create \
+            --strict-match-identifier \
+            --delete-stale-profiles
+          echo "Provisioning profiles downloaded:"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" 2>/dev/null || true
+
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+
+      - name: Apply provisioning profiles to Xcode project
+        script: |
+          xcode-project use-profiles \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --archive-method app-store
+
+      # 营销版本：ASC 最高版本与工程取 max 后 patch +0.0.1；Build 在该版本下 +1（见 scripts/codemagic-set-ios-versions.sh）
+      - name: Set iOS marketing version and build number
+        script: |
+          set -e
+          chmod +x scripts/codemagic-set-ios-versions.sh
+          ./scripts/codemagic-set-ios-versions.sh
+
+      - name: Build ipa
+        script: |
+          xcode-project build-ipa \
+            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+
+      # 带版本号的备份仅打 zip 供 Artifacts 下载；勿再产出第二个 .ipa（Publishing 默认匹配 **/*.ipa 会重复上传）
+      - name: Package ipa for Artifacts download
+        script: |
+          set -e
+          PBXPROJ="$CM_BUILD_DIR/ios/App/App.xcodeproj/project.pbxproj"
+          VERSION=$(grep -m1 'MARKETING_VERSION = ' "$PBXPROJ" | sed -E 's/.*MARKETING_VERSION = ([^;]+);/\1/' | tr -d ' \r')
+          BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION = ' "$PBXPROJ" | sed -E 's/.*CURRENT_PROJECT_VERSION = ([^;]+);/\1/' | tr -d ' \r')
+          mkdir -p build/ios/artifacts
+          DEST="build/ios/artifacts/BWAI-${VERSION}-${BUILD}.zip"
+          (cd build/ios/ipa && zip -q "../artifacts/BWAI-${VERSION}-${BUILD}.zip" App.ipa)
+          echo "Artifact (download only): $DEST"
+          echo "Publish (TestFlight): build/ios/ipa/App.ipa"
+          ls -la build/ios/ipa/ build/ios/artifacts/
+
+    artifacts:
+      - build/ios/ipa/App.ipa
+      - build/ios/artifacts/*.zip
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      email:
+        recipients:
+          - jenever.shishiwu@gmail.com
+        notify:
+          success: true
+          failure: true
+      # 构建成功后 post-processing：上传 ipa → App Store Connect → TestFlight Beta 审核
+      # 详见 https://docs.codemagic.io/yaml-publishing/app-store-connect/
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        expire_build_submitted_for_review: true
+        submit_to_app_store: false
+        # 外部测试组名（须与 App Store Connect → TestFlight 里组名完全一致），按需取消注释：
+        # beta_groups:
+        #   - 你的外部测试组名称
