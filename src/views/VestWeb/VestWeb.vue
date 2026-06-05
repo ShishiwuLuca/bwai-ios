@@ -1,24 +1,15 @@
 <template>
   <div class="vest-web-shell" :style="shellStyle">
     <Loading v-if="webviewLoading" class="vest-web__loading" vertical>{{ loadingText }}</Loading>
-    <iframe
-      class="vest-web__frame"
-      :src="HOME_WEB_URL"
-      title="BGAI"
-      frameborder="0"
-      allowfullscreen
-      allow="fullscreen; geolocation; microphone; camera"
-      referrerpolicy="no-referrer-when-downgrade"
-      @load="onWebviewLoad"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue';
+import { ref, computed, onActivated, onUnmounted } from 'vue';
 import { Capacitor } from '@capacitor/core';
 import { Loading } from 'vant';
 import { useI18n } from '/@/hooks/web/useI18n';
+import { openInBrowser } from '/@/hooks/useAppLauncher';
 import {
   resolveNativeTopInsetPx,
   scheduleNativeNavBarTopInsetSync
@@ -44,6 +35,7 @@ const webviewLoading = ref(true);
 const nativeTopInsetPx = ref(0);
 const HOME_LOADING_MAX_MS = 10000;
 let homeLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+let opening = false;
 
 const shellStyle = computed(() => {
   if (!Capacitor.isNativePlatform() || nativeTopInsetPx.value <= 0) {
@@ -61,31 +53,43 @@ const syncTopInset = async () => {
   }
 };
 
-const onWebviewLoad = () => {
+const clearHomeLoadingTimer = () => {
   if (homeLoadingTimer) {
     clearTimeout(homeLoadingTimer);
     homeLoadingTimer = null;
   }
+};
+
+const finishLoading = () => {
+  clearHomeLoadingTimer();
   webviewLoading.value = false;
 };
 
-onMounted(() => {
-  void syncTopInset();
-  homeLoadingTimer = setTimeout(() => {
-    webviewLoading.value = false;
-    homeLoadingTimer = null;
-  }, HOME_LOADING_MAX_MS);
-});
+const openVestSite = async () => {
+  if (opening) return;
+  opening = true;
+  webviewLoading.value = true;
+  clearHomeLoadingTimer();
+  homeLoadingTimer = setTimeout(finishLoading, HOME_LOADING_MAX_MS);
+
+  try {
+    await openInBrowser(HOME_WEB_URL.value, {
+      toolbarColor: '#060b1e',
+      presentationStyle: 'fullscreen'
+    });
+  } finally {
+    opening = false;
+    finishLoading();
+  }
+};
 
 onActivated(() => {
   void syncTopInset();
+  void openVestSite();
 });
 
 onUnmounted(() => {
-  if (homeLoadingTimer) {
-    clearTimeout(homeLoadingTimer);
-    homeLoadingTimer = null;
-  }
+  clearHomeLoadingTimer();
 });
 </script>
 
@@ -118,13 +122,5 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   background: #060b1e;
-}
-
-.vest-web__frame {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
-  border: 0;
-  background: #fff;
 }
 </style>

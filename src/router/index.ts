@@ -30,7 +30,7 @@ const routes: Array<RouteRecordRaw | any> = [
     component: isCapacitorAppBuild ? HomeView : () => import('/@/views/Home/Home.vue'),
     meta: { requiresAuth: false, keepAlive: true }
   },
-  // 马甲 / 隐藏入口 Web 壳（iframe，与 fundex 主仓 Home 马甲页同功能）
+  // 马甲 / 隐藏入口 Web 壳（Capacitor Browser 打开外链）
   {
     name: 'VestWeb',
     path: '/VestWeb',
