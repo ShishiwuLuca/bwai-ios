@@ -22,6 +22,8 @@
     "cap:android": "cap sync android && cap open android",
     "cap:ios": "cap sync ios && cap open ios",
     "build:ios": "pnpm run build-only:app && pnpm cap:ios",
+    "build:ios:release": "pnpm run build-only:app && cap sync ios && esno ./build/script/buildIos.ts release",
+    "build:ios:ipa": "esno ./build/script/buildIos.ts release",
     "build:cap": "pnpm build && cap sync",
     "build:ota": "pnpm run build-only:app && esno ./build/script/zipOta.ts",
     "build:android": "pnpm run build-only:app && cap sync android && esno ./build/script/buildAndroid.ts debug",

@@ -1,0 +1,29 @@
+---
+description: iOS 打包走 Codemagic 云构建；用户要求打包时先 push 再提示去 Codemagic
+alwaysApply: false
+---
+
+# iOS 打包（Codemagic）
+
+本仓库 **不在 Windows 本地打 iOS 包**。iOS 使用 [Codemagic](https://codemagic.io/) macOS 机构建，配置见根目录 `codemagic.yaml`，说明见 `docs/CODEMAGIC.md`。
+
+## 用户要求 iOS 打包时，Agent 必须按此顺序
+
+1. **确认代码已提交**：若有未提交改动，先 `git add` + `git commit`（勿改 git config）。
+2. **推送到远程**：`git push origin <当前分支>`（默认 `main`）。Codemagic 只构建远程仓库代码。
+3. **不要**在 Windows 上执行 `build:ios:release` / `xcodebuild` 作为正式发包手段（无 Mac 或仅供本地调试时除外）。
+4. **明确提示用户**去 Codemagic 手动触发构建，并给出步骤：
+   - 打开 [codemagic.io](https://codemagic.io/) → 本仓库应用
+   - 工作流：**BWAI iOS Release (.ipa)**（workflow id: `bwai-ios-release`）
+   - 选择刚 push 的分支 → **Start new build**
+   - 成功后可从 **Artifacts** 下载 `build/ios/ipa/*.ipa`；默认会自动上传 **TestFlight**（见 yaml `publishing.app_store_connect`）
+
+## 推送前建议（可选，非必须）
+
+- 前端与原生资源已就绪：`pnpm run build-only:app` 与 `cap sync ios` 的改动应已进仓库（Codemagic 会自行 `pnpm run build-only:app` + `npx cap sync ios`）。
+- 应用显示名当前为 **BGAI**，包名仍为 `com.bwai.io`。
+
+## 参考
+
+- 详细文档：`docs/CODEMAGIC.md`
+- 本地 Mac 备用：`pnpm run build:ios:release` → `PackageIOS/`

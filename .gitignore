@@ -16,8 +16,10 @@ coverage
 *.local
 OTA
 PackageAndroid
+PackageIOS
 android/app/build
 ios/App/build
+ios/signing.properties
 android/app/release
 
 # Editor directories and files

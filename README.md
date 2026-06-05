@@ -155,7 +155,7 @@ Web 资源目录：`dist`。`capacitor.config.ts` 含 **CapacitorHttp**（解决
 | `vite-plugin-compression` | 生成 `.gz` / `.br` **侧车文件**（供 Nginx `gzip_static` 等；**打进 APK / OTA 的构建建议 `VITE_BUILD_COMPRESS=none`**，见 `.env.app`） |
 | `static-file-plugin` | 开发服：`public/luckeywheel/` 直出 |
 
-**脚本**：`postBuild.ts`、`zipOta.ts`（OTA 输出 `OTA/`）、`buildAndroid.ts`、`proxy.ts`；`vite.config.ts` 含手动分包与时间戳资源名，减轻 WebView 下 CSS 与静态资源路径错位。
+**脚本**：`postBuild.ts`、`zipOta.ts`（OTA 输出 `OTA/`）、`buildAndroid.ts`、`buildIos.ts`、`proxy.ts`；`vite.config.ts` 含手动分包与时间戳资源名，减轻 WebView 下 CSS 与静态资源路径错位。
 
 ---
 
@@ -212,9 +212,25 @@ pnpm preview
 | `pnpm build:cap` | `pnpm build` + `cap sync` |
 | `pnpm build:ota` | app 模式构建 + OTA zip |
 | `pnpm build:android` / `pnpm build:android:release` | 构建 + 同步 + Gradle debug/release |
+| `pnpm build:ios:release` | app 构建 + sync + **Mac 上** 导出 `.ipa`（`PackageIOS/`） |
+| `pnpm build:ios:ipa` | 仅导出 `.ipa`（需已 `cap sync ios`，**仅 macOS**） |
 | `pnpm lint` | oxlint + eslint |
 | `pnpm format` | Prettier（`src/`） |
 | `pnpm android:compile` | 仅编译 Java（调试原生改动） |
+
+### iOS 导出 `.ipa`（仅 macOS）
+
+1. 复制 `ios/signing.properties.example` → `ios/signing.properties`，填写 Apple **Team ID**（10 位）。
+2. 本机安装 Xcode，并用 Apple ID 登录（**Signing & Capabilities** 使用 Automatic）。
+3. 在 Mac 项目根目录执行：
+
+```bash
+pnpm run build:ios:release
+```
+
+成功后安装包在 **`PackageIOS/`**，文件名形如 `BWAI-V1.0.0-<时间戳>-release.ipa`，可自行用 Transporter 等上传 App Store。
+
+**无 Mac、用 Codemagic 云打包**：见 **[docs/CODEMAGIC.md](./docs/CODEMAGIC.md)**（根目录 `codemagic.yaml`，构建产物在 Artifacts 中下载 `.ipa`）。
 
 ---
 
