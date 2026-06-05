@@ -28,11 +28,12 @@ export const main = (): void => {
 
   patchCordovaAndroidPluginsBuildGradle();
 
+  const gradleOpts = `-Dorg.gradle.java.home="${javaHome}"`;
   const child = spawn(gradlew, [task], {
     cwd: androidDir,
     stdio: 'inherit',
     shell: isWin,
-    env: { ...process.env, JAVA_HOME: javaHome }
+    env: { ...process.env, JAVA_HOME: javaHome, GRADLE_OPTS: gradleOpts }
   });
 
   child.on('exit', (code) => {

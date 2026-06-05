@@ -7,6 +7,14 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   /** WebView 底色：与 --van-background 深色一致，沉浸式时刘海/状态栏区不露出纯黑 */
   backgroundColor: '#090d20',
+  /**
+   * VestWeb 等场景需在 WebView 内直接打开外部站点（如 forwhale.com），
+   * 不跳转系统浏览器；* 表示允许任意域名在 WebView 内导航。
+   */
+  server: {
+    allowNavigation: ['*'],
+    cleartext: true
+  },
   // Android WebView配置
   android: {
     backgroundColor: '#090d20',

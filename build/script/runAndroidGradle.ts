@@ -28,11 +28,12 @@ const main = (): void => {
   const javaHome = ensureJdk21HomeForAndroidGradle();
   patchCordovaAndroidPluginsBuildGradle();
 
+  const gradleOpts = `-Dorg.gradle.java.home="${javaHome}"`;
   const child = spawn(gradlew, args, {
     cwd: androidDir,
     stdio: 'inherit',
     shell: isWin,
-    env: { ...process.env, JAVA_HOME: javaHome }
+    env: { ...process.env, JAVA_HOME: javaHome, GRADLE_OPTS: gradleOpts }
   });
 
   child.on('exit', (code) => {
