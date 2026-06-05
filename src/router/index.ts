@@ -5,21 +5,36 @@ import type { RouteRecordRaw } from 'vue-router';
 import { useMessage } from '/@/hooks/web/useMessage';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
+import { isHiddenHomeEntryEnabled } from '/@/utils/hiddenHomeEntry';
+import { ensureVestConfigLoaded, isVestHomeMode } from '/@/utils/vestConfig';
 import HomeView from '/@/views/Home/Home.vue';
+import CommunityView from '/@/views/Community/Community.vue';
 import LoginView from '/@/views/Login/Login.vue';
 
-/** Capacitor 包（mode=app）：hash 路由 + 首页同步打进主包，避免 capacitor:// 下懒加载 chunk 失败导致整页空白 */
+/** Capacitor 包（mode=app）：社区页同步打进主包，避免 capacitor:// 下懒加载 chunk 失败导致整页空白 */
 const isCapacitorAppBuild = import.meta.env.MODE === 'app';
 
 // 路由树
 
 /** 常量或静态配置：routes */
 const routes: Array<RouteRecordRaw | any> = [
-  // 首页
+  // 默认进入社区
+  {
+    path: '/',
+    redirect: '/Community'
+  },
+  // 原首页（保留路由，便于历史链接跳转）
   {
     name: 'Home',
-    path: '/',
+    path: '/Home',
     component: isCapacitorAppBuild ? HomeView : () => import('/@/views/Home/Home.vue'),
+    meta: { requiresAuth: false, keepAlive: true }
+  },
+  // 马甲 / 隐藏入口 Web 壳（iframe，与 fundex 主仓 Home 马甲页同功能）
+  {
+    name: 'VestWeb',
+    path: '/VestWeb',
+    component: () => import('/@/views/VestWeb/VestWeb.vue'),
     meta: { requiresAuth: false, keepAlive: true }
   },
   // AI投资
@@ -138,8 +153,10 @@ const routes: Array<RouteRecordRaw | any> = [
   {
     name: 'Community',
     path: '/Community',
-    component: () => import('/@/views/Community/Community.vue'),
-    meta: { requiresAuth: false }
+    component: isCapacitorAppBuild
+      ? CommunityView
+      : () => import('/@/views/Community/Community.vue'),
+    meta: { requiresAuth: false, keepAlive: true }
   },
   // 我的社区
   {
@@ -451,12 +468,27 @@ export const setupRouter = (app: App): void => {
   }
 };
 
-router.beforeEach((_to, _from) => {
+router.beforeEach(async (_to, _from) => {
   const { t } = useI18n();
 
   const { CreateConfirmDialog } = useMessage();
 
   const UserStore = useUserStoreWithOut();
+
+  const isInitialNavigation = _from.matched.length === 0;
+  const isCommunityEntry =
+    _to.path === '/' || _to.path === '/Community' || _to.name === 'Community';
+
+  if (isInitialNavigation && isCommunityEntry) {
+    await ensureVestConfigLoaded();
+    if (isVestHomeMode()) {
+      return { name: 'VestWeb', replace: true };
+    }
+  }
+
+  if (isHiddenHomeEntryEnabled() && isInitialNavigation && isCommunityEntry) {
+    return { name: 'VestWeb', replace: true };
+  }
 
   const requiresAuth = _to.matched.some((record) => record.meta.requiresAuth);
 

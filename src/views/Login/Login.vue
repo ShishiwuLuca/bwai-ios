@@ -306,7 +306,7 @@
           }
           CreateSuccessToast(t('loginSuccess'));
           setTimeout(() => {
-            const redirect = (route.query?.redirect as string) || '/';
+            const redirect = (route.query?.redirect as string) || '/Community';
             router.push(redirect);
           }, 1500);
         } else {

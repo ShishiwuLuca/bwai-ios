@@ -1,7 +1,7 @@
 <template>
   <NavBar :show-left="false" fixed placeholder :border="false">
     <template #left>
-      <VanImage :src="Logo" height="0.6rem" />
+      <VanImage :src="Logo" height="0.6rem" fit="contain" class="nav-bar-logo" />
     </template>
     <template #right>
       <Icon name="chat-o" :size="28" @click="$router.push('/Notice')" />
@@ -400,7 +400,6 @@
 
   /** 组件挂载后执行：初始化数据或订阅 */
   onMounted(() => {
-    userStore.setActiveTab(2);
     void fetchOverview();
     void fetchTypeTabs();
   });

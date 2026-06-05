@@ -528,7 +528,7 @@
         }
         CreateSuccessToast(t('registerSuccess'));
         setTimeout(() => {
-          router.push('/');
+          router.push('/Community');
         }, 1500);
       } else {
         CreateSuccessToast(t('registerSuccess'));

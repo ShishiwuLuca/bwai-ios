@@ -50,9 +50,6 @@ import { applyNativeStatusBarForTheme } from '/@/hooks/AppStatusBarUtils';
 // 原生邀请码 deep link
 import { setupNativeInviteDeepLink } from '/@/logics/nativeInviteDeepLink';
 
-// 原生：启动后服务端版本检测（checkVersion）
-import { scheduleNativePostBootUpdates } from '/@/logics/nativePostBootUpdates';
-
 // 原生壳能力（safe-area / 状态栏 / splash hide 等）
 import {
   applyNativeSafeArea,
@@ -148,6 +145,3 @@ void (async () => {
   initNativeResumeRecovery();
   await bootstrapApp();
 })();
-
-// 启动后检查服务端版本（仅原生环境，懒加载避免启动时插件异常闪退）
-scheduleNativePostBootUpdates();

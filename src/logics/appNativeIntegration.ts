@@ -29,7 +29,6 @@ import {
   applyNativeStatusBarForTheme,
   scheduleNativeNavBarTopInsetSync
 } from '/@/hooks/AppStatusBarUtils';
-import { resumeAppWebSocketsOnNativeForeground } from '/@/logics/appWebSocketSync';
 
 /**
  * 不在模块顶层调用 `useXxxStoreWithOut()` / `useAppInfo()` / `usePageVisibility()`：
@@ -354,51 +353,12 @@ export const initAppNativeIntegrationWatchers = (t: AppRootTranslate): void => {
 
   /** 侦听依赖变化并触发副作用 */
   watch(
-    () => ({
-      show: SystemStore.showAppUpdateDialog,
-      payload: SystemStore.appUpdateDialogPayload
-    }),
-    ({ show, payload }) => {
-      if (!show) {
-        appUpdateAutoStartedKey.value = '';
-        return;
-      }
-      if (!Capacitor.isNativePlatform() || !payload?.updateType) return;
-      const url = (payload.downloadUrl || '').trim();
-      if (!url) return;
-      // 非强制更新：不自动拉包，弹窗可关闭，由用户点击「立即更新」
-      if (!payload.forceUpdate) return;
-      let key: string;
-      if (payload.updateType === 'resource') {
-        const ver = resolveUpdateCacheVersionFromDialogFields({
-          serverVersion: payload.serverVersion,
-          newVersion: payload.newVersion
-        });
-        if (!ver) return;
-        key = `resource|${url}|${ver}`;
-      } else {
-        const pkgVer = resolveUpdateCacheVersionFromDialogFields({
-          serverVersion: payload.serverVersion,
-          newVersion: payload.newVersion
-        });
-        key = `package|${url}|${pkgVer}`;
-      }
-      if (appUpdateAutoStartedKey.value === key) return;
-      appUpdateAutoStartedKey.value = key;
-      void runAppUpdateFromDialogPayload(payload);
-    },
-    { flush: 'post' }
-  );
-
-  /** 侦听依赖变化并触发副作用 */
-  watch(
     () => PageVisibility.value,
     (newVal: string) => {
       if (newVal === 'visible' && Capacitor.isNativePlatform()) {
         if (Capacitor.getPlatform() !== 'ios') {
           scheduleNativeNavBarTopInsetSync();
         }
-        resumeAppWebSocketsOnNativeForeground();
       }
     },
     { deep: true }

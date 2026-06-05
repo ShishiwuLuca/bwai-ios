@@ -109,9 +109,11 @@ export const useUserStore = defineStore(StoreKeyName, {
     getNoticeContent(): string | null {
       return this.NoticeContent;
     },
-    // 获取底部TabBar当前选中项
+    // 获取底部TabBar当前选中项（community=0, mine=1；兼容旧版持久化下标）
     getActiveTab(): number {
-      return this.ActiveTab;
+      if (this.ActiveTab === 0 || this.ActiveTab === 1) return this.ActiveTab;
+      if (this.ActiveTab === 4) return 1;
+      return 0;
     },
     // 获取需要编辑的地址信息
     getEditAddress(): any {

@@ -5,10 +5,6 @@ import {
   markNativeIosEnteredBackground,
   recoverNativeIosFromBackground
 } from '/@/logics/nativeIosForegroundRecovery';
-import {
-  pauseAppWebSocketsOnNativeBackground,
-  resumeAppWebSocketsOnNativeForeground
-} from '/@/logics/appWebSocketSync';
 import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
 
 let resumeListenersInited = false;
@@ -21,7 +17,6 @@ export const initNativeResumeRecovery = (): void => {
   void App.addListener('appStateChange', ({ isActive }) => {
     if (!isActive) {
       markNativeIosEnteredBackground();
-      pauseAppWebSocketsOnNativeBackground();
       return;
     }
 
@@ -32,7 +27,5 @@ export const initNativeResumeRecovery = (): void => {
     }
 
     void notifyAppReady();
-
-    setTimeout(() => resumeAppWebSocketsOnNativeForeground(), Capacitor.getPlatform() === 'ios' ? 400 : 0);
   });
 };

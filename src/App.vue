@@ -12,7 +12,6 @@
     <Loading />
   </ConfigProvider>
   <CheckUpdates v-if="isOpenDefaultCheckUpdate" />
-  <AppUpdateDialog @update="onAppUpdateDialogPerformUpdate" />
 </template>
 
 <script setup lang="ts">
@@ -26,15 +25,10 @@
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { type ConfigProviderThemeVars, ConfigProvider } from 'vant';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { useWebSocketStoreWithOut } from '/@/stores/modules/WebSocket';
-  import { handleMemberWsMessage } from '/@/utils/memberWebSocketMessage';
-  import { computed, onBeforeMount, onUnmounted, watch, nextTick, ref } from 'vue';
-  import { CheckUpdates, Loading, AppUpdateDialog, LocaleModal } from '/@/components';
+  import { computed, onBeforeMount, watch, nextTick, ref } from 'vue';
+  import { CheckUpdates, Loading, LocaleModal } from '/@/components';
   import { ensureDeviceClientReportFields } from '/@/utils/deviceClientReportFields';
-  import { initAppNativeIntegrationWatchers, onAppUpdateDialogPerformUpdate, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
-  import { handleAppUpdateWsMessage, resetOtaMemberAppUpdateSubscribeSession, sendAppUpdateSubscribeIfConnected } from '/@/utils/appUpdateWebSocket';
-  import { WS_CHANNEL_MEMBER } from '/@/utils/websocketUrl';
-  import { syncAppWebSockets } from '/@/logics/appWebSocketSync';
+  import { initAppNativeIntegrationWatchers, runAppNativePostMountTasks } from '/@/logics/appNativeIntegration';
 
   /** 用户：UserStore */
   const UserStore = useUserStoreWithOut();
@@ -47,26 +41,10 @@
 
   initAppNativeIntegrationWatchers(t);
 
-  /** WebSocketStore */
-  const WebSocketStore = useWebSocketStoreWithOut();
-
   /** 解构赋值：组合式 API 返回的一组方法或状态 */
   const { VITE_GLOB_SYSTEM_VERSION } = getAppEnvConfig();
 
   // new VConsole();
-
-  /**
-   * 统一：行情 WebSocket（默认通道 default）与 WebSocketStore 同步。
-   * - 无登录 token 时 query 传空字符串 `token=`，不使用兜底。
-   * - 地址未变且已连接时跳过重复 connect。
-   */
-  const syncAppWebSocket = (): void => {
-    syncAppWebSockets();
-  };
-
-  const syncMemberWebSocket = (): void => {
-    syncAppWebSockets();
-  };
 
   // 是否启用默认版本更新检测程序（H5 热更新提示）
 
@@ -110,55 +88,6 @@
       document.body.setAttribute('dir', isRTL.value ? 'rtl' : 'ltr');
     },
     { immediate: true, deep: true }
-  );
-
-  // 登录 token 变化时重连两条 WebSocket（通道不同，需分别同步）
-  // 会员 /user/ws：未登录也连接（token 空 query），供原生 OTA subscribe_update；登录后带 token 重连
-
-  /** 侦听依赖变化并触发副作用 */
-  watch(
-    () => UserStore.Token,
-    (newToken, oldToken) => {
-      if (newToken === oldToken) return;
-      syncAppWebSocket();
-      syncMemberWebSocket();
-    }
-  );
-
-  // 监听会员通道推送并统一交给专用处理函数（App 版本更新 WS 仅原生处理，网页端不解析、不订阅）
-
-  /** 侦听依赖变化并触发副作用 */
-  watch(
-    () => WebSocketStore.getChannelState(WS_CHANNEL_MEMBER)?.lastMessage ?? null,
-    (raw) => {
-      handleMemberWsMessage(raw);
-      if (Capacitor.isNativePlatform()) {
-        handleAppUpdateWsMessage(raw);
-      }
-    }
-  );
-
-  /** 会员通道连上后订阅 App 更新推送（仅原生；H5 不依赖会员连接状态，也不发送 subscribe_update） */
-  // 只依赖 channels.member.connected，避免走 getter + sendChannel(pushMessage) 时误触发整段 OTA 逻辑
-
-  /** 侦听依赖变化并触发副作用 */
-  watch(
-    () =>
-      Capacitor.isNativePlatform()
-        ? !!(WebSocketStore.channels[WS_CHANNEL_MEMBER]?.connected ?? false)
-        : false,
-    (connected, wasConnected) => {
-      if (Capacitor.isNativePlatform() && wasConnected === true && !connected) {
-        resetOtaMemberAppUpdateSubscribeSession();
-        return;
-      }
-      if (!connected) return;
-      if (wasConnected === true) return;
-      void nextTick(() => {
-        void sendAppUpdateSubscribeIfConnected();
-      });
-    },
-    { flush: 'post', immediate: true }
   );
 
   // 写入谷歌搜索
@@ -265,27 +194,10 @@
     // 设备 ID：原生走 Device.getId；网页走 IndexedDB + localStorage 持久化（与 HTTP 头 device 一致）
     await getClientDeviceIdAsync();
 
-    // 厂商 / 型号 / 定制 UI（供 WS URL query、启动日志与版本检测体复用）
+    // 厂商 / 型号 / 定制 UI（供启动日志等复用）
     await ensureDeviceClientReportFields();
 
-    const runWs = (): void => {
-      syncAppWebSocket();
-      syncMemberWebSocket();
-    };
-    if (Capacitor.isNativePlatform()) {
-      setTimeout(runWs, 800);
-    } else {
-      runWs();
-    }
-
     await runAppNativePostMountTasks(!!isLogin.value);
-  });
-
-  // 卸载时断开所有通道（含 default 行情 + member）
-
-  /** 组件卸载时清理副作用 */
-  onUnmounted(() => {
-    WebSocketStore.disconnect();
   });
 </script>
 

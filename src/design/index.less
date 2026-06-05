@@ -102,6 +102,17 @@ html.cap-native .van-tabbar {
   box-sizing: content-box !important;
 }
 
+/* NavBar 左侧 Logo：仅设 height 时保持宽高比，避免 iOS WebView 横向拉满 */
+html.cap-native .van-nav-bar__left .van-image {
+  width: auto !important;
+  flex-shrink: 0;
+}
+
+html.cap-native .van-nav-bar__left .van-image__img {
+  width: auto !important;
+  object-fit: contain;
+}
+
 /*
  * Popup 安全区：Vant 默认仅用 env(safe-area-inset-*)；APP WebView 顶栏 env 常为 0，
  * 与 NavBar 一致叠加 AppStatusBarUtils 注入的 --safe-area-inset-*。

@@ -912,7 +912,7 @@
   };
   /** 返回上一页 */
   const handleBack = () => {
-    router.push('/');
+    router.push('/Community');
   };
   const goPrizeRecords = () => {
     /** id */

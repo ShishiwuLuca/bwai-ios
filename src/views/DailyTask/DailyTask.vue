@@ -1058,7 +1058,7 @@
     showRule.value = false;
   };
   onBeforeMount(() => {
-    UserStore.setActiveTab(4);
+    UserStore.setActiveTab(1);
   });
   onMounted(() => {
     isActiveDailyTask()

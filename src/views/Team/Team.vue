@@ -383,7 +383,7 @@
   import { getRewardInfo, type MyRewardVo } from '/@/service/Reward';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { Tabs, Tab, Button, Icon, PullRefresh, List, Popover } from 'vant';
-  import { ref, computed, watch, onMounted, onBeforeMount, onActivated } from 'vue';
+  import { ref, computed, watch, onMounted, onActivated } from 'vue';
   import { NavBar, PageWrap, AppCard, AppTabBar, CountTo, InviteModal } from '/@/components';
   import { getTeamInfo, getTeamChildren, type MyTeamVo, type TeamMemberVo } from '/@/service/Team';
   import { isCapacitorNative } from '/@/utils/shareInviteImage';
@@ -693,10 +693,6 @@
   /** 若 Team 被 KeepAlive 包裹，返回时 onMounted 不执行，需在此同步 Tab */
   onActivated(() => {
     applyTabFromRoute();
-  });
-  // 初始化
-  onBeforeMount((): void => {
-    UserStore.setActiveTab(3);
   });
 </script>
 

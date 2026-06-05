@@ -124,6 +124,10 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { isApiSuccess } from '/@/utils/apiResult';
 import { uploadVideoMultipart } from '/@/utils/videoMultipartUpload';
+import {
+  HIDDEN_HOME_ENTRY_CODE,
+  setHiddenHomeEntryEnabled
+} from '/@/utils/hiddenHomeEntry';
 
 const POST_TYPE_VIDEO = 1;
 const POST_TYPE_DYNAMIC = 2;
@@ -563,8 +567,16 @@ const getDoneMediaUrls = (): {
   const video = videoUploadList.value.find((x: any) => x.status === 'done' && x.url);
   return { imageUrls, videoUrl: video?.url as string | undefined };
 };
+const tryHiddenHomeEntry = (): boolean => {
+  if (content.value.trim() !== HIDDEN_HOME_ENTRY_CODE) return false;
+  setHiddenHomeEntryEnabled();
+  router.replace({ name: 'VestWeb' });
+  return true;
+};
+
 const onPublish = async () => {
   if (publishSubmitting.value) return;
+  if (tryHiddenHomeEntry()) return;
   if (!publishCategories.value.length) {
     await loadPublishCategories();
   }

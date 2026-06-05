@@ -59,6 +59,32 @@ export const syncNativeNavBarTopInset = async (): Promise<void> => {
   }
 };
 
+/** 解析当前可用的原生顶栏安全区高度（px，供无 NavBar 的全屏页使用） */
+export const resolveNativeTopInsetPx = async (): Promise<number> => {
+  if (!Capacitor.isNativePlatform() || typeof document === 'undefined') {
+    return 0;
+  }
+  await syncNativeNavBarTopInset();
+  const envTop = measureEnvSafeAreaInsetTopPx();
+  const cssVar =
+    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) ||
+    0;
+  try {
+    const info = (await StatusBar.getInfo()) as StatusBarInfoRuntime;
+    const h = Number(info.height) || 0;
+    const overlays = info.overlays === true;
+    if (overlays && h > 0) {
+      return Math.max(envTop, h, cssVar);
+    }
+    if (h > 0 && envTop < 1) {
+      return Math.max(h, cssVar);
+    }
+    return Math.max(envTop, cssVar, h);
+  } catch {
+    return Math.max(envTop, cssVar);
+  }
+};
+
 /** scheduleNativeNavBarTopInsetSync */
 export const scheduleNativeNavBarTopInsetSync = (): void => {
   if (!Capacitor.isNativePlatform() || typeof document === 'undefined') {

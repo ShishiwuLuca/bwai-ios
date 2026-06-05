@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.bwai.io',
-  appName: 'BWAI',
+  appName: 'BGAI',
   webDir: 'dist',
   /** WebView 底色：与 --van-background 深色一致，沉浸式时刘海/状态栏区不露出纯黑 */
   backgroundColor: '#090d20',

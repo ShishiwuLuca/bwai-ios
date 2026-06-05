@@ -1,7 +1,7 @@
 <template>
   <NavBar :show-left="false" fixed placeholder :border="false">
     <template #left>
-      <VanImage :src="Logo" height="0.6rem" />
+      <VanImage :src="Logo" height="0.6rem" fit="contain" class="nav-bar-logo" />
     </template>
     <template #right>
       <div class="flex items-center gap-1">
@@ -406,7 +406,6 @@
   // 初始化
   onBeforeMount((): void => {
     SystemStore.setLoading(true);
-    UserStore.setActiveTab(0);
     getHomeDataList();
     getRawListData();
   });

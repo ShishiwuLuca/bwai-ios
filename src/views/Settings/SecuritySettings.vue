@@ -18,17 +18,6 @@
         size="large"
         :border="false"
         class="rounded !pt-1 !pb-1 mb-1"
-        :title="t('trade_password_title')"
-        :value="UserInfo.capitalPasswordSet === true ? t('set_text') : t('unset_text')"
-        is-link
-        :to="'/TradePassword'"
-      />
-      <Cell
-        clickable
-        center
-        size="large"
-        :border="false"
-        class="rounded !pt-1 !pb-1 mb-1"
         :title="t('google_code_title')"
         :value="UserInfo.googleCodeSet ? t('bind_text') : t('unbind_text')"
         is-link

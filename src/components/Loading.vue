@@ -8,7 +8,7 @@
   >
     <div class="h-100% w-100% flex items-center justify-center">
       <div class="text-center w-full text-[#aaa] flex flex-col items-center">
-        <VanImage :src="Logo" width="2.5rem" />
+        <VanImage :src="LOADING_LOGO" width="2.5rem" fit="contain" />
         <div>LOADING</div>
       </div>
     </div>
@@ -19,8 +19,12 @@
   // Vant 遮罩与图片
   import { Overlay, Image as VanImage } from 'vant';
   import { Capacitor } from '@capacitor/core';
-  import { onUnmounted, ref, watchEffect, computed } from 'vue';
+  import { onUnmounted, ref, watchEffect } from 'vue';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
+  import { FALLBACK_APP_LOGO } from '/@/utils/appLogo';
+
+  /** Loading 固定使用本地 Bitgoai Logo，不依赖接口异步返回 */
+  const LOADING_LOGO = FALLBACK_APP_LOGO;
 
   /** 原生 App 不用全屏 Loading：iOS 上半透明遮罩易变成纯色底盖住页面 */
   const isNativeApp = Capacitor.isNativePlatform();
@@ -55,13 +59,6 @@
   // const getLogoImages = computed(() => {
   //   return new URL(`../assets/images/header_logo.png`, import.meta.url).href;
   // });
-
-  // logo
-
-  /** 计算属性：由其它状态派生的展示或判断 */
-  const Logo = computed(() => {
-    return SystemStore.getLoginLogo;
-  });
 
   // 启动定时器
 

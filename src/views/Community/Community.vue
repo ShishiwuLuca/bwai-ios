@@ -4,7 +4,7 @@
       class="community-page__navbar">
       <template #left>
         <div class="community-page__nav-avatar" aria-hidden="true" @click="goMyCommunity">
-          <VanImage :src="userAvatarSrc" />
+          <VanImage :src="userAvatarSrc" width="0.6rem" height="0.6rem" fit="cover" />
         </div>
       </template>
       <template #right>
@@ -270,7 +270,7 @@ const loadCategoryTabs = async () => {
 onBeforeMount(() => {
   UserStore.fetchUserInfo();
   loadBanners();
-  UserStore.setActiveTab(1);
+  UserStore.setActiveTab(0);
   void loadCategoryTabs();
 });
 </script>

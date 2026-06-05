@@ -109,6 +109,8 @@
     // 确保返回按钮有足够的点击区域
     min-width: 0.8rem;
     min-height: 0.8rem;
+    max-width: none;
+    width: auto;
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -121,6 +123,17 @@
 
     .van-icon-arrow-left {
       font-size: 0.45rem;
+    }
+
+    /* 仅设 height 的 Logo：避免 van-image__img 宽度 100% 在 iOS 原生端被拉满 */
+    .van-image {
+      width: auto !important;
+      flex-shrink: 0;
+    }
+
+    .van-image__img {
+      width: auto !important;
+      object-fit: contain;
     }
   }
 
