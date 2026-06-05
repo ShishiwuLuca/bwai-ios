@@ -47,37 +47,15 @@ export const syncNativeNavBarTopInset = async (): Promise<void> => {
     }
     if (px > 0) {
       root.style.setProperty('--safe-area-inset-top', `${px}px`);
+    } else {
+      root.style.removeProperty('--safe-area-inset-top');
     }
-    // px===0 时不 removeProperty：避免清掉 SystemBars 已注入的 inset，导致全屏页顶栏被挡
   } catch {
     if (envTop > 0) {
       root.style.setProperty('--safe-area-inset-top', `${envTop}px`);
+    } else {
+      root.style.removeProperty('--safe-area-inset-top');
     }
-  }
-};
-
-/** 解析当前可用的原生顶栏安全区高度（px，供无 NavBar 的全屏页使用） */
-export const resolveNativeTopInsetPx = async (): Promise<number> => {
-  if (!Capacitor.isNativePlatform() || typeof document === 'undefined') {
-    return 0;
-  }
-  await syncNativeNavBarTopInset();
-  const envTop = measureEnvSafeAreaInsetTopPx();
-  const cssVar =
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0;
-  try {
-    const info = (await StatusBar.getInfo()) as StatusBarInfoRuntime;
-    const h = Number(info.height) || 0;
-    const overlays = info.overlays === true;
-    if (overlays && h > 0) {
-      return Math.max(envTop, h, cssVar);
-    }
-    if (h > 0 && envTop < 1) {
-      return Math.max(h, cssVar);
-    }
-    return Math.max(envTop, cssVar, h);
-  } catch {
-    return Math.max(envTop, cssVar);
   }
 };
 
@@ -102,12 +80,14 @@ export const applyNativeStatusBarForTheme = async (_themeMode: ThemeEnum): Promi
     return;
   }
   try {
-    await StatusBar.setOverlaysWebView({ overlay: true });
-    try {
-      // 沉浸式：状态栏区域透明，避免与页面内容出现「双色条」
-      await StatusBar.setBackgroundColor({ color: '#00000000' });
-    } catch {
-      // iOS 等可能不支持 setBackgroundColor
+    const isIos = Capacitor.getPlatform() === 'ios';
+    await StatusBar.setOverlaysWebView({ overlay: !isIos });
+    if (!isIos) {
+      try {
+        await StatusBar.setBackgroundColor({ color: '#00000000' });
+      } catch {
+        // ignore
+      }
     }
     // 始终浅色内容（白）：Capacitor Style.Dark = light text/icons on dark background
     await StatusBar.setStyle({ style: Style.Dark });

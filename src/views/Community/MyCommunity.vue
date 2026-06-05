@@ -20,7 +20,6 @@
         v-model:active="mainTab"
         class="my-community-page__tabs my-community-page__tabs--main"
         color="#4db3ff"
-        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab
@@ -36,7 +35,6 @@
         v-model:active="statusTab"
         class="my-community-page__tabs my-community-page__tabs--status"
         color="#4db3ff"
-        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab :title="t('mc_status_all')" name="all" />
@@ -101,8 +99,6 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
-  import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
-  import { iosNativeTabsAnimated } from '/@/utils/iosUiAnimations';
   import CommunityPostSwipeRow from './CommunityPostSwipeRow.vue';
   import {
     mapPostToDisplay,
@@ -366,9 +362,9 @@
         (!reset && mapped.length > 0 && added === 0);
       feedFinished.value = noMore;
       if (!noMore) feedPageNo.value += 1;
-    } catch (e: unknown) {
+    } catch {
       feedFinished.value = true;
-      notifyApiRequestFailed(e);
+      CreateErrorToast(t('apiRequestFailed'));
     } finally {
       // 仅当前代次的请求能收尾，避免「后返回的旧请求」在整表重置后误关 loading
       if (myGeneration === listFetchGeneration.value) {

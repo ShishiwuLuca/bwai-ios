@@ -16,10 +16,38 @@ import { updateGrayMode } from '/@/logics/theme/updateGrayMode';
 import { updateColorWeak } from '/@/logics/theme/updateColorWeak';
 import { APP_PRESET_COLOR_LIST } from '/@/settings/projectSetting';
 import type { LocaleSetting, LocaleType, ProjectConfig } from '/#/config';
-import { getSystemConfig, getCountryList } from '/@/service/System';
+import { getSystemConfig, getCountryList, getFiatExchangeRate } from '/@/service/System';
 
 /** 解构赋值：组合式 API 返回的一组方法或状态 */
 const { VITE_GLOB_APP_TITLE } = getAppEnvConfig();
+
+/** 服务端版本检测：更新类型（与接口 `updateType` 一致） */
+export type AppUpdateDialogUpdateType = 'resource' | 'package';
+
+/** 服务端版本检测通过后展示的升级弹窗数据 */
+export interface AppUpdateDialogPayload {
+  currentVersion: string;
+  newVersion: string;
+  contentList: string[];
+  forceUpdate: boolean;
+  /** 接口 `updateType`：resource 资源包 / package 安装包 */
+  updateType?: AppUpdateDialogUpdateType;
+  /** 接口 `downloadUrl`：安装包或资源包下载地址 */
+  downloadUrl?: string;
+  /** 接口 `version`：目标更新版本号（OTA 与展示兜底） */
+  serverVersion?: string;
+  androidApkUrl?: string;
+  iosStoreUrl?: string;
+  iosAppStoreId?: string;
+}
+
+/** 升级弹窗内展示的下载进度（MB 两位小数由调用方格式化） */
+export interface AppUpdateDownloadProgressState {
+  active: boolean;
+  percent: number;
+  loadedMb: string;
+  totalMb: string;
+}
 
 // 配置名称Key
 
@@ -36,6 +64,8 @@ interface SystemState {
   projectConfig: ProjectConfig | any;
   // UI库主题变量配置
   themeVars: object;
+  // 加载动画状态
+  Loading: boolean;
   // 语言列表
   LocaleList: any[];
   // 所有币种
@@ -52,10 +82,18 @@ interface SystemState {
   isApp?: boolean;
   // 币种汇率等（ContractUtils 等使用）
   SymbolRate?: Record<string, unknown>;
+  // APP 升级弹窗是否显示
+  showAppUpdateDialog: boolean;
+  /** 升级弹窗展示数据（由服务端 checkVersion 结果填充） */
+  appUpdateDialogPayload: AppUpdateDialogPayload | null;
+  /** 升级下载进度（弹窗内展示） */
+  appUpdateDownloadProgress: AppUpdateDownloadProgressState | null;
   // 国家区号列表
   CountryList: any[];
   // 默认的国家区号信息
   DefaultCountryInfo: any;
+  // 法币汇率：key 为 quoteCurrency，值为 rate
+  FiatExchangeRate: Record<string, number>;
   // 网络类型列表
   NetworkTypeList: any[];
   // 网络币种列表
@@ -73,6 +111,8 @@ export const useSystemStore = defineStore(StoreKeyName, {
     projectConfig: {},
     // UI库主题变量配置
     themeVars: {},
+    // 加载动画状态
+    Loading: true,
     // 语言列表
     LocaleList: [],
     // 所有币种
@@ -89,10 +129,16 @@ export const useSystemStore = defineStore(StoreKeyName, {
     isApp: false,
     // 币种汇率（ContractUtils 等使用）
     SymbolRate: {} as Record<string, unknown>,
+    // APP 升级弹窗是否显示
+    showAppUpdateDialog: false,
+    appUpdateDialogPayload: null,
+    appUpdateDownloadProgress: null,
     // 国家区号列表
     CountryList: [],
     // 默认的国家区号信息
     DefaultCountryInfo: {},
+    // 法币汇率
+    FiatExchangeRate: {},
     // 网络类型列表
     NetworkTypeList: [],
     // 网络币种列表
@@ -127,6 +173,10 @@ export const useSystemStore = defineStore(StoreKeyName, {
     getGrayMode(): boolean {
       return (this.projectConfig as ProjectConfig).grayMode || false;
     },
+    // 获取加载动画状态
+    getLoading(): boolean {
+      return this.Loading;
+    },
     // 获取语言列表
     getLocaleList(): any[] {
       return this.LocaleList || [];
@@ -158,6 +208,10 @@ export const useSystemStore = defineStore(StoreKeyName, {
     // 获取默认的国家区号信息
     getDefaultCountryInfo(): any {
       return this.DefaultCountryInfo || {};
+    },
+    // 获取法币汇率
+    getFiatExchangeRate(): Record<string, number> {
+      return this.FiatExchangeRate || {};
     },
     // 获取网络类型列表
     getNetworkTypeList(): any[] {
@@ -202,6 +256,35 @@ export const useSystemStore = defineStore(StoreKeyName, {
     setIsApp(payload: boolean): void {
       this.isApp = payload;
     },
+    // 设置 APP 升级弹窗是否显示（强制更新时忽略「关闭」类调用，除非 bypassForceGuard）
+    setShowAppUpdateDialog(
+      payload: boolean,
+      options?: {
+        bypassForceGuard?: boolean;
+      }
+    ): void {
+      if (
+        !payload &&
+        this.appUpdateDialogPayload?.forceUpdate === true &&
+        !options?.bypassForceGuard
+      ) {
+        return;
+      }
+      this.showAppUpdateDialog = payload;
+      if (!payload) {
+        this.appUpdateDialogPayload = null;
+        this.appUpdateDownloadProgress = null;
+      }
+    },
+    setAppUpdateDownloadProgress(progress: AppUpdateDownloadProgressState | null): void {
+      this.appUpdateDownloadProgress = progress;
+    },
+    /** 打开升级弹窗并写入展示数据 */
+    openAppUpdateDialog(dialogPayload: AppUpdateDialogPayload): void {
+      this.appUpdateDownloadProgress = null;
+      this.appUpdateDialogPayload = dialogPayload;
+      this.showAppUpdateDialog = true;
+    },
     // 修改主题模式
     setDarkMode(payload: ThemeEnum): void {
       (this.projectConfig as ProjectConfig).themeDark = payload;
@@ -245,6 +328,18 @@ export const useSystemStore = defineStore(StoreKeyName, {
     setColorWeak(payload: boolean): void {
       (this.projectConfig as ProjectConfig).colorWeak = payload;
       updateColorWeak(payload);
+    },
+    // 保存加载动画状态
+    setLoading(payload: boolean): void {
+      // 如果是关闭
+      if (payload === false) {
+        // 延迟500毫秒关闭防止页面未渲染完成
+        setTimeout(() => {
+          this.Loading = payload;
+        }, 500);
+      } else {
+        this.Loading = payload;
+      }
     },
     // 保存语言列表
     async setLocaleList(payload: any[]): Promise<void> {
@@ -442,6 +537,23 @@ export const useSystemStore = defineStore(StoreKeyName, {
       // 保存默认的国家区号信息
       this.DefaultCountryInfo = defaultCountry;
     },
+    // 保存法币汇率
+    async setFiatExchangeRate() {
+      getFiatExchangeRate({ baseSymbol: 'USDT' }).then((res: any) => {
+        const { code, data } = res;
+        if (code === 0) {
+          const map: Record<string, number> = {};
+          (data || []).forEach((item: any) => {
+            const key = item?.quoteCurrency;
+            const rate = Number(item?.rate ?? NaN);
+            if (key && !Number.isNaN(rate)) {
+              map[key] = rate;
+            }
+          });
+          this.FiatExchangeRate = map;
+        }
+      });
+    },
     // 保存网络类型列表
     setNetworkTypeList(payload: any[]): void {
       this.NetworkTypeList = payload;
@@ -453,7 +565,9 @@ export const useSystemStore = defineStore(StoreKeyName, {
   },
   persist: {
     key: StoreKeyName,
-    storage: localStorage
+    storage: localStorage,
+    // Loading 仅用于首屏遮罩，持久化为 true 会在 iOS 恢复/冷启时盖住整页
+    omit: ['Loading']
   }
 });
 

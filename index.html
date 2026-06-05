@@ -16,7 +16,7 @@
   <meta http-equiv="expires" content="-1" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="wap-font-scale" content="no" />
-  <meta name="keywords" content="BGAI" />
+  <meta name="keywords" content="BWAI" />
   <meta name="theme-color" content="transparent" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -28,6 +28,32 @@
   <title>
     <%= title %>
   </title>
+  <style id="cap-ios-paint-fix">
+    html.cap-native,
+    html.cap-native body,
+    html.cap-native #app,
+    html.cap-native .van-config-provider {
+      min-height: var(--app-height, 100vh);
+      height: var(--app-height, 100vh);
+    }
+  </style>
+  <script>
+    (function () {
+      var p = location.protocol || '';
+      if (p !== 'capacitor:' && p !== 'ionic:') return;
+      document.documentElement.classList.add('cap-native');
+      function setAppHeight() {
+        var h = Math.max(window.innerHeight || 0, 1);
+        var px = h + 'px';
+        document.documentElement.style.setProperty('--app-height', px);
+        document.documentElement.style.height = px;
+        if (document.body) document.body.style.height = px;
+      }
+      setAppHeight();
+      window.addEventListener('resize', setAppHeight, { passive: true });
+      window.addEventListener('orientationchange', setAppHeight, { passive: true });
+    })();
+  </script>
   <script>
     !(function (window) {
       var docWidth = 750,
@@ -43,6 +69,9 @@
       if (!doc.addEventListener) return;
       window.addEventListener(resizeEvt, recalc, false);
       doc.addEventListener('DOMContentLoaded', recalc, false);
+      window.addEventListener('load', recalc, false);
+      setTimeout(recalc, 100);
+      setTimeout(recalc, 500);
     })(window);
 
     (function () {
@@ -75,8 +104,8 @@
 </head>
 
 <body ontouchstart="" style="background: var(--van-background)" translate="no">
-  <div id="app">
-    <script type="module" src="/src/main.ts"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

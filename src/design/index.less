@@ -28,6 +28,7 @@ body {
 *::after {
   box-sizing: border-box;
   margin: 0;
+  /* 勿全局 relative：iOS WKWebView 下会破坏 fixed 合成，出现 DOM 完整但屏幕只显示底色 */
   font-weight: normal;
 }
 
@@ -40,106 +41,42 @@ body {
   padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
 }
 
-/*
- * iOS WKWebView（Capacitor）：缓解「DOM 在、可点可复制、有底色但内容不绘制」。
- * - 禁用易触发独立合成层的 transform / fixed 居中
- * - 明确 dvh 高度链与文本色
- * - 关闭 backdrop-filter / will-change 等页面级 GPU 层陷阱
- */
+/* 原生 APP：沉浸式状态栏；根节点与底部占位与安全区底色与主题一致，避免底部白条 */
 html.cap-native {
-  -webkit-text-size-adjust: 100%;
   padding-top: 0 !important;
   background-color: var(--van-background);
-  min-height: 100dvh;
-
-  body {
-    text-rendering: auto;
-    color: var(--van-text-color, #ffffff);
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    background-color: var(--van-background);
-    min-height: 100dvh;
-  }
-
-  #app,
-  .van-config-provider {
-    padding-top: 0 !important;
-    min-height: 100dvh;
-    box-sizing: border-box;
-    background-color: var(--van-background);
-    transform: none !important;
-    -webkit-transform: none !important;
-  }
-
-  #app {
-    padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
-  }
-
-  .van-config-provider {
-    min-height: 100dvh;
-  }
-
-  .cps-row__front,
-  .msw-row__front {
-    will-change: auto !important;
-    isolation: auto !important;
-  }
-
-  [class*='message-page'] .van-nav-bar,
-  [class*='message-page'] .message-page__batch-bar {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  .van-overlay {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* Tabs / Swipe / Vue Transition：禁用 transform 切换动画，避免路由或 Tab 切换后整页不绘制 */
-  .van-tabs__track,
-  .van-tabs__content,
-  .van-tabs__content--animated,
-  .van-tab__panel-wrapper,
-  .van-swipe__track {
-    transition: none !important;
-    transition-duration: 0s !important;
-  }
-
-  .slide-left-enter-active,
-  .slide-right-enter-active,
-  .slide-left-leave-active,
-  .slide-right-leave-active,
-  .message-batch-bar-enter-active,
-  .message-batch-bar-leave-active {
-    transition: none !important;
-    transform: none !important;
-    position: static !important;
-    width: auto !important;
-  }
+  min-height: var(--app-height, 100vh);
+  height: var(--app-height, 100vh);
+  overflow: visible;
 }
-
-/*
- * iOS 诊断开关：强制可见基线（用于定位白屏/透明渲染问题）。
- * 通过 VITE_IOS_DEBUG_FORCE_VISIBLE=true 启用（见 main.ts）。
- */
-html.cap-native.ios-debug-force-visible {
-  color-scheme: light !important;
-  background: #ffffff !important;
-
-  body,
-  #app,
-  .van-config-provider {
-    background: #ffffff !important;
-    color: #111111 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    -webkit-text-fill-color: #111111 !important;
-  }
+html.cap-native body {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  background-color: var(--van-background);
+  min-height: var(--app-height, 100vh);
+  height: var(--app-height, 100vh);
+  overflow: visible;
+}
+html.cap-native #app {
+  padding-top: 0 !important;
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) !important;
+  min-height: var(--app-height, 100vh);
+  height: var(--app-height, 100vh);
+  box-sizing: border-box;
+  background-color: var(--van-background);
+  overflow: visible;
 }
 
 html.cap-native .van-tabbar__placeholder {
   background-color: var(--van-background) !important;
+}
+
+html.cap-native .van-config-provider {
+  min-height: var(--app-height, 100vh);
+  height: var(--app-height, 100vh);
+  width: 100%;
+  background-color: var(--van-background);
+  overflow: visible;
 }
 
 /*
@@ -218,7 +155,7 @@ a {
   //   border-bottom: 0;
   // }
 
-  .van-config-provider {
+  html:not(.cap-native) .van-config-provider {
     max-width: 9rem;
     left: 50%;
     transform: translateX(-50%);
@@ -231,18 +168,7 @@ a {
     border-bottom: 0;
   }
 
-  /* 原生 App 不用 H5 宽屏 fixed+transform 布局，避免 WKWebView 合成层整页不绘制 */
-  html.cap-native .van-config-provider {
-    max-width: none;
-    left: auto;
-    transform: none !important;
-    max-height: none;
-    overflow: visible;
-    position: static !important;
-    margin: 0;
-  }
-
-  .page-wrap {
+  html:not(.cap-native) .page-wrap {
     padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
     height: 100vh;
     overflow: auto;
@@ -280,6 +206,34 @@ a {
 
 :where(audio, canvas, iframe, img, svg, video) {
   vertical-align: middle;
+}
+
+.Loading {
+  opacity: 0;
+  animation: fadein 1.5s ease-in alternate infinite;
+  -webkit-tap-highlight-color: transparent;
+  will-change: opacity;
+  user-select: none;
+}
+
+@-webkit-keyframes fadein {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* 动画样式 */

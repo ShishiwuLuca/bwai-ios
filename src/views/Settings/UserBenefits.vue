@@ -30,6 +30,42 @@
           </div>
         </div>
       </div>
+      <div class="p-1 border border-solid border-[#EDD59C] rounded relative mt-2 bg_linear">
+        <div class="flex items-center justify-between">
+          <div class="text-[0.26rem]">{{ t('current_level_title') }}</div>
+          <VanImage class="!absolute top-[-450%] right-[-2%]" :src="Level" width="2.5rem" />
+        </div>
+        <Cell
+          clickable
+          center
+          size="large"
+          class="!bg-transparent !pl-0 !pr-0 !pb-0 !pt-0.5"
+          :title="UserInfo.level.name || 'VIP1'"
+          title-class="!text-[#EDD59C] !font-bold !text-[0.4rem]"
+          is-link
+          to="/TeamBenefits"
+        />
+      </div>
+
+      <!-- 团队权益 -->
+      <div class="mt-[0.32rem]" v-if="UserInfo.level?.level && UserInfo.level?.level > 0">
+        <div class="mb-[0.16rem] text-[0.28rem] font-bold text-white">{{
+          t('team_rights_title')
+        }}</div>
+        <div class="rounded-sm bg-[var(--van-card-background)] p-[0.28rem] text-[0.26rem]">
+          <div>{{ t('team_condition_1', [formatInt(currentTeamLevelRow?.fundAmount ?? 0)]) }}</div>
+          <div class="mt-[0.12rem]">{{
+            t('team_condition_2', [formatNum(currentTeamLevelRow?.pointSum ?? 0)])
+          }}</div>
+          <div class="mt-[0.12rem]">{{
+            t('team_benefit_1', [
+              formatNum(currentTeamLevelRow?.jrate ?? 0),
+              formatNum(currentTeamLevelRow?.erate ?? 0),
+              formatNum(currentTeamLevelRow?.brate ?? 0)
+            ])
+          }}</div>
+        </div>
+      </div>
       <!-- 个人信息：Cell 列表 -->
       <div class="mt-[0.32rem]">
         <div class="mb-[0.16rem] text-[0.28rem] font-bold text-white">{{
@@ -86,6 +122,15 @@
             <Icon class="ml-0.5" name="edit" :size="18" color="var(--van-text-color)" />
           </template>
         </Cell>
+        <Cell
+          clickable
+          center
+          size="large"
+          :border="false"
+          :title="t('vip_level_label')"
+          :value="UserInfo.level.name || 'VIP 1'"
+          class="!rounded-sm mb-1"
+        />
       </div>
     </div>
   </PageWrap>
@@ -93,7 +138,17 @@
 
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
-  import { computed, ref } from 'vue';
+  import { computed, onBeforeMount, ref } from 'vue';
+  import { getTeamRewardConfig } from '/@/service/Team';
+  import {
+    buildTeamRewardCardsFromPayload,
+    getTeamRewardCardForUserVip,
+    getUserVipLevel,
+
+    /** TeamRewardCard：类型别名 */
+    type TeamRewardCard
+  } from '/@/utils/teamRewardLevelConfig';
+  import Level from '/@/assets/images/vip.png';
   import { useCopyToClipboard } from '/@/utils';
   import { uploadFile } from '/@/service/System';
   import Avatar from '/@/assets/images/avatar.png';
@@ -128,6 +183,51 @@
   /** 计算属性：用户 */
   const UserInfo: any = computed(() => {
     return UserStore.getUserInfo;
+  });
+
+  // 与团队权益页同一接口，按当前 VIP 匹配一条等级配置
+
+  /** 响应式状态：团队 */
+  const teamRewardCards = ref<TeamRewardCard[]>([]);
+
+  /** 计算属性：团队 */
+  const currentTeamLevelRow = computed(() =>
+    getTeamRewardCardForUserVip(
+      teamRewardCards.value,
+      getUserVipLevel(UserInfo.value as Record<string, unknown>)
+    )
+  );
+
+  /** 格式化展示：formatInt */
+  const formatInt = (v: number): string => {
+    if (!Number.isFinite(v)) return '0';
+    return Math.round(v).toLocaleString();
+  };
+
+  /** 格式化展示：formatNum */
+  const formatNum = (v: number): string => {
+    if (!Number.isFinite(v)) return '0';
+    if (Number.isInteger(v)) return String(v);
+    return v.toFixed(4).replace(/\.?0+$/, '');
+  };
+
+  /** 拉取接口数据：fetchTeamRewardConfig */
+  const fetchTeamRewardConfig = (): void => {
+    getTeamRewardConfig()
+      .then((res) => {
+        if (Number(res.code) === 0) {
+          teamRewardCards.value = buildTeamRewardCardsFromPayload(res.data);
+        } else {
+          teamRewardCards.value = [];
+        }
+      })
+      .catch(() => {
+        teamRewardCards.value = [];
+      });
+  };
+
+  onBeforeMount(() => {
+    fetchTeamRewardConfig();
   });
 
   // 参数

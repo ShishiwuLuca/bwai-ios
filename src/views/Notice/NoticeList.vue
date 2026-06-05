@@ -1,7 +1,7 @@
 <template>
   <NavBar :title="t('notice_list_title')" fixed placeholder :border="false" />
   <PageWrap class="notice-list-page">
-    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="noticeTabsAnimated" :swipeable="iosNativeTabsSwipeable()">
+    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="!isRTL" swipeable>
       <Tab
         :show-zero-badge="false"
         v-for="(item, index) in NoticeTypeList"
@@ -91,17 +91,21 @@
   import { AppCardLinear } from '/@/components';
   import { NavBar, PageWrap } from '/@/components';
   import { TimeToFormat } from '/@/utils/TimeZone';
+  import { onEvent, offEvent } from '/@/utils/eventBus';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
-  import { ref, computed, onBeforeMount, watch } from 'vue';
+  import { ref, computed, onBeforeMount, onUnmounted, watch } from 'vue';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
+  import { MEMBER_WS_REFRESH_MY_MESSAGES } from '/@/utils/memberWebSocketMessage';
   import { Tab, Tabs, Cell, Badge, Divider, PullRefresh, List, Empty, BackTop } from 'vant';
+  import { syncAppIconBadgeWithUnreadCount } from '/@/utils/appIconBadge';
+  import { applyAppIconBadgeFromMessageUnreadCount } from '/@/utils/appNativeNotify';
   import {
     getNoticePage,
     getMyMessage,
     updateMessageReadStatus,
+    getMyMessageUnreadCount,
     updateNoticeReadStatus
   } from '/@/service/Notice';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   /** 从 useI18n 解构的文案与能力 */
   const { t } = useI18n();
@@ -165,8 +169,6 @@
   const isRTL = computed(() => {
     return SystemStore.localInfo.isRTL;
   });
-
-  const noticeTabsAnimated = computed(() => !isRTL.value && iosNativeTabsAnimated());
 
   // 监听Tab切换
 
@@ -321,7 +323,12 @@
       return;
     }
 
-    updateMessageReadStatus({ ids: ShowData }).then(() => {});
+    updateMessageReadStatus({ ids: ShowData }).then((res) => {
+      const { code } = res;
+      if (Number(code) === 0) {
+        void syncAppIconBadgeWithUnreadCount();
+      }
+    });
   };
 
   // 更新公告已读状态
@@ -344,9 +351,52 @@
     });
   };
 
+  // 获取我的消息未读数量
+
+  /** 提示与弹窗：getMyMessageUnreadCountData */
+  const getMyMessageUnreadCountData = (): void => {
+    if (!UserStore.getToken) return;
+    getMyMessageUnreadCount().then((res) => {
+      const { code, data } = res;
+      if (Number(code) === 0) {
+        NoticeTypeList.value[1].badge = data;
+        void applyAppIconBadgeFromMessageUnreadCount(data);
+      }
+    });
+  };
+
+  /** WS：刷新「我的消息」未读数 + 收件箱第一页（与当前 Tab 无关，写入 Tab 1） */
+  const refreshMyMessageFromServer = (): void => {
+    if (UserStore.getToken) {
+      getMyMessageUnreadCount().then((res) => {
+        const { code, data } = res;
+        if (Number(code) === 0) {
+          NoticeTypeList.value[1].badge = data;
+          void applyAppIconBadgeFromMessageUnreadCount(data);
+        }
+      });
+    }
+    getMyMessage({ pageNo: 1, pageSize: inputParams.value.pageSize }).then((res) => {
+      const { code, data } = res as { code: number; data: { list?: any[] } };
+      if (Number(code) !== 0) return;
+      const list = data?.list ?? [];
+      NoticeTypeList.value[1].children = list.map((item: any) => ({
+        ...item,
+        isRead: item.status === 0 ? false : true
+      }));
+    });
+  };
+
   // 初始化
   onBeforeMount((): void => {
     getNoticeList();
+    getMyMessageUnreadCountData();
+    onEvent(MEMBER_WS_REFRESH_MY_MESSAGES, refreshMyMessageFromServer);
+  });
+
+  /** 组件卸载时清理副作用 */
+  onUnmounted((): void => {
+    offEvent(MEMBER_WS_REFRESH_MY_MESSAGES, refreshMyMessageFromServer);
   });
 </script>
 

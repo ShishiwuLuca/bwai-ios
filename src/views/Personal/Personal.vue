@@ -31,6 +31,47 @@
           </div>
         </div>
       </div>
+      <div class="p-1 border border-solid border-[#EDD59C] rounded relative mt-2 bg_linear">
+        <div class="flex items-center justify-between">
+          <div class="text-[0.26rem]">{{ t('current_level_title') }}</div>
+          <VanImage class="!absolute top-[-450%] right-[-2%]" :src="Level" width="2.5rem" />
+        </div>
+        <Cell
+          clickable
+          center
+          size="large"
+          class="!bg-transparent !pl-0 !pr-0 !pb-0 !pt-0.5"
+          :title="(UserInfo.level && UserInfo.level.name) || 'VIP1'"
+          title-class="!text-[#EDD59C] !font-bold !text-[0.4rem]"
+          :value="t('current_level_value')"
+          to="/UserBenefits"
+          value-class="!text-[var(--van-text-color)]"
+          is-link
+        />
+      </div>
+      <InviteModal />
+      <Cell
+        clickable
+        center
+        size="large"
+        :border="false"
+        class="border border-solid border-[#EDD59C] rounded mt-1"
+        :title="t('my_wallet_title')"
+        :value="t('my_wallet_value')"
+        value-class="!text-[var(--van-text-color)]"
+        is-link
+        :style="{ background: 'linear-gradient(180deg, #020237 0%, #111A45 100%)' }"
+        to="/Wallet"
+      >
+        <template #icon>
+          <Icon
+            :name="getImage('wallet')"
+            class="mr-0.7"
+            :size="30"
+            color="var(--van-primary-color)"
+          />
+        </template>
+      </Cell>
       <div class="mt-1">
         <div class="text-[0.32rem]">{{ t('account_settings_title') }}</div>
         <!-- <Cell clickable center size="large" :border="false" class="rounded mt-1 !pt-1 !pb-1 mb-1"
@@ -84,6 +125,35 @@
             </div>
           </template>
         </Cell>
+        <Cell
+          clickable
+          center
+          size="large"
+          :border="false"
+          class="rounded mt-1 !pt-1 !pb-1 mb-1"
+          :title="t('about_us_title')"
+          is-link
+          to="/About"
+        >
+          <template #icon>
+            <Icon name="info" class="mr-0.7" :size="25" color="var(--van-primary-color)" />
+          </template>
+        </Cell>
+        <Cell
+          v-if="!isApp"
+          clickable
+          center
+          size="large"
+          :border="false"
+          class="rounded mt-1 !pt-1 !pb-1 mb-1"
+          :title="t('download_title')"
+          is-link
+          to="/Download"
+        >
+          <template #icon>
+            <Icon name="down" class="mr-0.7" :size="25" color="var(--van-primary-color)" />
+          </template>
+        </Cell>
       </div>
       <div class="mt-2" v-if="isLogin">
         <Button type="danger" block @click="onLogout" round>{{ t('logout_title') }}</Button>
@@ -106,6 +176,7 @@
   import { useRouter } from 'vue-router';
   import { logout } from '/@/service/Auth';
   import { Capacitor } from '@capacitor/core';
+  import Level from '/@/assets/images/vip.png';
   import { useCopyToClipboard } from '/@/utils';
   import { emitEvent } from '/@/utils/eventBus';
   import { useI18n } from '/@/hooks/web/useI18n';
@@ -118,7 +189,7 @@
   import { Icon, Image as VanImage, Cell, Button } from 'vant';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { NavBar, PageWrap, AppTabBar } from '/@/components';
+  import { NavBar, PageWrap, AppTabBar, InviteModal } from '/@/components';
 
   /** 从 useI18n 解构的文案与能力 */
   const { t } = useI18n();
@@ -195,6 +266,13 @@
     return App.getInfo().then((info) => (info.version || '').trim());
   };
 
+  // 引入图片
+
+  /** getImage */
+  const getImage = (name: string) => {
+    return new URL(`../../assets/images/${name}.png`, import.meta.url).href;
+  };
+
   // 复制文字
 
   /** CopyText */
@@ -232,8 +310,9 @@
 
   // 初始化
   onBeforeMount((): void => {
-    UserStore.setActiveTab(1);
+    UserStore.setActiveTab(4);
     UserStore.fetchUserInfo();
+    UserStore.fetchAssetCurrencyList();
 
     if (isApp.value) {
       getInstalledAppVersion()
@@ -278,5 +357,9 @@
     background-repeat: no-repeat;
     // width: 100%;
     height: 100vh;
+  }
+
+  .bg_linear {
+    background: linear-gradient(180deg, #020237 0%, #111a45 100%);
   }
 </style>

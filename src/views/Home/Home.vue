@@ -1,124 +1,560 @@
 <template>
-  <div class="home-page-shell" :style="shellStyle">
-    <Loading v-if="webviewLoading" class="home-page__loading" vertical>{{ loadingText }}</Loading>
-    <iframe
-      class="home-page__webview"
-      :src="HOME_WEB_URL"
-      title="BGAI"
-      frameborder="0"
-      allowfullscreen
-      allow="fullscreen; geolocation; microphone; camera"
-      referrerpolicy="no-referrer-when-downgrade"
-      @load="onWebviewLoad"
-    />
-  </div>
+  <NavBar :show-left="false" fixed placeholder :border="false">
+    <template #left>
+      <VanImage :src="Logo" height="0.6rem" />
+    </template>
+    <template #right>
+      <div class="flex items-center gap-1">
+        <Icon
+          class-prefix="exchange-icon"
+          name="locale"
+          :size="25"
+          color="var(--van-primary-color)"
+          @click="emitEvent('ShowLocales')"
+        />
+        <Icon name="chat-o" :size="28" @click="$router.push('/Notice')" />
+      </div>
+    </template>
+  </NavBar>
+  <PageWrap class="home-page">
+    <div class="p-1 !pt-0">
+      <Swipe class="pt-0.5" :autoplay="3000" :show-indicators="true" indicator-color="white">
+        <SwipeItem v-for="(item, index) in bannerList" :key="index" class="rounded-sm">
+          <VanImage
+            :src="item.imageUrl"
+            class="overflow-hidden rounded-sm"
+            width="100%"
+            height="100%"
+          />
+        </SwipeItem>
+      </Swipe>
+      <NoticeBar
+        :scrollable="false"
+        class="mt-1 rounded-sm overflow-hidden border-1 border-solid border-[var(--van-border-color)]"
+        :style="{ background: 'var(--van-card-linear-background)' }"
+        color="var(--van-text-color)"
+      >
+        <Swipe
+          :loop="true"
+          vertical
+          :show-indicators="false"
+          :autoplay="5000"
+          :touchable="false"
+          class="!w-full !h-[0.9rem] !line-height-[0.9rem] !mr-2"
+        >
+          <SwipeItem v-for="(item, index) in NoticeList" :key="index">
+            <div class="flex items-center justify-between">
+              <div>{{ item.title }}</div>
+              <div @click="ToNotice(item)">
+                <span class="text-[0.24rem]">{{ t('str_view_more') }}</span>
+                <Icon color="var(--van-text-color)" name="arrow" :size="14" />
+              </div>
+            </div>
+          </SwipeItem>
+        </Swipe>
+        <template #left-icon>
+          <Icon :name="NoticeIcon" :size="38" />
+        </template>
+      </NoticeBar>
+      <Grid
+        center
+        clickable
+        :border="false"
+        :column-num="MenuList.length >= 5 ? 5 : 4"
+        icon-size="0.9rem"
+      >
+        <GridItem
+          v-for="(item, index) in MenuList"
+          :key="index"
+          :icon="item.imageUrl"
+          :text="item.name"
+          :to="item.path"
+        />
+      </Grid>
+      <div class="home-cards mt-0.5">
+        <div class="home-card task_bg" @click="$router.push('/DailyTask')">
+          <div class="home-card__head">
+            <h3 class="home-card__title">{{ t('str_daily_tasks') }}</h3>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <div class="home-card__desc">{{ t('str_daily_tasks_desc') }}</div>
+            <div class="home-card__illus--tasks">
+              <VanImage :src="DailyTasks" width="1.2rem" />
+            </div>
+          </div>
+        </div>
+        <div class="home-card task_bg" @click="$router.push('/Rank')">
+          <div class="home-card__head">
+            <h3 class="home-card__title">{{ t('str_rankings') }}</h3>
+          </div>
+          <div class="flex items-center gap-0.5">
+            <div class="home-card__desc">{{ t('str_rankings_desc') }}</div>
+            <div class="home-card__illus--rankings">
+              <VanImage :src="Rankings" width="1.2rem" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <Tabs v-model:active="TabActive" class="home-market-tabs mt-1" shrink :ellipsis="false">
+        <Tab
+          v-for="(group, groupIndex) in tradingPairList"
+          :key="group.label"
+          :name="groupIndex"
+        >
+          <template #title>
+            <div class="home-market-tabs__title flex items-center gap-0.2">
+              <Icon
+                v-if="groupIndex === 0"
+                :name="HotIcon"
+                :size="20"
+                color="var(--van-danger-color)"
+              />
+              <span>{{ group.label }}</span>
+            </div>
+          </template>
+          <div
+            class="market-table-header flex items-center py-0.5 text-[var(--van-text-color)] text-[0.2rem] font-bold"
+          >
+            <div class="flex-1">{{ t('str_trading_pair') }}</div>
+            <div class="flex-1 text-right mr-2">{{ t('str_latest_price') }}</div>
+            <div class="w-[1.2rem] text-center">{{ t('str_today_price_change') }}</div>
+          </div>
+          <div
+            class="flex items-center pt-0.5 pb-0.3"
+            v-for="item in group.children"
+            :key="item.symbol"
+          >
+            <div class="flex-1">
+              <div class="flex items-center gap-0.5">
+                <div
+                  class="w-3 h-3 rounded-full flex items-center justify-center text-white text-[0.4rem] font-semibold flex-shrink-0"
+                >
+                  <VanImage
+                    :src="item.iconUrl ?? item.logo"
+                    class="rounded-full overflow-hidden"
+                    width="0.65rem"
+                  />
+                </div>
+                <div class="line-height-[0.35rem]">
+                  <div>
+                    <span class="text-[0.3rem] font-bold">{{ item.symbol }}</span>
+                  </div>
+                  <div class="text-[0.24rem] text-[#999]">{{
+                    formatTradeVolume(item.totalVolume ?? item.volume24h)
+                  }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="flex-1 text-right mr-2 line-height-[0.35rem]">
+              <div class="text-[0.3rem] font-bold">
+                <CountTo
+                  :startVal="0"
+                  :decimals="2"
+                  :endVal="Number(ReturnPrecision(item.currentPrice ?? item.price, 4))"
+                />
+              </div>
+              <div class="text-[0.24rem] text-[#999]">
+                <CountTo
+                  prefix="$"
+                  :startVal="0"
+                  :decimals="2"
+                  :endVal="
+                    Number(ReturnPrecision(item.currentPrice ?? item.price * (FiatExchangeRate['USD'] ?? 0), 4))
+                  "
+                />
+              </div>
+            </div>
+            <div class="w-[1.2rem] text-center">
+              <Button
+                class="w-5 !text-[0.25rem]"
+                :color="
+                  Number(item.changePercent) >= 0
+                    ? 'var(--van-top-color)'
+                    : 'var(--van-down-color)'
+                "
+                size="small"
+              >
+                <span v-if="Number(item.changePercent) >= 0">+</span
+                >{{ ReturnPrecision(item.changePercent, 2) }}%
+              </Button>
+            </div>
+          </div>
+        </Tab>
+      </Tabs>
+    </div>
+  </PageWrap>
+  <AppTabBar />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue';
-import { Capacitor } from '@capacitor/core';
-import { Loading } from 'vant';
-import { useI18n } from '/@/hooks/web/useI18n';
-import {
-  resolveNativeTopInsetPx,
-  scheduleNativeNavBarTopInsetSync
-} from '/@/hooks/AppStatusBarUtils';
-import { getVestDisplaySite, isVestHomeMode } from '/@/utils/vestConfig';
+  import { useRouter } from 'vue-router';
+  import { emitEvent } from '/@/utils/eventBus';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import HotIcon from '/@/assets/images/hot.png';
+  // import Logo from '/@/assets/images/home_logo.png';
+  import Rankings from '/@/assets/images/Ranking.png';
+  import NoticeIcon from '/@/assets/images/notice.png';
+  import { getHomeData, getRawList } from '/@/service/Home';
+  import DailyTasks from '/@/assets/images/daily_tasks.png';
+  import { onBeforeMount, ref, computed, watch } from 'vue';
+  import { ReturnPrecision, formatTradeVolume } from '/@/utils';
+  import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
+  import { NavBar, PageWrap, AppTabBar, CountTo } from '/@/components';
+  import { useWebSocketStoreWithOut } from '/@/stores/modules/WebSocket';
+  import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
+  import {
+    Image as VanImage,
+    Icon,
+    Swipe,
+    SwipeItem,
+    NoticeBar,
+    Grid,
+    GridItem,
+    Button,
+    Tabs,
+    Tab
+  } from 'vant';
 
-const DEFAULT_HOME_WEB_URL = 'https://forwhale.com/';
+  // 国际化
 
-const HOME_WEB_URL = computed(() => {
-  if (isVestHomeMode()) {
-    const site = getVestDisplaySite();
-    if (site) return site;
+  /** 从 useI18n 解构的文案与能力 */
+  const { t } = useI18n();
+
+  /** 路由实例：编程式导航 */
+  const router = useRouter();
+
+  /** 用户：UserStore */
+  const UserStore = useUserStoreWithOut();
+
+  /** SystemStore */
+  const SystemStore = useSystemStoreWithOut();
+
+  /** 与 App.vue 共用的全局 WebSocket（推送在 store.lastMessage 更新） */
+  const WebSocketStore = useWebSocketStoreWithOut();
+
+  // 轮播图
+
+  /** 响应式状态：列表数据 */
+  const bannerList = ref<any[]>([]);
+
+  // 公告列表
+
+  /** 响应式状态：列表数据 */
+  const NoticeList = ref<any[]>([]);
+
+  // 功能区菜单
+
+  /** 响应式状态：列表数据 */
+  const MenuList = ref<any[]>([]);
+
+  // 热门交易对 / RAW 分组列表
+
+  type TradingPairGroup = { label: string; children: any[] };
+
+  /** 响应式状态：分组列表（热门 + RAW） */
+  const tradingPairList = ref<TradingPairGroup[]>([
+    { label: t('str_hot_trading'), children: [] },
+    { label: 'RAW', children: [] }
+  ]);
+
+  /** 当前交易对 Tab（0 热门 / 1 RAW） */
+  const TabActive = ref<number>(0);
+
+  /** mapTradingPairChildren */
+  const mapTradingPairChildren = (list: any[]) =>
+    list.map((child: any) => ({
+      ...child,
+      changePercent: ReturnPrecision(child.changePercent, 2)
+    }));
+
+  // 获取法币汇率
+
+  /** 计算属性：由其它状态派生的展示或判断 */
+  const FiatExchangeRate = computed(() => {
+    return SystemStore.getFiatExchangeRate;
+  });
+
+  // 系统语言
+
+  /** 计算属性：由其它状态派生的展示或判断 */
+  const Locale = computed(() => {
+    return SystemStore.getLocaleInfo;
+  });
+
+  // logo
+
+  /** 计算属性：由其它状态派生的展示或判断 */
+  const Logo = computed(() => {
+    return SystemStore.getSiteLogo;
+  });
+
+  // 获取RAW币种列表
+  const getRawListData = () => {
+    getRawList().then((res: any) => {
+      const { code, data } = res;
+      if (code === 0) {
+        const list = Array.isArray(data) ? data : (data?.coins ?? []);
+        tradingPairList.value[1].children = mapTradingPairChildren(list);
+      }
+    });
+  };
+
+  // 获取首页数据
+
+  /** 列表数据：getHomeDataList */
+  const getHomeDataList = () => {
+    getHomeData().then((res: any) => {
+      const { code } = res;
+      if (code === 0) {
+        const {
+          data: { modules }
+        } = res;
+        if (modules) {
+          modules.forEach((item: any) => {
+            switch (item.moduleType) {
+              case 'banner':
+                bannerList.value = item.data;
+                break;
+              case 'notice':
+                NoticeList.value = item.data;
+                break;
+              case 'feature':
+                MenuList.value = item.data;
+                break;
+              case 'hot_symbol':
+                tradingPairList.value[0].children = mapTradingPairChildren(
+                  item.data ?? []
+                );
+                break;
+            }
+          });
+        }
+      }
+    });
+  };
+
+  // 监听系统语言切换
+
+  /** 侦听依赖变化并触发副作用 */
+  watch(
+    () => Locale.value,
+    () => {
+      tradingPairList.value[0].label = t('str_hot_trading');
+      getHomeDataList();
+    }
+  );
+
+  /** 行情 WS 下行中与热门列表相关的 content（字段以后端为准） */
+  interface WsSpotTickerContent {
+    symbol?: string;
+    currentPrice?: number;
+    changePercent?: number;
+    totalVolume?: number;
+    highPrice?: number;
   }
-  return DEFAULT_HOME_WEB_URL;
-});
 
-const { t } = useI18n();
-const loadingText = computed(() => t('dt_loading'));
+  /** parseSpotTickerContent */
+  const parseSpotTickerContent = (msg: string | ArrayBuffer | null): WsSpotTickerContent | null => {
+    if (msg == null || typeof msg !== 'string') return null;
+    try {
+      const body = JSON.parse(msg) as { content?: WsSpotTickerContent };
+      const c = body?.content;
+      return c?.symbol ? c : null;
+    } catch {
+      return null;
+    }
+  };
 
-const webviewLoading = ref(true);
-const nativeTopInsetPx = ref(0);
-const HOME_LOADING_MAX_MS = 10000;
-let homeLoadingTimer: ReturnType<typeof setTimeout> | null = null;
+  /** default 通道行情推送：按 symbol 合并更新热门交易对（无匹配则不改列表引用） */
+  watch(
+    () => WebSocketStore.lastMessage,
+    (msg: any) => {
+      const content = parseSpotTickerContent(msg);
+      if (!content?.symbol) return;
 
-const shellStyle = computed(() => {
-  if (!Capacitor.isNativePlatform() || nativeTopInsetPx.value <= 0) {
-    return undefined;
-  }
-  return { paddingTop: `${nativeTopInsetPx.value}px` };
-});
+      const { symbol } = content;
+      let changed = false;
+      const next = tradingPairList.value.map((group) => {
+        const children = group.children.map((item: any) => {
+          if (item.symbol !== symbol) return item;
+          changed = true;
+          return {
+            ...item,
+            currentPrice: content.currentPrice ?? item.currentPrice,
+            changePercent:
+              content.changePercent != null
+                ? ReturnPrecision(content.changePercent, 2)
+                : item.changePercent,
+            totalVolume: content.totalVolume ?? item.totalVolume,
+            highPrice: content.highPrice ?? item.highPrice
+          };
+        });
+        return { ...group, children };
+      });
+      if (changed) tradingPairList.value = next;
+    }
+  );
 
-const syncHomeTopInset = async () => {
-  if (!Capacitor.isNativePlatform()) return;
-  scheduleNativeNavBarTopInsetSync();
-  const px = await resolveNativeTopInsetPx();
-  if (px > 0) {
-    nativeTopInsetPx.value = px;
-  }
-};
+  // 查看公告内容
 
-const onWebviewLoad = () => {
-  if (homeLoadingTimer) {
-    clearTimeout(homeLoadingTimer);
-    homeLoadingTimer = null;
-  }
-  webviewLoading.value = false;
-};
+  /** ToNotice */
+  const ToNotice = (item: any) => {
+    UserStore.setNoticeContent(item);
+    router.push('/Notice/Detail');
+  };
 
-onMounted(() => {
-  void syncHomeTopInset();
-  homeLoadingTimer = setTimeout(() => {
-    webviewLoading.value = false;
-    homeLoadingTimer = null;
-  }, HOME_LOADING_MAX_MS);
-});
-
-onActivated(() => {
-  void syncHomeTopInset();
-});
-
-onUnmounted(() => {
-  if (homeLoadingTimer) {
-    clearTimeout(homeLoadingTimer);
-    homeLoadingTimer = null;
-  }
-});
+  // 初始化
+  onBeforeMount((): void => {
+    SystemStore.setLoading(true);
+    UserStore.setActiveTab(0);
+    getHomeDataList();
+    getRawListData();
+  });
 </script>
 
 <style scoped lang="less">
-/* 与 NavBar / index.less 一致：env + --safe-area-inset-top（App 内由 StatusBar 同步） */
-@home-safe-top: max(0px, constant(safe-area-inset-top), env(safe-area-inset-top), var(--safe-area-inset-top, 0px));
+  // 设计图配色：深色背景、卡片内背景、青蓝强调、橙黄进度
+  @card-outline: rgba(255, 255, 255, 0.08);
+  @accent-cyan: #73bcff;
 
-.home-page-shell {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  height: 100dvh;
-  min-height: 100dvh;
-  overflow: hidden;
-  padding-top: constant(safe-area-inset-top);
-  padding-top: @home-safe-top;
-  background: #060b1e;
-}
+  .home-page {
+    color: var(--van-text-color);
+  }
 
-.home-page__loading {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #060b1e;
-}
+  :deep(.van-nav-bar__left) {
+    padding: 0 var(--van-padding-md);
+  }
 
-.home-page__webview {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
-  border: 0;
-  background: #fff;
-}
+  :deep(.van-notice-bar) {
+    padding: 0 var(--van-padding-xs);
+  }
+
+  // 双卡片容器：左右并排，留间距
+  .home-cards {
+    display: flex;
+    gap: 0.24rem;
+    width: 100%;
+  }
+
+  .home-card {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    border-radius: 0.2rem;
+    // background: var(--van-card-linear-background);
+    padding: 0.2rem;
+    // border: 1px solid var(--van-border-color);
+    overflow: hidden;
+  }
+
+  .home-card__head {
+    margin-bottom: 0.12rem;
+  }
+
+  .home-card__title {
+    margin: 0;
+    font-size: 0.27rem;
+    // font-weight: 700;
+    color: #ffffff;
+    line-height: 1.25;
+  }
+
+  .home-card__underline {
+    width: 0.6rem;
+    height: 0.04rem;
+    margin-top: 0.08rem;
+    background: @accent-cyan;
+    border-radius: 0.03rem;
+  }
+
+  .home-card__desc {
+    font-size: 0.23rem;
+    color: #ffffff;
+    line-height: 1.4;
+    opacity: 0.95;
+  }
+
+  .home-card__progress {
+    display: flex;
+    align-items: center;
+    gap: 0.08rem;
+    margin-bottom: 0.16rem;
+  }
+
+  .home-card__bar {
+    width: 0.05rem;
+    height: 0.28rem;
+    background: rgba(177, 219, 255, 1);
+    flex-shrink: 0;
+  }
+
+  .home-card__bar--filled {
+    background: rgba(255, 208, 156, 1);
+  }
+
+  .home-card__illus {
+    position: absolute;
+    right: 0.4rem;
+    bottom: -0.1rem;
+    width: 1rem;
+    pointer-events: none;
+  }
+
+  :deep(.van-notice-bar__content) {
+    width: 100%;
+  }
+
+  :deep(.van-grid-item__content) {
+    padding: var(--van-padding-md) 0.1rem;
+    .van-grid-item__icon {
+      background: var(--van-tabbar-background);
+      border-radius: 50%;
+      padding: 0.15rem;
+    }
+  }
+
+  .task_bg {
+    background-image: url('../../assets/images/task_bg.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .home-market-tabs :deep(.van-tabs__wrap) {
+    height: 0.88rem;
+  }
+
+  .home-market-tabs :deep(.van-tabs__nav) {
+    background: transparent;
+    justify-content: flex-start;
+  }
+
+  .home-market-tabs :deep(.van-tab) {
+    flex: none;
+    padding: 0 0.28rem;
+    font-size: 0.28rem;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 400;
+  }
+
+  .home-market-tabs :deep(.van-tab:first-child) {
+    padding-left: 0;
+  }
+
+  .home-market-tabs :deep(.van-tab--active) {
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .home-market-tabs :deep(.van-tabs__line) {
+    background: @accent-cyan;
+  }
+
+  .home-market-tabs :deep(.van-tabs__content) {
+    padding-top: 0.08rem;
+  }
+
+  .home-market-tabs__title {
+    line-height: 1.2;
+  }
 </style>

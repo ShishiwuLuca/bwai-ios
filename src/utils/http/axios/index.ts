@@ -19,7 +19,6 @@ import type { AxiosTransform, CreateAxiosOptions } from './axiosTransform';
 import { RequestEnum, ResultEnum, ContentTypeEnum } from '/@/enums/httpEnum';
 import { setObjToUrlParams, deepMerge } from '/@/utils';
 import { buildHttpClientTraceHeaders } from '/@/utils/http/buildHttpClientTraceHeaders';
-import { isIOSNativeWebView, scheduleIOSWebViewRepaint } from '/@/utils/iosWebViewRepaint';
 
 /** globSetting */
 const globSetting = useGlobSetting();
@@ -28,7 +27,7 @@ const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix;
 
 /** 从 useMessage 解构的 Toast / Dialog 能力 */
-const { CreateErrorToast, CreateErrorNotify, CreateAlertDialog } = useMessage();
+const { CreateErrorToast, CreateAlertDialog } = useMessage();
 
 /** 解构赋值：组合式 API 返回的一组方法或状态 */
 const { VITE_GLOB_API_URL, VITE_GLOB_SYSTEM_VERSION } = getAppEnvConfig();
@@ -227,13 +226,7 @@ const transform: AxiosTransform = {
         if (errorMessageMode === 'modal') {
           CreateAlertDialog({ title: t('common_title_text'), message: errMessage });
         } else if (errorMessageMode === 'message' && errMessage !== '') {
-          // iOS：网络抖动时仅走一次节流重绘，避免 repair/notify/repaint 叠加触发合成层竞态
-          if (isIOSNativeWebView()) {
-            CreateErrorNotify(errMessage);
-            scheduleIOSWebViewRepaint();
-          } else {
-            CreateErrorToast(errMessage);
-          }
+          CreateErrorToast(errMessage);
         }
         return Promise.reject(error);
       }
@@ -290,7 +283,7 @@ const createAxios = (opt?: Partial<CreateAxiosOptions>) => {
   // 基础接口地址
   if (isDevMode() === false) {
     // 生产环境
-    CreateOptions.baseURL = VITE_GLOB_API_URL ? VITE_GLOB_API_URL : 'https://forwhale.com'; // 网页端
+    CreateOptions.baseURL = VITE_GLOB_API_URL ? VITE_GLOB_API_URL : window.location.origin; // 网页端
   }
   return new VAxios(deepMerge(CreateOptions, opt || {}));
 };

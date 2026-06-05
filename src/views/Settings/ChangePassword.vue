@@ -6,8 +6,7 @@
         v-if="UserInfo.mobile"
         v-model:active="ActiveTab"
         :line-height="0"
-        :swipeable="iosNativeTabsSwipeable()"
-        :animated="iosNativeTabsAnimated()"
+        swipeable
         shrink
         :border="false"
       >
@@ -174,7 +173,6 @@
   import { ref, computed, watch, onBeforeMount } from 'vue';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 

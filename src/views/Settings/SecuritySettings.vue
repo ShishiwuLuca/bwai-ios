@@ -18,6 +18,28 @@
         size="large"
         :border="false"
         class="rounded !pt-1 !pb-1 mb-1"
+        :title="t('trade_password_title')"
+        :value="UserInfo.capitalPasswordSet === true ? t('set_text') : t('unset_text')"
+        is-link
+        :to="'/TradePassword'"
+      />
+      <Cell
+        clickable
+        center
+        size="large"
+        :border="false"
+        class="rounded !pt-1 !pb-1 mb-1"
+        :title="t('google_code_title')"
+        :value="UserInfo.googleCodeSet ? t('bind_text') : t('unbind_text')"
+        is-link
+        :to="'/GoogleCode'"
+      />
+      <Cell
+        clickable
+        center
+        size="large"
+        :border="false"
+        class="rounded !pt-1 !pb-1 mb-1"
         :title="t('bind_email_title')"
         :value="UserInfo.email ? t('bind_text') : t('unbind_text')"
         is-link
@@ -33,6 +55,16 @@
         :value="UserInfo.mobile ? t('bind_text') : t('unbind_text')"
         is-link
         :to="'/BindPhone'"
+      />
+      <Cell
+        clickable
+        center
+        size="large"
+        :border="false"
+        class="rounded !pt-1 !pb-1 mb-1"
+        :title="t('address_book_title')"
+        is-link
+        :to="'/AddressBook'"
       />
     </div>
   </PageWrap>

@@ -1,4 +1,5 @@
 import UIKit
+import WebKit
 import Capacitor
 
 @UIApplicationMain
@@ -7,59 +8,71 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // 与深色主题 --van-background 一致；透明状态栏下若露出窗口底色则不为白（浅色主题可在后续用桥接刷新）
-        applyRootWindowBackground()
         return true
     }
 
-    /// 将 keyWindow 底色设为与前端深色页一致，避免沉浸式状态栏下顶部/底部露出系统白底
-    private func applyRootWindowBackground() {
-        let bg = UIColor(red: 9 / 255, green: 13 / 255, blue: 32 / 255, alpha: 1)
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        stripSplashOverlaysFromWindows()
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        stripSplashOverlaysFromWindows()
+        nudgeWebViewScroll()
+    }
+
+    /// 回前台时 Capacitor Splash 偶发仍盖在 WebView 上（与页面同色 #090d20，看起来像空白）
+    private func stripSplashOverlaysFromWindows() {
         DispatchQueue.main.async {
-            if #available(iOS 13.0, *) {
-                UIApplication.shared.connectedScenes
-                    .compactMap { $0 as? UIWindowScene }
-                    .flatMap(\.windows)
-                    .forEach { $0.backgroundColor = bg }
-            } else {
-                UIApplication.shared.windows.forEach { $0.backgroundColor = bg }
+            for window in self.keyWindows() {
+                self.walkAndRemoveSplash(in: window)
             }
         }
     }
 
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+    private func nudgeWebViewScroll() {
+        DispatchQueue.main.async {
+            for window in self.keyWindows() {
+                guard let webView = self.findWebView(in: window) else { continue }
+                webView.isHidden = false
+                webView.alpha = 1
+                let offset = webView.scrollView.contentOffset
+                webView.scrollView.setContentOffset(CGPoint(x: offset.x, y: offset.y + 1), animated: false)
+                webView.scrollView.setContentOffset(offset, animated: false)
+            }
+        }
     }
 
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    private func keyWindows() -> [UIWindow] {
+        if #available(iOS 13.0, *) {
+            return UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .flatMap(\.windows)
+        }
+        return UIApplication.shared.windows
     }
 
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+    private func findWebView(in root: UIView) -> WKWebView? {
+        if let wv = root as? WKWebView { return wv }
+        for sub in root.subviews {
+            if let found = findWebView(in: sub) { return found }
+        }
+        return nil
     }
 
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        applyRootWindowBackground()
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+    private func walkAndRemoveSplash(in root: UIView) {
+        let name = String(describing: type(of: root))
+        if name.contains("Splash") || name.contains("CAPSplash") {
+            root.removeFromSuperview()
+            return
+        }
+        Array(root.subviews).forEach(walkAndRemoveSplash)
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        // Called when the app was launched with a url. Feel free to add additional processing here,
-        // but if you want the App API to support tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
 
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-        // Called when the app was launched with an activity, including Universal Links.
-        // Feel free to add additional processing here, but if you want the App API to support
-        // tracking app url opens, make sure to keep this call
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
-
 }

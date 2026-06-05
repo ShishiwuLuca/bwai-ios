@@ -51,6 +51,20 @@ export interface SetTradePasswordForm {
   confirmPwd: string;
 }
 
+/** 申购表单 */
+export interface InvestJoinForm {
+  currency: string;
+  lockDays: string;
+  arriveDate: string;
+  arriveType: string;
+  income: string;
+  remark: string;
+  redeemAmount: string;
+  redeemable: string;
+  autoReinvest: string;
+  autoReinvestBool: boolean;
+}
+
 /** ECharts K 线/成交量 数据源 */
 export interface EChartsSourceData {
   dataList?: unknown[];

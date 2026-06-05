@@ -11,13 +11,13 @@ if (keystorePropertiesFile.exists()) {
 def resolveAppName = {
     try {
         def stringsXml = file('src/main/res/values/strings.xml')
-        if (!stringsXml.exists()) return 'BGAI'
+        if (!stringsXml.exists()) return 'BWAI'
         def xml = new groovy.xml.XmlSlurper().parse(stringsXml)
         def appNameNode = xml.string.find { it.@name?.text() == 'app_name' }
         def appName = appNameNode?.text()?.trim()
-        return appName ? appName : 'BGAI'
+        return appName ? appName : 'BWAI'
     } catch (Exception ignored) {
-        return 'BGAI'
+        return 'BWAI'
     }
 }
 
@@ -28,8 +28,8 @@ android {
         applicationId "com.bwai.io"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.0.3"
+        versionCode 1
+        versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
