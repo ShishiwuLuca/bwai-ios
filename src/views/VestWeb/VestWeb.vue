@@ -2,14 +2,13 @@
   <div class="vest-web-shell" :style="shellStyle">
     <Loading v-if="webviewLoading" class="vest-web__loading" vertical>{{ loadingText }}</Loading>
     <iframe
-      v-if="!useNativeDirectLoad"
       class="vest-web__frame"
       :src="HOME_WEB_URL"
       title="BGAI"
       frameborder="0"
       allowfullscreen
-      allow="*"
-      referrerpolicy="unsafe-url"
+      allow="fullscreen; geolocation; microphone; camera"
+      referrerpolicy="no-referrer-when-downgrade"
       @load="onWebviewLoad"
     />
   </div>
@@ -30,33 +29,13 @@ defineOptions({ name: 'VestWeb' });
 
 const DEFAULT_HOME_WEB_URL = 'https://forwhale.com/';
 
-const useNativeDirectLoad = Capacitor.isNativePlatform();
-
-const resolveHomeWebUrl = (): string => {
+const HOME_WEB_URL = computed(() => {
   if (isVestHomeMode()) {
     const site = getVestDisplaySite();
     if (site) return site;
   }
   return DEFAULT_HOME_WEB_URL;
-};
-
-const HOME_WEB_URL = computed(() => resolveHomeWebUrl());
-
-const openExternalSiteInNativeWebView = (): void => {
-  const url = resolveHomeWebUrl();
-  if (!url) return;
-  try {
-    const target = new URL(url);
-    const current = new URL(window.location.href);
-    if (current.origin === target.origin && current.pathname === target.pathname) {
-      webviewLoading.value = false;
-      return;
-    }
-  } catch {
-    // ignore malformed URL comparison
-  }
-  window.location.replace(url);
-};
+});
 
 const { t } = useI18n();
 const loadingText = computed(() => t('dt_loading'));
@@ -73,7 +52,7 @@ const shellStyle = computed(() => {
   return { paddingTop: `${nativeTopInsetPx.value}px` };
 });
 
-const syncTopInset = async () => {
+const syncHomeTopInset = async () => {
   if (!Capacitor.isNativePlatform()) return;
   scheduleNativeNavBarTopInsetSync();
   const px = await resolveNativeTopInsetPx();
@@ -91,11 +70,7 @@ const onWebviewLoad = () => {
 };
 
 onMounted(() => {
-  void syncTopInset();
-  if (useNativeDirectLoad) {
-    openExternalSiteInNativeWebView();
-    return;
-  }
+  void syncHomeTopInset();
   homeLoadingTimer = setTimeout(() => {
     webviewLoading.value = false;
     homeLoadingTimer = null;
@@ -103,7 +78,7 @@ onMounted(() => {
 });
 
 onActivated(() => {
-  void syncTopInset();
+  void syncHomeTopInset();
 });
 
 onUnmounted(() => {
