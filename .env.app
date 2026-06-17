@@ -11,7 +11,7 @@ VITE_GLOB_APP_SHORT_NAME = exchange_bwai
 VITE_PUBLIC_PATH = ./
 
 # 版本号
-VITE_GLOB_SYSTEM_VERSION = '1.0.3'
+VITE_GLOB_SYSTEM_VERSION = '1.0.4'
 
 # 打包是否输出gz｜br文件
 # 可选: gzip | brotli | none
