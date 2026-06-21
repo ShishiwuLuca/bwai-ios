@@ -40,7 +40,7 @@ export const ensureVestConfigLoaded = async (): Promise<VestConfigData | null> =
   return loadPromise;
 };
 
-/** 当前平台对应 status === 1 时展示 Home 马甲页 */
+/** 当前平台对应 status === 1 时展示马甲页 */
 export const isVestHomeMode = (): boolean => getVestStatusForCurrentPlatform() === 1;
 
 /** 马甲页 iframe 地址（displaySite） */

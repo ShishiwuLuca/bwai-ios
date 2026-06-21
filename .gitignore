@@ -9,15 +9,6 @@ lerna-debug.log*
 
 node_modules
 .DS_Store
-
-# 密钥与本地签名（勿提交）
-android/fundex.jks
-android/*.keystore
-android/keystore.properties
-.env.local
-*.p8
-AuthKey_*.p8
-
 dist
 dist-ssr
 output
@@ -25,13 +16,8 @@ coverage
 *.local
 OTA
 PackageAndroid
-PackageIOS
 android/app/build
-ios/build
-ios/signing.properties
 ios/App/build
-ios/App/App/public
-android/app/src/main/assets/public
 android/app/release
 
 # Editor directories and files

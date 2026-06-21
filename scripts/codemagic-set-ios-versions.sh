@@ -12,7 +12,7 @@ cd "$CM_BUILD_DIR/$IOS_APP_DIR"
 
 read_pbxproj_value() {
   local key="$1"
-  grep -m1 "${key} = " "$PBXPROJ" | sed -E "s/.*${key} = ([^;]+);/\\1/" | tr -d ' "'\''\r'
+  grep -m1 "${key} = " "$PBXPROJ" | sed -E "s/.*${key} = ([^;]+);/\\1/" | tr -d ' "'\''\r"
 }
 
 set_pbxproj_versions() {

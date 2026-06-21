@@ -1,0 +1,250 @@
+// 全局页面背景色（背景图由 JS 预加载后注入，避免刷新闪现）
+@app-page-bg-color: #ffffff;
+@app-page-bg-image: url('/images/login_bg.png');
+
+.app-page-bg() {
+  background-color: @app-page-bg-color;
+}
+
+.app-page-bg-image() {
+  background-image: @app-page-bg-image;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+}
+
+html,
+body {
+  min-height: 100%;
+  .app-page-bg();
+}
+
+#app {
+  min-height: 100%;
+  .app-page-bg();
+}
+
+html.page-shell-bg,
+body.page-shell-bg,
+body.page-shell-bg #app {
+  min-height: 100%;
+  .app-page-bg-image();
+}
+
+.page-shell {
+  --page-shell-text: #000000;
+  --page-shell-text-secondary: #8c8c8c;
+  --page-shell-accent-gradient: linear-gradient(180deg, #6ca9ff 0%, #2071f8 100%);
+  --page-shell-btn-gradient: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%);
+  background: transparent;
+  color: var(--page-shell-text);
+  min-height: 100vh;
+
+  .van-nav-bar {
+    // background: transparent !important;
+  }
+
+  .van-nav-bar__placeholder {
+    background: transparent;
+  }
+
+  .van-nav-bar__title {
+    color: var(--page-shell-text);
+  }
+
+  .nav-back-button .van-icon {
+    color: var(--page-shell-text) !important;
+  }
+
+  .page-wrap {
+    background: transparent;
+    color: var(--page-shell-text);
+  }
+
+  .page-shell__logo-wrap {
+    margin-top: -0.1rem;
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .page-shell__welcome {
+    font-size: 0.26rem;
+    color: var(--page-shell-text-secondary);
+  }
+
+  // 表单 label：纯色黑字加粗，不用渐变
+  .page-shell__label {
+    color: #000000;
+    font-weight: bold;
+  }
+
+  .page-shell__accent {
+    background: var(--page-shell-accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .page-shell__footer {
+    color: var(--page-shell-text-secondary);
+  }
+
+  .page-shell__eye-icon {
+    color: #2071f8;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+  }
+
+  .page-shell__eye-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .page-shell__submit-btn.van-button--primary {
+    background: var(--page-shell-btn-gradient);
+    border: none;
+    color: #ffffff;
+  }
+
+  .van-radio {
+    --van-radio-size: 16px;
+  }
+
+  .van-radio__icon--dot {
+    width: 16px;
+    height: 16px;
+  }
+
+  .van-radio__icon--dot .van-radio__icon--dot__icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .van-radio__icon--checked.van-radio__icon--dot {
+    border-color: #2a61f9;
+  }
+
+  .van-radio__icon--checked.van-radio__icon--dot .van-radio__icon--dot__icon {
+    background: var(--page-shell-btn-gradient);
+  }
+
+  .page-shell__send-code-btn.van-button--primary {
+    background: linear-gradient(180deg, #6ca9ff 0%, #2071f8 100%);
+    border: none;
+    color: #ffffff;
+    border-radius: 4px;
+    min-width: 69px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    line-height: 24px;
+  }
+
+  .page-shell__send-code-btn.van-button--primary.van-button--disabled {
+    opacity: 0.6;
+  }
+
+  .van-tab .van-tab__text {
+    color: var(--page-shell-text-secondary);
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  .van-tab--active .van-tab__text {
+    background: var(--page-shell-accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .van-field__control {
+    color: var(--page-shell-text);
+  }
+
+  .van-field__control::placeholder {
+    color: var(--page-shell-text-secondary);
+  }
+
+  .van-cell {
+    background: #ffffff;
+  }
+
+  .van-checkbox__label {
+    color: var(--page-shell-text);
+  }
+
+  .van-tabs__nav {
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
+
+    .van-tab {
+      padding-left: 0;
+    }
+  }
+
+  .page-shell__phone-row {
+    display: flex;
+    align-items: center;
+    margin-top: 0.25rem;
+    background: #ffffff;
+    border-radius: 0.08rem;
+    overflow: hidden;
+  }
+
+  .page-shell__country-code {
+    display: flex;
+    align-items: center;
+    gap: 0.06rem;
+    padding: 0 0.2rem;
+    color: var(--page-shell-text);
+    font-size: 0.28rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .page-shell__phone-field {
+    flex: 1;
+    min-width: 0;
+
+    .van-field__body {
+      padding-left: 0;
+    }
+  }
+}
+
+// 壳层弹窗（语言切换、区号选择等）：与 page-shell 共用 Radio / 按钮渐变
+.page-shell-modal {
+  --page-shell-btn-gradient: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%);
+
+  .van-radio {
+    --van-radio-size: 16px;
+  }
+
+  .van-radio__icon--dot {
+    width: 16px;
+    height: 16px;
+  }
+
+  .van-radio__icon--dot .van-radio__icon--dot__icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .van-radio__icon--checked.van-radio__icon--dot {
+    border-color: #2a61f9;
+  }
+
+  .van-radio__icon--checked.van-radio__icon--dot .van-radio__icon--dot__icon {
+    background: var(--page-shell-btn-gradient);
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * 启动日志 / 版本检测 / HTTP 请求头共用的设备上报字段（厂商、型号、定制 UI 名与版本）。
+ * 启动日志 / 版本检测共用的设备上报字段（厂商、型号、定制 UI 名与版本）。
  * 原生 Android 的 UI 层通过 BWAIAppControl.getDeviceRomLayer 读取；其余环境 JS 兜底。
  */
 import { Capacitor } from '@capacitor/core';

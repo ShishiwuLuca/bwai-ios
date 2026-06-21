@@ -1,4 +1,4 @@
-import Avatar from '/@/assets/images/avatar.png';
+import Avatar from '/@/assets/images/avatar_default.png';
 import { useI18n } from '/@/hooks/web/useI18n';
 import type { AppMarketingPostRespVO } from '/@/service/MarketingPost';
 

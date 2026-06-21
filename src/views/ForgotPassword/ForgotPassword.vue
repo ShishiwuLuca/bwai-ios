@@ -1,143 +1,145 @@
 <template>
-  <NavBar :title="t('forgot_password_title')">
-    <template #right>
-      <Icon
-        class-prefix="exchange-icon"
-        name="locale"
-        :size="25"
-        color="var(--van-text-color)"
-        @click="emitEvent('ShowLocales')"
-      />
-    </template>
-  </NavBar>
-  <PageWrap>
-    <div class="p-1">
-      <Tabs v-model:active="ActiveTab" :line-height="0" :swipeable="iosNativeTabsSwipeable()" :animated="iosNativeTabsAnimated()" shrink :border="false">
-        <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
-      </Tabs>
-      <div class="mt-1">
-        <Field
-          v-if="ActiveTab === 0"
-          v-model="inputParams.email"
-          center
-          clearable
-          size="large"
-          :border="false"
-          class="rounded-sm overflow-hidden"
-          type="text"
-          autocomplete="off"
-          :placeholder="t('login_email_placeholder')"
+  <div class="page-shell">
+    <NavBar :title="t('forgot_password_title')">
+      <template #right>
+        <Icon
+          class-prefix="exchange-icon"
+          name="locale"
+          :size="25"
+          color="rgb(24 12 12)"
+          @click="emitEvent('ShowLocales')"
         />
-        <div v-else class="forgot-page__phone-row">
-          <div class="forgot-page__country-code" @click="showCountryPicker = true">
-            <span
-              >{{
-                currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
-              }}&nbsp;{{ selectedCountry.areaCode }}</span
-            >
-            <Icon name="arrow-down" size="14" />
-          </div>
+      </template>
+    </NavBar>
+    <PageWrap>
+      <div class="p-1">
+        <Tabs v-model:active="ActiveTab" :line-height="0" swipeable shrink :border="false">
+          <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
+        </Tabs>
+        <div class="mt-1">
           <Field
-            v-model="inputParams.mobile"
+            v-if="ActiveTab === 0"
+            v-model="inputParams.email"
             center
             clearable
             size="large"
+            :border="false"
+            class="rounded-sm overflow-hidden"
+            type="text"
+            autocomplete="off"
+            :placeholder="t('login_email_placeholder')"
+          />
+          <div v-else class="page-shell__phone-row">
+            <div class="page-shell__country-code" @click="showCountryPicker = true">
+              <span
+                >{{
+                  currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
+                }}&nbsp;{{ selectedCountry.areaCode }}</span
+              >
+              <Icon name="arrow-down" size="14" />
+            </div>
+            <Field
+              v-model="inputParams.mobile"
+              center
+              clearable
+              size="large"
+              autocomplete="off"
+              :border="false"
+              class="page-shell__phone-field rounded-sm overflow-hidden"
+              type="tel"
+              :placeholder="t('login_phone_placeholder')"
+              :formatter="(v) => (v || '').replace(/\D/g, '')"
+              inputmode="tel"
+              :maxlength="11"
+            />
+          </div>
+          <CountryPicker
+            v-model:show="showCountryPicker"
+            :selected-area-code="selectedCountry.areaCode"
+            @select="onCountrySelect"
+          />
+          <div class="page-shell__label mt-1 text-[0.3rem]">
+            {{ t('register_verify_code_title') }}
+          </div>
+          <Field
+            v-model="inputParams.code"
+            center
+            clearable
+            size="large"
+            :border="false"
+            class="rounded-sm overflow-hidden mt-1"
+            type="digit"
+            maxlength="6"
+            :placeholder="t('register_verify_code_placeholder')"
+            autocomplete="off"
+            :formatter="(v) => (v || '').replace(/\D/g, '')"
+            inputmode="numeric"
+          >
+            <template #button>
+              <Button
+                type="primary"
+                size="small"
+                class="page-shell__send-code-btn"
+                :disabled="countdown > 0"
+                @click="onSendVerifyCode"
+              >
+                {{ countdown > 0 ? `${countdown}s` : t('register_verify_code_button_text') }}
+              </Button>
+            </template>
+          </Field>
+          <div class="page-shell__label mt-1 text-[0.3rem]">{{ t('login_password_title') }}</div>
+          <Field
+            v-model="inputParams.password"
+            center
+            clearable
+            size="large"
+            :type="ShowPassword ? 'text' : 'password'"
             autocomplete="off"
             :border="false"
-            class="forgot-page__phone-field rounded-sm overflow-hidden"
-            type="tel"
-            :placeholder="t('login_phone_placeholder')"
-            :formatter="(v) => (v || '').replace(/\D/g, '')"
-            inputmode="tel"
-            :maxlength="11"
-          />
+            class="rounded-sm overflow-hidden mt-1"
+            :placeholder="t('login_password_error')"
+          >
+            <template #button>
+              <PasswordEyeToggle :visible="ShowPassword" @click="ShowPassword = !ShowPassword" />
+            </template>
+          </Field>
+          <div class="page-shell__label mt-1 text-[0.3rem]">
+            {{ t('register_confirm_pwd_title') }}
+          </div>
+          <Field
+            v-model="inputParams.confirmPword"
+            center
+            clearable
+            size="large"
+            :type="ShowConfirmPassword ? 'text' : 'password'"
+            autocomplete="off"
+            :border="false"
+            class="rounded-sm overflow-hidden mt-1"
+            :placeholder="t('login_password_error')"
+          >
+            <template #button>
+              <PasswordEyeToggle
+                :visible="ShowConfirmPassword"
+                @click="ShowConfirmPassword = !ShowConfirmPassword"
+              />
+            </template>
+          </Field>
         </div>
-        <CountryPicker v-model:show="showCountryPicker" @select="onCountrySelect" />
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
-          {{ t('register_verify_code_title') }}
+        <div class="mt-6">
+          <Button
+            class="page-shell__submit-btn"
+            type="primary"
+            block
+            round
+            :loading="loading"
+            @click="onSubmit"
+          >
+            {{ t('confirm') }}
+          </Button>
         </div>
-        <Field
-          v-model="inputParams.code"
-          center
-          clearable
-          size="large"
-          :border="false"
-          class="rounded-sm overflow-hidden mt-1"
-          type="digit"
-          maxlength="6"
-          :placeholder="t('register_verify_code_placeholder')"
-          autocomplete="off"
-          :formatter="(v) => (v || '').replace(/\D/g, '')"
-          inputmode="numeric"
-        >
-          <template #button>
-            <Button
-              type="primary"
-              size="small"
-              block
-              round
-              class="rounded-sm overflow-hidden"
-              :disabled="countdown > 0"
-              @click="onSendVerifyCode"
-            >
-              {{ countdown > 0 ? `${countdown}s` : t('register_verify_code_button_text') }}
-            </Button>
-          </template>
-        </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">{{
-          t('login_password_title')
-        }}</div>
-        <Field
-          v-model="inputParams.password"
-          center
-          clearable
-          size="large"
-          :type="ShowPassword ? 'text' : 'password'"
-          autocomplete="off"
-          :border="false"
-          class="rounded-sm overflow-hidden mt-1"
-          :placeholder="t('login_password_error')"
-        >
-          <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowPassword = !ShowPassword"
-            />
-          </template>
-        </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
-          {{ t('register_confirm_pwd_title') }}
-        </div>
-        <Field
-          v-model="inputParams.confirmPword"
-          center
-          clearable
-          size="large"
-          :type="ShowConfirmPassword ? 'text' : 'password'"
-          autocomplete="off"
-          :border="false"
-          class="rounded-sm overflow-hidden mt-1"
-          :placeholder="t('login_password_error')"
-        >
-          <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowConfirmPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowConfirmPassword = !ShowConfirmPassword"
-            />
-          </template>
-        </Field>
       </div>
-      <div class="mt-6">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
-          {{ t('confirm') }}
-        </Button>
-      </div>
-    </div>
-  </PageWrap>
+    </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -150,9 +152,8 @@
   import { isPassword, isEmail } from '/@/utils/is';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { Tab, Tabs, Field, Button, Icon } from 'vant';
-  import { NavBar, PageWrap, CountryPicker } from '/@/components';
+  import { NavBar, PageWrap, CountryPicker, PasswordEyeToggle } from '/@/components';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 
@@ -401,53 +402,3 @@
       });
   };
 </script>
-
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
-
-    .van-tab {
-      padding-left: 0;
-    }
-
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.3rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
-  }
-
-  .forgot-page__phone-row {
-    display: flex;
-    align-items: center;
-    margin-top: 0.25rem;
-    background: var(--van-cell-background);
-    border-radius: 0.08rem;
-    overflow: hidden;
-  }
-
-  .forgot-page__country-code {
-    display: flex;
-    align-items: center;
-    gap: 0.06rem;
-    padding: 0 0.2rem;
-    color: var(--van-text-color);
-    font-size: 0.3rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .forgot-page__phone-field {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .forgot-page__phone-field :deep(.van-field__body) {
-    padding-left: 0;
-  }
-</style>

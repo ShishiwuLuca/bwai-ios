@@ -204,7 +204,6 @@
     overflow: hidden;
     touch-action: pan-y;
     /* 与主卡片同色：亚像素缝隙、圆角抗锯齿时也不会透出红底 */
-    background: #0c1428;
   }
 
   .cps-row__behind {
@@ -250,7 +249,6 @@
     width: 100%;
     min-width: 100%;
     box-sizing: border-box;
-    background: #0c1428;
     will-change: transform;
     isolation: isolate;
     /* 与卡片同圆角，前景背景盖住四角，避免裁掉卡片 box-shadow 不用 overflow:hidden */

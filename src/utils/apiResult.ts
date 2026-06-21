@@ -3,6 +3,7 @@ export const isApiSuccess = (
   res:
     | {
         code?: number;
+        msg?: string;
         data?: unknown;
       }
     | null

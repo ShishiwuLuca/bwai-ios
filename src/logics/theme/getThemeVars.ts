@@ -13,7 +13,7 @@ export const getThemeVars = (Color: string) => {
     popoverDarkBackground: Color,
     backTopBackground: Color,
     navBarTextColor: Color,
-    // navBarTitleTextColor: Color,
+    navBarTitleTextColor: '#000',
     buttonDefaultBorderColor: Color
   };
 };

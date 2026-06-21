@@ -4,20 +4,20 @@
     position="center"
     :safe-area-inset-top="true"
     :safe-area-inset-bottom="true"
-    class="p-0.5 !h-full modal flex min-h-0 flex-col !w-full"
+    class="page-shell-modal p-0.5 !h-full modal flex min-h-0 flex-col !w-full"
   >
-    <div class="flex shrink-0 items-center justify-between p-1">
-      <div class="text-[0.3rem] font-600 text-[var(--van-text-color)]">{{
+    <div class="locale-modal__header flex shrink-0 items-center justify-between p-1">
+      <div class="locale-modal__title text-[0.3rem] font-600">{{
         t('customSetting_action_language')
       }}</div>
       <div class="text-[0.25rem] font-600" @click="ClosePicker">
-        <Icon color="var(--van-text-color)" name="cross" :size="22" />
+        <Icon class="locale-modal__close" color="#000000" name="cross" :size="22" />
       </div>
     </div>
     <div class="min-h-0 w-full flex-1 overflow-auto" :class="[{ '!pb-6.5': isStandalone }]">
       <Cell
-        class="mb-0.5 !bg-transparent"
-        :class="[{ '!text-white': item.value === Locales }]"
+        class="locale-modal__cell mb-0.5 !bg-transparent"
+        :class="{ 'locale-modal__cell--active': item.value === Locales }"
         clickable
         center
         size="large"
@@ -31,7 +31,7 @@
           <Icon :name="item.icon" class="mr-1 rtl:mr-0 rtl:ml-1" :size="28" />
         </template>
         <template #right-icon>
-          <Radio shape="dot" :icon-size="23" :checked="Locales === item.value" :name="item.value" />
+          <Radio shape="dot" :icon-size="16" :checked="Locales === item.value" :name="item.value" />
         </template>
       </Cell>
     </div>
@@ -129,8 +129,29 @@
 </script>
 
 <style lang="less" scoped>
+  .locale-modal__title,
+  .locale-modal__close {
+    color: #000000;
+  }
+
   &:deep(.van-cell) {
     align-items: center;
+  }
+
+  &:deep(.locale-modal__cell) {
+    color: var(--van-cell-text-color);
+
+    .van-cell__title {
+      color: var(--van-cell-text-color);
+    }
+  }
+
+  &:deep(.locale-modal__cell--active) {
+    color: #000000;
+
+    .van-cell__title {
+      color: #000000;
+    }
   }
 
   &:deep(.van-popover__wrapper) {

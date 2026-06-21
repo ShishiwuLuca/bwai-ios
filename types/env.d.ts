@@ -1,5 +1,10 @@
 /// <reference types="vite/client" />
 
+interface ImportMetaEnv {
+  /** 开发 / 原生生产包：固定 WebSocket 根地址（如 wss://api.example.com，无 path） */
+  readonly VITE_WS_FIXED_ORIGIN?: string;
+}
+
 declare module '*.png' {
   const src: string;
   export default src;

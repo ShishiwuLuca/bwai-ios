@@ -10,7 +10,7 @@
     <template #left>
       <slot v-if="$slots.left" name="left"></slot>
       <div v-else-if="isShowLeft" class="nav-back-button" @click="ToBack">
-        <Icon name="arrow-left" :size="22" color="#fff" />
+        <Icon name="arrow-left" :size="22" color="#000" />
       </div>
     </template>
     <template v-if="$slots.title" #title>
@@ -85,6 +85,24 @@
 </script>
 
 <style lang="less" scoped>
+  @import '/@/design/navBar.less';
+
+  &:deep(.van-nav-bar) {
+    background: @nav-bar-bg !important;
+    backdrop-filter: blur(0.16rem);
+    -webkit-backdrop-filter: blur(0.16rem);
+    border-bottom: 1px solid @nav-bar-border;
+  }
+
+  &:deep(.van-nav-bar__placeholder) {
+    background: @nav-bar-bg;
+  }
+
+  &:deep(.van-nav-bar__title) {
+    color: #000;
+    font-weight: 700;
+  }
+
   // 返回按钮样式
   .nav-back-button {
     width: 0.8rem;

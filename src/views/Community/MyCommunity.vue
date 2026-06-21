@@ -20,7 +20,6 @@
         v-model:active="mainTab"
         class="my-community-page__tabs my-community-page__tabs--main"
         color="#4db3ff"
-        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab
@@ -36,7 +35,6 @@
         v-model:active="statusTab"
         class="my-community-page__tabs my-community-page__tabs--status"
         color="#4db3ff"
-        :animated="iosNativeTabsAnimated()"
         @click-tab="onTabClickReload"
       >
         <Tab :title="t('mc_status_all')" name="all" />
@@ -101,8 +99,6 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
-  import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
-  import { iosNativeTabsAnimated } from '/@/utils/iosUiAnimations';
   import CommunityPostSwipeRow from './CommunityPostSwipeRow.vue';
   import {
     mapPostToDisplay,
@@ -366,9 +362,9 @@
         (!reset && mapped.length > 0 && added === 0);
       feedFinished.value = noMore;
       if (!noMore) feedPageNo.value += 1;
-    } catch (e: unknown) {
+    } catch {
       feedFinished.value = true;
-      notifyApiRequestFailed(e);
+      CreateErrorToast(t('apiRequestFailed'));
     } finally {
       // 仅当前代次的请求能收尾，避免「后返回的旧请求」在整表重置后误关 loading
       if (myGeneration === listFetchGeneration.value) {
@@ -440,7 +436,7 @@
 <style scoped lang="less">
   /* 双行 Tab + 列表（左滑删帖） */
 
-  @bg-page: #060b19;
+  @bg-page: transparent;
   @blue-active: #4db3ff;
   @text-muted: #828282;
 
@@ -457,11 +453,11 @@
     :deep(.van-nav-bar__title) {
       font-size: 0.36rem;
       font-weight: 700;
-      color: #fff;
+      color: #000;
     }
 
     :deep(.van-nav-bar .van-icon) {
-      color: #fff;
+      color: #000;
     }
 
     :deep(.van-nav-bar__right) {

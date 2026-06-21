@@ -1,13 +1,13 @@
 <template>
   <div class="personal">
-    <NavBar :show-left="false" :fixed="false" placeholder :border="false">
+    <NavBar :show-left="false" :fixed="true" placeholder :border="false" >
       <template #left>
-        <VanImage :src="Logo" height="0.6rem" />
+        <VanImage :src="Logo" height="0.6rem" width="2.2rem" />
       </template>
       <template #right>
         <div class="flex items-center justify-between gap-1">
-          <Icon name="chat-o" :size="28" @click="$router.push('/Notice')" />
-          <Icon name="service" :size="28" @click="OpenService" />
+          <VanImage :src="MessageIcon" width="28px" height="28px" @click="$router.push('/Notice')" />
+          <VanImage :src="ServiceIcon" width="28px" height="28px" @click="OpenService" />
         </div>
       </template>
     </NavBar>
@@ -17,22 +17,18 @@
           <VanImage :src="UserInfo.avatar || Avatar" width="1.4rem" />
         </div>
         <div>
-          <div class="text-[0.4rem] text-[#EDD59C] font-bold">{{ UserInfo.nickname }}</div>
-          <div class="text-[0.32rem] font-bold flex items-center justify-start gap-0.5">
+          <div class="text-[0.4rem] text-[#222534] font-bold">{{ UserInfo.nickname }}</div>
+          <div class="text-[0.32rem] font-bold flex items-center justify-start gap-0.5 text-[#767B98]">
             <div>ID: {{ UserInfo.id }}</div>
             <div @click="CopyText(UserInfo.id)">
-              <Icon
-                class-prefix="exchange-icon"
-                name="copy"
-                :size="22"
-                color="var(--van-primary-color)"
-              />
+              <VanImage :src="CopyIcon" width="22px" height="22px" />
             </div>
           </div>
         </div>
       </div>
+      
       <div class="mt-1">
-        <div class="text-[0.32rem]">{{ t('account_settings_title') }}</div>
+        <div class="personal-section-title">{{ t('account_settings_title') }}</div>
         <!-- <Cell clickable center size="large" :border="false" class="rounded mt-1 !pt-1 !pb-1 mb-1"
             :title="t('notification_settings_title')" :value="t('other_settings_value')"
             value-class="!text-[var(--van-text-color)]" is-link>
@@ -47,16 +43,18 @@
           :border="false"
           class="rounded mt-1 !pt-1 !pb-1 mb-1"
           :title="t('security_settings_title')"
+          title-class="!text-[#000] !font-medium"
           is-link
           to="/SecuritySettings"
+          :style="{ background: '#F9FAFF', boxShadow: '0 0 2px rgba(87,119,251,0.25)' }"
         >
           <template #icon>
-            <Icon name="lock" class="mr-0.7" :size="25" color="var(--van-primary-color)" />
+            <VanImage :src="SecurityIcon" width="30px" height="30px" class="mr-0.7" />
           </template>
         </Cell>
       </div>
       <div class="mt-1">
-        <div class="text-[0.32rem]">{{ t('other_settings_title') }}</div>
+        <div class="personal-section-title">{{ t('other_settings_title') }}</div>
         <Cell
           clickable
           center
@@ -64,18 +62,14 @@
           :border="false"
           class="rounded mt-1 !pt-1 !pb-1 mb-1"
           :title="t('language_title')"
-          @click="emitEvent('ShowLocales')"
-          value-class="!text-[var(--van-text-color)]"
+          title-class="!text-[#000] !font-medium"
+          value-class="!text-[#727794]"
           is-link
+          :style="{ background: '#F9FAFF', boxShadow: '0 0 2px rgba(87,119,251,0.25)' }"
+          @click="emitEvent('ShowLocales')"
         >
           <template #icon>
-            <Icon
-              class-prefix="exchange-icon"
-              name="locale"
-              class="mr-0.7"
-              :size="25"
-              color="var(--van-primary-color)"
-            />
+            <VanImage :src="LangIcon" width="30px" height="30px" class="mr-0.7" />
           </template>
           <template #value>
             <div class="flex items-center justify-end gap-0.5">
@@ -84,11 +78,33 @@
             </div>
           </template>
         </Cell>
+        <Cell
+          clickable
+          center
+          size="large"
+          :border="false"
+          class="rounded mt-1 !pt-1 !pb-1 mb-1"
+          :title="t('about_us_title')"
+          title-class="!text-[#000] !font-medium"
+          is-link
+          to="/About"
+          :style="{ background: '#F9FAFF', boxShadow: '0 0 2px rgba(87,119,251,0.25)' }"
+        >
+          <template #icon>
+            <VanImage :src="AboutIcon" width="30px" height="30px" class="mr-0.7" />
+          </template>
+        </Cell>
       </div>
-      <div class="mt-2" v-if="isLogin">
-        <Button type="danger" block @click="onLogout" round>{{ t('logout_title') }}</Button>
+      <div class="mt-[-.1rem]" v-if="isLogin">
+        <Button
+          type="primary"
+          block
+          round
+          :style="{ background: 'linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%)', border: 'none' }"
+          @click="onLogout"
+        >{{ t('logout_title') }}</Button>
       </div>
-      <div class="mt-1 text-center flex items-center justify-center gap-1">
+      <div class="mt-1 text-center flex items-center justify-center gap-1 text-[#333]">
         <div v-if="isApp">{{ t('app_version_title') }}: {{ AppVersion }}</div>
         <div>{{
           isApp
@@ -110,7 +126,16 @@
   import { emitEvent } from '/@/utils/eventBus';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { getAppEnvConfig } from '/@/utils/env';
-  import Avatar from '/@/assets/images/avatar.png';
+  import Avatar from '/@/assets/images/avatar_default.png';
+  import SecurityIcon from '/@/assets/images/security_icon.png';
+  import LangIcon from '/@/assets/images/lang_icon.png';
+  import AboutIcon from '/@/assets/images/about_icon.png';
+  import CopyIcon from '/@/assets/images/copy_icon.png';
+  import MessageIcon from '/@/assets/images/message_icon.png';
+  import ServiceIcon from '/@/assets/images/service_icon.png';
+  import AppDownloadIconImg from '/@/assets/images/app_download_icon.png';
+  import VipLinkIconImg from '/@/assets/images/vip_link_icon.png';
+  import AiIconImg from '/@/assets/images/ai_icon.png';
   import { computed, onBeforeMount, ref } from 'vue';
   // import Logo from '/@/assets/images/home_logo.png';
   import { useMessage } from '/@/hooks/web/useMessage';
@@ -195,6 +220,13 @@
     return App.getInfo().then((info) => (info.version || '').trim());
   };
 
+  // 引入图片
+
+  /** getImage */
+  const getImage = (name: string) => {
+    return new URL(`../../assets/images/${name}.png`, import.meta.url).href;
+  };
+
   // 复制文字
 
   /** CopyText */
@@ -234,6 +266,7 @@
   onBeforeMount((): void => {
     UserStore.setActiveTab(1);
     UserStore.fetchUserInfo();
+    UserStore.fetchAssetCurrencyList();
 
     if (isApp.value) {
       getInstalledAppVersion()
@@ -254,10 +287,6 @@
     padding: 0 var(--van-padding-md);
   }
 
-  :deep(.van-nav-bar) {
-    background: transparent !important;
-  }
-
   :deep(.van-cell__title) {
     flex: auto !important;
   }
@@ -272,11 +301,30 @@
   }
 
   .personal {
-    background-image: url('/@/assets/images/user_bg.png');
+    background-image: url('/@/assets/images/user_center_bg.png');
     background-size: 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
     // width: 100%;
     height: 100vh;
+  }
+
+  .personal-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.12rem;
+    font-size: 0.28rem;
+    font-weight: 600;
+    color: #000;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 0.28rem;
+      background: #2071f8;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
   }
 </style>

@@ -1,0 +1,209 @@
+// 消息中心（/Notice）：Figma 143-7803 配色与对齐（375 设计稿 px）
+.page-shell.notice-page {
+  .van-nav-bar__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+  }
+
+  .nav-back-button .van-icon {
+    color: #000000 !important;
+  }
+
+  .van-tabs__wrap {
+    padding-top: 19px;
+  }
+
+  .van-tabs__nav {
+    padding-left: 21px !important;
+    padding-right: 21px !important;
+    background: transparent;
+  }
+
+  .van-tab {
+    flex: none !important;
+    padding: 0 !important;
+    margin-right: 20px;
+    height: 24px;
+    line-height: 24px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .van-tab .van-tab__text {
+    color: #8c8c8c;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+  }
+
+  .van-tab--active .van-tab__text {
+    background: linear-gradient(169deg, #6ca9ff 9%, #2071f8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 24px;
+  }
+
+  .van-tab .van-badge--top-right {
+    top: 0;
+    right: -10px;
+  }
+
+  .van-badge--dot {
+    width: 10px;
+    height: 10px;
+    background: #e62727;
+  }
+
+  .van-badge:not(.van-badge--dot) {
+    min-width: 10px;
+    height: 10px;
+    padding: 0 2px;
+    font-size: 8px;
+    line-height: 10px;
+    background: #e62727;
+    border: none;
+  }
+
+  .notice-page__card {
+    margin: 10px 20px 0;
+    background: #f9faff !important;
+    border: none !important;
+    border-radius: 10px;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
+  }
+
+  .notice-page__card .van-cell {
+    padding: 10px 21px 0;
+    background: transparent;
+  }
+
+  .notice-page__card-body {
+    padding: 0 21px 10px;
+  }
+
+  .notice-page__card-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #000000;
+  }
+
+  .notice-page__card-date {
+    font-size: 12px;
+    font-weight: 500;
+    color: #000000;
+  }
+
+  .notice-page__divider {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    border-color: #dadada !important;
+  }
+
+  .notice-page__detail-btn {
+    width: auto !important;
+    flex: none !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 10px !important;
+    background: linear-gradient(169deg, #6ca9ff 9%, #2071f8 100%) !important;
+    border-radius: 100px !important;
+
+    &::after {
+      display: none;
+    }
+
+    .van-cell__body {
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      width: auto;
+      min-height: 22px;
+      height: 22px;
+      padding: 0;
+    }
+
+    .van-cell__title {
+      flex: none;
+      line-height: 22px;
+    }
+
+    .van-cell__right-icon {
+      display: flex;
+      align-items: center;
+      flex: none;
+      height: 22px;
+      margin-left: 0;
+      font-size: 12px;
+      line-height: 1;
+      color: #ffffff;
+    }
+  }
+
+  .notice-page__detail-btn-text {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #ffffff !important;
+  }
+}
+
+// 公告详情（/Notice/Detail）：Figma 143-9242 配色与字号
+.page-shell.notice-detail {
+  .van-nav-bar__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #000000;
+  }
+
+  .nav-back-button .van-icon {
+    color: #000000 !important;
+  }
+
+  .notice-detail__body {
+    padding: 10px 21px 0.6rem;
+  }
+
+  .notice-detail__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.5;
+    background: linear-gradient(169deg, #6ca9ff 9%, #2071f8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  .notice-detail__time {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #000000;
+  }
+
+  .notice-detail__divider {
+    margin: 10px 0 !important;
+    border-color: #dadada !important;
+  }
+
+  .notice-detail__content {
+    line-height: 1.6;
+    word-break: break-word;
+
+    img {
+      display: block;
+      max-width: 100%;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+  }
+}

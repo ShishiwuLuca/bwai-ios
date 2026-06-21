@@ -69,6 +69,7 @@ export default defineConfigWithVueTs(
       'vue/one-component-per-file': 'off',
       'vue/html-closing-bracket-newline': 'off',
       'vue/max-attributes-per-line': 'off',
+      'vue/first-attribute-linebreak': 'off',
       'vue/multiline-html-element-content-newline': 'off',
       'vue/singleline-html-element-content-newline': 'off',
       'vue/attribute-hyphenation': 'off',
@@ -88,7 +89,10 @@ export default defineConfigWithVueTs(
       ],
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'off',
-      'vue/prop-name-casing': 'off'
+      'vue/prop-name-casing': 'off',
+      /** Vue 3：允许多根节点、v-model:xxx 参数 */
+      'vue/no-multiple-template-root': 'off',
+      'vue/no-v-model-argument': 'off'
     }
   },
   ...oxlint.configs['flat/recommended']

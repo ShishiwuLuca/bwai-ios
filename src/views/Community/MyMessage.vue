@@ -103,14 +103,7 @@
                     <span class="message-page__name">{{ item.name }}</span>
                     <span class="message-page__time">{{ item.time }}</span>
                   </div>
-                  <div class="message-page__preview-row">
-                    <span
-                      v-if="rowShowsUnread(item)"
-                      class="message-page__unread-dot"
-                      aria-hidden="true"
-                    ></span>
-                    <div class="message-page__preview">{{ item.preview }}</div>
-                  </div>
+                  <div class="message-page__preview">{{ item.preview }}</div>
                 </div>
               </div>
             </MessageSwipeRow>
@@ -166,7 +159,6 @@
   import { useI18n } from '/@/hooks/web/useI18n';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { isApiSuccess } from '/@/utils/apiResult';
-  import { notifyApiRequestFailed } from '/@/utils/apiErrorNotify';
   import defaultAvatar from '/@/assets/avatar.png';
 
   /** 从 useI18n 解构的文案与能力 */
@@ -326,8 +318,8 @@
       } else {
         CreateErrorToast(res?.msg || t('od_op_fail'));
       }
-    } catch (e: unknown) {
-      notifyApiRequestFailed(e);
+    } catch {
+      CreateErrorToast(t('apiRequestFailed'));
     }
   };
 
@@ -446,10 +438,10 @@
         (!reset && mapped.length > 0 && added === 0);
       feedFinished.value = noMore;
       if (!noMore) feedPageNo.value += 1;
-    } catch (e: unknown) {
+    } catch {
       feedFinished.value = true;
       if (reset) list.value = [];
-      notifyApiRequestFailed(e);
+      CreateErrorToast(t('apiRequestFailed'));
     } finally {
       if (myGeneration === listFetchGeneration.value) {
         if (!reset) appendInFlight.value = false;
@@ -493,8 +485,8 @@
       } else {
         CreateErrorToast(res?.msg || t('od_op_fail'));
       }
-    } catch (e: unknown) {
-      notifyApiRequestFailed(e);
+    } catch {
+      CreateErrorToast(t('apiRequestFailed'));
     }
   };
   const onDeleteConversation = async (item: MessageRow) => {
@@ -523,45 +515,37 @@
 </script>
 
 <style scoped lang="less">
-  /* 会话列表、批量已读底栏 */
-
-  @bg-page: #060b19;
-  @accent: #4db3ff;
-  @text-muted: rgba(255, 255, 255, 0.48);
-  @card-border: rgba(255, 255, 255, 0.07);
-
+  @primary-blue: #3366ff;
+  @text-primary: #000;
+  @text-muted: #999;
   .message-page-shell {
+    position: relative;
     min-height: 100vh;
-    background: @bg-page;
-    background-image:
-      radial-gradient(ellipse 120% 80% at 50% -15%, rgba(77, 179, 255, 0.14), transparent 55%),
-      radial-gradient(ellipse 80% 50% at 100% 30%, rgba(22, 119, 255, 0.06), transparent 45%),
-      linear-gradient(180deg, #0a1228 0%, @bg-page 28%, #04070f 100%);
-  }
+    background: transparent;
+    --van-nav-bar-title-text-color: #000;
+    --van-nav-bar-icon-color: #000;
 
-  .message-page__navbar {
-    :deep(.van-nav-bar) {
+    :deep(.van-nav-bar),
+    :deep(.van-nav-bar__placeholder) {
       background: transparent;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     :deep(.van-nav-bar__title) {
       font-size: 0.36rem;
       font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.02em;
+      color: #000;
     }
 
     :deep(.van-nav-bar .van-icon) {
-      color: rgba(255, 255, 255, 0.92);
+      color: #000;
     }
   }
 
   .message-page {
+    position: relative;
+    z-index: 1;
     background: transparent;
-    color: #fff;
+    color: @text-primary;
     padding-bottom: env(safe-area-inset-bottom);
   }
 
@@ -571,13 +555,13 @@
 
   .message-page__nav-action {
     font-size: 0.28rem;
-    font-weight: 600;
-    color: @accent;
+    font-weight: 500;
+    color: @primary-blue;
     padding: 0.12rem 0.12rem 0.12rem 0.2rem;
   }
 
   .message-page__nav-action--muted {
-    color: rgba(255, 255, 255, 0.55);
+    color: @text-muted;
   }
 
   .message-page__pull {
@@ -594,7 +578,7 @@
 
   .message-page__list-wrap :deep(.van-list__finished-text),
   .message-page__list-wrap :deep(.van-list__loading) {
-    color: rgba(255, 255, 255, 0.45);
+    color: @text-muted;
   }
 
   .message-page__empty {
@@ -608,58 +592,36 @@
   .message-page__list {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    padding: 0.12rem 0.28rem 0.48rem;
+    padding: 0 0.32rem 0.48rem;
   }
 
   .message-page__row-wrap {
     flex-shrink: 0;
+
+    &:not(:last-child) .message-page__item {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
   }
 
   .message-page__item {
     display: flex;
-    align-items: flex-start;
-    gap: 0.26rem;
-    padding: 0.28rem 0.3rem;
-    border-radius: 0.22rem;
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.07) 0%,
-      rgba(255, 255, 255, 0.025) 48%,
-      rgba(0, 0, 0, 0.12) 100%
-    );
-    box-shadow:
-      0 0.06rem 0.24rem rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    align-items: center;
+    gap: 0.24rem;
+    padding: 0.28rem 0;
+    background: transparent;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition:
-      transform 0.18s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
-
-  .message-page__item--unread {
-    border-color: rgba(77, 179, 255, 0.28);
-    box-shadow:
-      0 0.08rem 0.28rem rgba(0, 0, 0, 0.35),
-      0 0 0 1px rgba(77, 179, 255, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .message-page__item:active {
-    transform: scale(0.992);
+    opacity: 0.88;
   }
 
   .message-page__avatar-wrap {
     position: relative;
     flex-shrink: 0;
-    width: 1rem;
-    height: 1rem;
-  }
-
-  .message-page__item--unread .message-page__avatar {
-    box-shadow: 0 0 0 2px rgba(77, 179, 255, 0.35);
+    width: 0.96rem;
+    height: 0.96rem;
   }
 
   .message-page__badge {
@@ -677,15 +639,26 @@
     display: block;
     width: 100%;
     height: 100%;
-    border-radius: 0.18rem;
+    border-radius: 0.16rem;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.06);
+    background: #f0f2f5;
+  }
+
+  .message-page__badge :deep(.van-badge--fixed) {
+    min-width: 0.32rem;
+    height: 0.32rem;
+    padding: 0 0.06rem;
+    font-size: 0.2rem;
+    font-weight: 600;
+    line-height: 0.32rem;
+    background: #ff4d4f;
+    border: 2px solid #fff;
+    box-shadow: none;
   }
 
   .message-page__body {
     flex: 1;
     min-width: 0;
-    padding-top: 0.04rem;
   }
 
   .message-page__row-top {
@@ -693,101 +666,59 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.2rem;
-    margin-bottom: 0.12rem;
+    margin-bottom: 0.08rem;
   }
 
   .message-page__name {
     flex: 1;
     min-width: 0;
     font-size: 0.3rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.96);
+    font-weight: 700;
+    color: @text-primary;
     line-height: 1.35;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .message-page__item--unread .message-page__name {
-    color: #fff;
-  }
-
   .message-page__time {
     flex-shrink: 0;
     font-size: 0.22rem;
-    color: rgba(255, 255, 255, 0.38);
+    color: @text-primary;
     line-height: 1.35;
     font-variant-numeric: tabular-nums;
-    padding: 0.04rem 0.12rem;
-    border-radius: 0.08rem;
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .message-page__preview-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.12rem;
-  }
-
-  .message-page__unread-dot {
-    flex-shrink: 0;
-    width: 0.12rem;
-    height: 0.12rem;
-    margin-top: 0.12rem;
-    border-radius: 50%;
-    background: linear-gradient(135deg, @accent, #1677ff);
-    box-shadow: 0 0 0.12rem rgba(77, 179, 255, 0.55);
+    opacity: 0.85;
   }
 
   .message-page__preview {
-    flex: 1;
-    min-width: 0;
     font-size: 0.24rem;
     color: @text-muted;
-    line-height: 1.5;
+    line-height: 1.45;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .message-page__item--unread .message-page__preview {
-    color: rgba(255, 255, 255, 0.62);
-  }
-
-  .message-page__badge :deep(.van-badge--fixed) {
-    min-width: 0.34rem;
-    height: 0.34rem;
-    padding: 0 0.08rem;
-    font-size: 0.2rem;
-    font-weight: 600;
-    line-height: 0.34rem;
-    background: linear-gradient(145deg, #ff6b6b, #ee0a24);
-    border: none;
-    box-shadow: 0 0.04rem 0.1rem rgba(238, 10, 36, 0.35);
+    white-space: nowrap;
   }
 
   .message-page__batch-check {
     flex-shrink: 0;
-    padding-top: 0.08rem;
+    padding-right: 0.08rem;
   }
 
   .message-page__batch-check :deep(.van-checkbox__icon--checked) {
-    background-color: @accent;
-    border-color: @accent;
+    background-color: @primary-blue;
+    border-color: @primary-blue;
   }
 
   .message-page__item--batch {
-    padding-left: 0.18rem;
+    padding-left: 0;
   }
 
   .message-page__item--selected {
-    border-color: rgba(77, 179, 255, 0.42);
-    box-shadow:
-      0 0.08rem 0.28rem rgba(0, 0, 0, 0.35),
-      0 0 0 1px rgba(77, 179, 255, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    background: rgba(51, 102, 255, 0.06);
+    border-radius: 0.12rem;
+    padding-left: 0.12rem;
+    padding-right: 0.12rem;
+    margin: 0 -0.12rem;
   }
 
   .message-page__batch-bar {
@@ -797,15 +728,8 @@
     bottom: 0;
     z-index: 100;
     padding-bottom: env(safe-area-inset-bottom);
-    background: linear-gradient(
-      180deg,
-      rgba(6, 11, 25, 0) 0%,
-      rgba(5, 8, 18, 0.94) 22%,
-      #050811 100%
-    );
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: linear-gradient(180deg, rgba(245, 248, 255, 0) 0%, #f5f8ff 28%, #fff 100%);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .message-page__batch-bar-inner {
@@ -832,13 +756,13 @@
 
   .message-page__batch-count {
     font-size: 0.24rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: @text-primary;
     font-weight: 600;
   }
 
   .message-page__batch-tip {
     font-size: 0.2rem;
-    color: rgba(255, 255, 255, 0.38);
+    color: @text-muted;
   }
 
   .message-page__batch-submit {
@@ -847,12 +771,12 @@
     padding: 0 0.34rem;
     height: 0.72rem;
     border: none;
-    border-radius: 0.36rem;
+    border-radius: 999px;
     font-size: 0.28rem;
     font-weight: 600;
     color: #fff;
-    background: linear-gradient(135deg, #5eb8ff 0%, @accent 48%, #2b8cff 100%);
-    box-shadow: 0 0.06rem 0.2rem rgba(77, 179, 255, 0.32);
+    background: linear-gradient(180deg, #6eb4ff 0%, #4090ff 100%);
+    box-shadow: 0 0.06rem 0.2rem rgba(51, 102, 255, 0.22);
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -862,7 +786,7 @@
   }
 
   .message-page__batch-submit:active:not(:disabled) {
-    filter: brightness(1.06);
+    opacity: 0.92;
   }
 
   .message-batch-bar-enter-active,

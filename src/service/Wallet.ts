@@ -1,5 +1,20 @@
 import { defHttp } from '/@/utils/http/axios';
 
+/** 划转通道（POST /member/app/transfer/getList 返回的 data 项） */
+export interface TransferSettingVo {
+  id: number;
+  fromAccount: string;
+  toAccount: string;
+  fundCode: string;
+}
+
+/** 财务账目类型（POST /member/app/wallet/getFundTypeList 返回的 data 项） */
+export interface FundTypeDO {
+  id: number;
+  code: string;
+  name: string;
+}
+
 // -----------------------------------------------------------------------------
 // 钱包模块 API 封装
 // - 获取我的钱包信息
@@ -38,7 +53,22 @@ enum WalletApi {
   GetTransferFee = '/manager/transfer/fee-config',
 
   // 提交转账
-  SubmitTransfer = '/manager/transfer/create'
+  SubmitTransfer = '/manager/transfer/create',
+
+  // 提交账户划转
+  SubmitTransferST = '/member/app/transfer/transfer',
+
+  // 获取划转通道列表
+  GetTransferChannelList = '/member/app/transfer/getList',
+
+  // 获取划转手续费
+  GetTransferSTFee = '/member/app/transfer/getFee',
+
+  // 获取剩余交易量
+  GetTransferTradeAmount = '/member/app/transfer/getTradeAmount',
+
+  // 获取财务账目类型
+  GetFundTypeList = '/member/app/wallet/getFundTypeList'
 }
 
 /**
@@ -127,4 +157,51 @@ export const getTransferFee = (data: any) => {
  */
 export const submitTransfer = (data: any) => {
   return defHttp.post({ url: WalletApi.SubmitTransfer, data });
+};
+
+/**
+ * 提交账户划转
+ * POST /member/app/transfer/transfer
+ */
+export const submitTransferST = (data: any) => {
+  return defHttp.post({ url: WalletApi.SubmitTransferST, data });
+};
+
+/**
+ * 获取划转通道列表
+ * POST /member/app/transfer/getList
+ */
+export const getTransferChannelList = () => {
+  return defHttp.post({ url: WalletApi.GetTransferChannelList });
+};
+
+/** 划转手续费入参 */
+export interface TransferSTFeeParams {
+  uid: number;
+  amount: number;
+  settingId: number;
+}
+
+/**
+ * 获取划转手续费
+ * POST /member/app/transfer/getFee
+ */
+export const getTransferSTFee = (data: TransferSTFeeParams) => {
+  return defHttp.post({ url: WalletApi.GetTransferSTFee, data });
+};
+
+/**
+ * 获取剩余交易量
+ * POST /member/app/transfer/getTradeAmount
+ */
+export const getTransferTradeAmount = () => {
+  return defHttp.post({ url: WalletApi.GetTransferTradeAmount });
+};
+
+/**
+ * 获取财务账目类型（交易记录筛选用）
+ * POST /member/app/wallet/getFundTypeList
+ */
+export const getFundTypeList = () => {
+  return defHttp.post<{ data: FundTypeDO[] }>({ url: WalletApi.GetFundTypeList });
 };

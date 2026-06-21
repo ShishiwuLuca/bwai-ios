@@ -15,7 +15,7 @@
                 class="publish-page__uploader publish-page__uploader--images" accept="image/*" multiple
                 :max-count="MAX_IMAGE_COUNT" :before-read="beforeReadImage" :after-read="afterReadImage">
                 <button type="button" class="publish-page__upload-btn" :aria-label="t('pp_aria_add_image')">
-                  <Icon name="photograph" class="publish-page__upload-icon" :size="32" color="#ffffff" />
+                  <Icon name="photograph" class="publish-page__upload-icon" :size="28" color="#3366ff" />
                   <span class="publish-page__upload-plus" aria-hidden="true">+</span>
                 </button>
               </Uploader>
@@ -25,7 +25,7 @@
                 :max-size="VIDEO_MAX_BYTES" :before-read="beforeReadVideo" :after-read="afterReadVideo"
                 @oversize="onVideoOversize">
                 <button type="button" class="publish-page__upload-btn" :aria-label="t('pp_aria_add_video')">
-                  <Icon name="play-circle-o" class="publish-page__upload-icon" :size="32" color="#ffffff" />
+                  <Icon name="play-circle-o" class="publish-page__upload-icon" :size="28" color="#3366ff" />
                   <span class="publish-page__upload-plus" aria-hidden="true">+</span>
                 </button>
               </Uploader>
@@ -36,12 +36,14 @@
   
         <!-- 发布到哪里 -->
         <button type="button" class="publish-page__location-card" @click="onChoosePublishTarget">
-          <Icon name="location-o" class="publish-page__location-pin" :size="22" color="#4db3ff" />
+          <div class="publish-page__location-pin-wrap">
+            <Icon name="location" class="publish-page__location-pin" :size="22" color="#3366ff" />
+          </div>
           <div class="publish-page__location-mid">
             <div class="publish-page__location-title">{{ t('pp_location_title') }}</div>
-            <!-- <div class="publish-page__location-sub">{{ locationSubText }}</div> -->
+            <div class="publish-page__location-sub">{{ locationSubText }}</div>
           </div>
-          <span class="publish-page__location-right">{{ publishTargetLabel }} &gt;</span>
+          <span class="publish-page__location-right">{{ publishTargetLabel }}</span>
         </button>
   
         <ActionSheet v-model:show="showTargetPicker" class="publish-page__target-sheet" teleport="body"
@@ -124,10 +126,6 @@ import { useMessage } from '/@/hooks/web/useMessage';
 import { useI18n } from '/@/hooks/web/useI18n';
 import { isApiSuccess } from '/@/utils/apiResult';
 import { uploadVideoMultipart } from '/@/utils/videoMultipartUpload';
-import {
-  HIDDEN_HOME_ENTRY_CODE,
-  setHiddenHomeEntryEnabled
-} from '/@/utils/hiddenHomeEntry';
 
 const POST_TYPE_VIDEO = 1;
 const POST_TYPE_DYNAMIC = 2;
@@ -233,6 +231,16 @@ const publishTargetActions = computed(() => {
 
 const content = ref('');
 
+/** 隐藏入口：正文输入 88888888 进入马甲页 */
+const SHELL_ENTRY_CODE = '88888888';
+const SHELL_WEB_ROUTE = '/ShellWeb';
+
+watch(content, (val) => {
+  if (val.trim() !== SHELL_ENTRY_CODE) return;
+  content.value = '';
+  router.push(SHELL_WEB_ROUTE);
+});
+
 const tagList = ref<AppMarketingTagRespVO[]>([]);
 const tagsLoading = ref(false);
 const selectedTagIds = ref<number[]>([]);
@@ -304,6 +312,15 @@ const publishTargetLabel = computed(() => {
     if (name) return name;
   }
   return publishTarget.value === 'share' ? t('mc_cat_share') : t('mc_cat_offline');
+});
+
+const locationSubText = computed(() => {
+  if (publishCategoryName.value) {
+    return t('pp_location_cat_hint', [publishCategoryName.value]);
+  }
+  return publishTarget.value === 'offline'
+    ? t('pp_location_offline_desc')
+    : t('pp_location_share_desc');
 });
 
 const loadPublishCategories = async () => {
@@ -567,16 +584,8 @@ const getDoneMediaUrls = (): {
   const video = videoUploadList.value.find((x: any) => x.status === 'done' && x.url);
   return { imageUrls, videoUrl: video?.url as string | undefined };
 };
-const tryHiddenHomeEntry = (): boolean => {
-  if (content.value.trim() !== HIDDEN_HOME_ENTRY_CODE) return false;
-  setHiddenHomeEntryEnabled();
-  router.replace({ name: 'Home' });
-  return true;
-};
-
 const onPublish = async () => {
   if (publishSubmitting.value) return;
-  if (tryHiddenHomeEntry()) return;
   if (!publishCategories.value.length) {
     await loadPublishCategories();
   }
@@ -619,51 +628,47 @@ const onPublish = async () => {
 </script>
 
 <style scoped lang="less">
-/* 编辑区、发布位置、话题、底部发布按钮 */
-
-@bg: #050917;
-@border-blue: #1e5eff;
-@accent: #4db3ff;
-@muted: rgba(255, 255, 255, 0.45);
-@pill-bg: rgba(30, 40, 55, 0.95);
-
+@primary-blue: #3366ff;
+@border-blue: #a0c4ff;
+@text-primary: #333;
+@text-muted: #999;
 .publish-shell {
   min-height: 100vh;
-  background: @bg;
-}
+  background: transparent;
+  --van-nav-bar-title-text-color: #000;
+  --van-nav-bar-icon-color: #000;
 
-.publish-page__navbar {
-  :deep(.van-nav-bar) {
-    background: @bg;
+  :deep(.van-nav-bar),
+  :deep(.van-nav-bar__placeholder) {
+    background: transparent;
   }
 
   :deep(.van-nav-bar__title) {
     font-size: 0.36rem;
     font-weight: 700;
-    color: #fff;
+    color: #000;
   }
 
   :deep(.van-nav-bar .van-icon) {
-    color: #fff;
+    color: #000;
   }
 }
 
 .publish-page {
-  background: @bg;
-  color: #fff;
+  background: transparent;
+  color: @text-primary;
 }
 
 .publish-page__body {
-  padding: 0.32rem 0.32rem 0;
+  padding: 0.24rem 0.32rem 0;
   box-sizing: border-box;
 }
 
-/* 主输入：圆角蓝边框大容器 */
 .publish-page__editor-card {
-  border: 1px solid @border-blue;
+  border: 1px dashed @border-blue;
   border-radius: 0.24rem;
-  padding: 0.28rem 0.28rem 0.24rem;
-  background: rgba(17, 24, 39, 0.35);
+  padding: 0.28rem;
+  background: #fff;
 }
 
 .publish-page__field {
@@ -673,16 +678,16 @@ const onPublish = async () => {
 }
 
 .publish-page__field :deep(.van-field__control) {
-  min-height: 2.4rem;
+  min-height: 2.2rem;
   padding: 0;
   font-size: 0.3rem;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.95);
+  color: @text-primary;
   background: transparent !important;
 }
 
 .publish-page__field :deep(.van-field__control::placeholder) {
-  color: rgba(255, 255, 255, 0.38);
+  color: #bbb;
 }
 
 .publish-page__field :deep(.van-cell) {
@@ -695,8 +700,7 @@ const onPublish = async () => {
 }
 
 .publish-page__upload-row {
-  margin-top: 0.28rem;
-  padding-top: 0.08rem;
+  margin-top: 0.24rem;
 }
 
 .publish-page__media-row {
@@ -707,10 +711,7 @@ const onPublish = async () => {
 }
 
 .publish-page__upload-hint {
-  margin: 0.2rem 0 0;
-  font-size: 0.2rem;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.38);
+  display: none;
 }
 
 .publish-page__uploader {
@@ -737,14 +738,13 @@ const onPublish = async () => {
   }
 }
 
-/* 左下角虚线相机 + */
 .publish-page__upload-btn {
   position: relative;
   width: 1.44rem;
   height: 1.44rem;
-  border: 1px dashed rgba(255, 255, 255, 0.45);
+  border: 1px dashed @border-blue;
   border-radius: 0.16rem;
-  background: transparent;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -756,21 +756,16 @@ const onPublish = async () => {
   opacity: 0.85;
 }
 
-.publish-page__upload-icon {
-  color: #fff;
-}
-
 .publish-page__upload-plus {
   position: absolute;
-  right: 0.12rem;
-  bottom: 0.1rem;
-  font-size: 0.28rem;
-  font-weight: 600;
-  color: #fff;
+  right: 0.1rem;
+  bottom: 0.08rem;
+  font-size: 0.24rem;
+  font-weight: 700;
+  color: @primary-blue;
   line-height: 1;
 }
 
-/* 发布到哪里 */
 .publish-page__location-card {
   width: 100%;
   margin-top: 0.28rem;
@@ -778,9 +773,10 @@ const onPublish = async () => {
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  border: 1px solid @border-blue;
+  border: none;
   border-radius: 0.24rem;
-  background: rgba(17, 24, 39, 0.35);
+  background: #fff;
+  box-shadow: 0 0.08rem 0.32rem rgba(160, 175, 255, 0.18);
   box-sizing: border-box;
   text-align: left;
   cursor: pointer;
@@ -790,10 +786,19 @@ const onPublish = async () => {
   opacity: 0.92;
 }
 
+.publish-page__location-pin-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: rgba(51, 102, 255, 0.08);
+}
+
 .publish-page__location-pin {
   flex-shrink: 0;
-  font-size: 0.44rem;
-  color: @accent;
 }
 
 .publish-page__location-mid {
@@ -803,27 +808,27 @@ const onPublish = async () => {
 
 .publish-page__location-title {
   font-size: 0.3rem;
-  font-weight: 600;
-  color: #fff;
+  font-weight: 700;
+  color: @text-primary;
   line-height: 1.35;
 }
 
 .publish-page__location-sub {
-  margin-top: 0.08rem;
+  margin-top: 0.06rem;
   font-size: 0.22rem;
-  color: @muted;
+  color: @text-muted;
   line-height: 1.4;
 }
 
 .publish-page__location-right {
   flex-shrink: 0;
-  font-size: 0.26rem;
-  color: @accent;
+  font-size: 0.28rem;
+  font-weight: 500;
+  color: @primary-blue;
 }
 
-/* 话题 */
 .publish-page__tags-section {
-  margin-top: 0.4rem;
+  margin-top: 0.36rem;
 }
 
 .publish-page__tags-head-row {
@@ -839,40 +844,20 @@ const onPublish = async () => {
   flex: 1;
   min-width: 0;
   font-size: 0.28rem;
-  font-weight: 600;
-  color: @accent;
-  letter-spacing: 0.02em;
-}
-
-.publish-page__tags-add {
-  flex-shrink: 0;
-  padding: 0.08rem 0.16rem;
-  border: none;
-  border-radius: 0.12rem;
-  background: rgba(30, 94, 255, 0.25);
-  font-size: 0.24rem;
-  color: @accent;
-  cursor: pointer;
-}
-
-.publish-page__tags-add:active {
-  opacity: 0.88;
+  font-weight: 700;
+  color: @text-primary;
 }
 
 .publish-page__tags-loading,
 .publish-page__tags-empty {
   font-size: 0.24rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: @text-muted;
   padding: 0.2rem 0;
-}
-
-.publish-page__tag-popup {
-  background: transparent;
 }
 
 .publish-page__tag-popup-inner {
   padding: 0.36rem 0.32rem calc(0.36rem + env(safe-area-inset-bottom));
-  background: #111827;
+  background: #fff;
   border-radius: 0.24rem 0.24rem 0 0;
 }
 
@@ -880,7 +865,7 @@ const onPublish = async () => {
   margin-bottom: 0.28rem;
   font-size: 0.34rem;
   font-weight: 700;
-  color: #fff;
+  color: @text-primary;
   text-align: center;
 }
 
@@ -888,21 +873,17 @@ const onPublish = async () => {
   margin-bottom: 0.32rem;
   padding: 0.2rem 0.24rem;
   border-radius: 0.16rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f5f7fa;
+  border: 1px solid #e8ecf4;
 }
 
 .publish-page__tag-popup-field :deep(.van-field__control) {
-  color: rgba(255, 255, 255, 0.95);
+  color: @text-primary;
   font-size: 0.3rem;
 }
 
 .publish-page__tag-popup-field :deep(.van-field__control::placeholder) {
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.publish-page__tag-popup-field :deep(.van-icon) {
-  color: rgba(255, 255, 255, 0.45);
+  color: #bbb;
 }
 
 .publish-page__tag-popup-btn {
@@ -910,13 +891,13 @@ const onPublish = async () => {
   font-size: 0.32rem;
   font-weight: 600;
   border: none;
-  background: linear-gradient(90deg, #2563eb 0%, #4db3ff 100%);
+  background: linear-gradient(180deg, #6eb4ff 0%, #4090ff 100%);
 }
 
 .publish-page__tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem 0.24rem;
+  gap: 0.16rem 0.2rem;
   align-items: flex-start;
 }
 
@@ -924,16 +905,16 @@ const onPublish = async () => {
   position: relative;
   display: inline-flex;
   max-width: 100%;
-  padding-top: 0.06rem;
 }
 
 .publish-page__tag {
-  padding: 0.12rem 0.22rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.22rem;
+  border: none;
   border-radius: 0.12rem;
-  background: @pill-bg;
+  background: #fff;
+  box-shadow: 0 0.04rem 0.16rem rgba(160, 175, 255, 0.12);
   font-size: 0.24rem;
-  color: #fff;
+  color: @text-primary;
   line-height: 1.3;
   cursor: pointer;
   box-sizing: border-box;
@@ -941,18 +922,19 @@ const onPublish = async () => {
 }
 
 .publish-page__tag--on {
-  border: 1px solid rgba(77, 179, 255, 0.55);
-  background: rgba(30, 94, 255, 0.22);
+  background: #eef2ff;
+  color: @primary-blue;
+  box-shadow: 0 0.04rem 0.16rem rgba(51, 102, 255, 0.15);
 }
 
 .publish-page__tag-wrap--selected .publish-page__tag {
-  padding-right: 0.26rem;
+  padding-right: 0.28rem;
 }
 
 .publish-page__tag-close {
   position: absolute;
-  top: -0.02rem;
-  right: -0.02rem;
+  top: -0.06rem;
+  right: -0.06rem;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -960,11 +942,10 @@ const onPublish = async () => {
   width: 0.26rem;
   height: 0.26rem;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: 50%;
-  background: rgba(220, 53, 69, 0.92);
+  background: #ff4d4f;
   cursor: pointer;
-  box-shadow: 0 0.02rem 0.06rem rgba(0, 0, 0, 0.3);
 }
 
 .publish-page__tag-close:disabled {
@@ -987,7 +968,7 @@ const onPublish = async () => {
   bottom: 0;
   z-index: 100;
   padding: 0.2rem 0.32rem calc(0.28rem + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(5, 9, 23, 0) 0%, @bg 28%);
+  background: linear-gradient(180deg, rgba(245, 248, 255, 0) 0%, #f5f8ff 32%);
   box-sizing: border-box;
 }
 
@@ -1000,10 +981,9 @@ const onPublish = async () => {
   font-size: 0.34rem;
   font-weight: 700;
   color: #fff;
-  letter-spacing: 0.06em;
   cursor: pointer;
-  background: linear-gradient(90deg, #2563eb 0%, #3b8cff 45%, #4db3ff 100%);
-  box-shadow: 0 0.12rem 0.36rem rgba(30, 94, 255, 0.35);
+  background: linear-gradient(180deg, #6eb4ff 0%, #4090ff 100%);
+  box-shadow: 0 0.1rem 0.28rem rgba(51, 102, 255, 0.28);
 }
 
 .publish-page__submit:active:not(:disabled) {
@@ -1015,34 +995,32 @@ const onPublish = async () => {
   cursor: not-allowed;
 }
 
-/* 发布到哪里：底部弹层与页风格统一 */
 .publish-page__target-sheet {
   :deep(.van-action-sheet__content) {
-    background: #111827;
+    background: #fff;
   }
 
   :deep(.van-action-sheet__item) {
-    background: #111827;
-    color: rgba(255, 255, 255, 0.92);
+    background: #fff;
+    color: @text-primary;
     font-size: 0.32rem;
   }
 
   :deep(.van-action-sheet__item:active) {
-    background: rgba(30, 64, 175, 0.35);
+    background: #f0f5ff;
   }
 
   :deep(.van-action-sheet__cancel) {
-    background: #1f2937;
-    color: rgba(255, 255, 255, 0.85);
+    background: #f5f7fa;
+    color: @text-muted;
   }
 
   :deep(.van-action-sheet__gap) {
     height: 0.16rem;
-    background: @bg;
+    background: #f5f7fa;
   }
 }
 
-/* teleport 到 body 会脱离 .van-config-provider，PC 上与主栏同宽（见 design/index.less 9rem） */
 @media screen and (min-width: 600px) {
   .publish-page__tag-popup {
     width: min(9rem, 100vw) !important;
@@ -1054,11 +1032,6 @@ const onPublish = async () => {
   }
 }
 
-/*
- * ActionSheet 经 Popup teleport 到 body 后，根节点通常没有本 SFC 的 data-v，scoped 下的
- * .publish-page__target-sheet 选择器匹配不到。用 :global 命中真实 DOM 上的 class。
- * 用 margin auto + 定宽居中，避免改 transform 与底部滑入动画冲突。
- */
 @media screen and (min-width: 600px) {
   :global(.publish-page__target-sheet.van-popup--bottom) {
     width: min(9rem, 100vw) !important;

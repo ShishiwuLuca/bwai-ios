@@ -1,24 +1,25 @@
 <template>
+  <div class="bind-phone-page">
   <NavBar :title="t('bind_phone_title')" />
   <PageWrap>
     <div class="p-1">
       <div class="mt-1">
         <!-- <template v-if="UserInfo.mobile">
-          <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+          <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
             {{ t('old_phone_verify_code_title') }}
           </div>
           <Field v-model="inputParams.old_verify_code" center clearable size="large" :border="false"
-            class="rounded-sm overflow-hidden mt-1" type="digit" maxlength="6" autocomplete="off"
+            class="bind-phone-page__field rounded-sm overflow-hidden mt-1" type="digit" maxlength="6" autocomplete="off"
             :placeholder="t('old_phone_verify_code_placeholder')">
             <template #button>
-              <Button type="primary" size="small" block round class="rounded-sm overflow-hidden min-w-[1rem]"
+              <Button size="small" block class="bind-phone-page__send-btn min-w-[1rem]"
                 :disabled="oldPhoneCountdown > 0" @click="onSendOldVerifyCode">
                 {{ oldPhoneCountdown > 0 ? `${oldPhoneCountdown}s` : t('register_verify_code_button_text') }}
               </Button>
             </template>
 </Field>
 </template> -->
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('new_phone_title') }}
         </div>
         <Field
@@ -27,7 +28,7 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="bind-phone-page__field rounded-sm overflow-hidden mt-1"
           autocomplete="off"
           type="tel"
           :placeholder="t('new_phone_placeholder')"
@@ -36,17 +37,15 @@
           :maxlength="11"
         >
           <template #left-icon>
-            <div class="flex items-center gap-0.5" @click="showCountryPicker = true">
-              <span
-                >{{
-                  currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
-                }}&nbsp;{{ selectedCountry.areaCode }}</span
-              >
-              <Icon name="arrow-down" size="14" />
+            <div class="flex items-center gap-0.5 text-[#333]" @click="showCountryPicker = true">
+              <span>{{
+                currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
+              }}&nbsp;{{ selectedCountry.areaCode }}</span>
+              <Icon name="arrow-down" size="14" color="#333" />
             </div>
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('new_phone_verify_code_title') }}
         </div>
         <Field
@@ -55,7 +54,7 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="bind-phone-page__field rounded-sm overflow-hidden mt-1"
           type="digit"
           :maxlength="6"
           autocomplete="off"
@@ -65,11 +64,9 @@
         >
           <template #button>
             <Button
-              type="primary"
               size="small"
               block
-              round
-              class="rounded-sm overflow-hidden min-w-[1rem]"
+              class="bind-phone-page__send-btn min-w-[1rem]"
               :disabled="newPhoneCountdown > 0"
               @click="onSendNewVerifyCode"
             >
@@ -83,13 +80,18 @@
         </Field>
       </div>
       <div class="mt-2">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
+        <Button block round class="bind-phone-page__submit-btn" :loading="loading" @click="onSubmit">
           {{ t('confirm') }}
         </Button>
       </div>
     </div>
   </PageWrap>
-  <CountryPicker v-model:show="showCountryPicker" @select="onCountrySelect" />
+  </div>
+  <CountryPicker
+    v-model:show="showCountryPicker"
+    :selected-area-code="selectedCountry.areaCode"
+    @select="onCountrySelect"
+  />
 </template>
 
 <script setup lang="ts">
@@ -241,7 +243,12 @@
       CreateToast(t('new_phone_placeholder'));
       return;
     }
-    sendLoginSmsCode({ target: mobile, scene: 'MEMBER_BIND_PHONE', type: 'SMS' })
+    sendLoginSmsCode({
+      target: mobile,
+      scene: 'MEMBER_UPDATE_MOBILE',
+      type: 'SMS',
+      countryCode: selectedCountry.value?.areaCode
+    })
       .then((res: any) => {
         const { code, msg } = res;
         if (code === 0) {
@@ -312,52 +319,39 @@
   };
 </script>
 
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
+<style lang="less" scoped>
+  .bind-phone-page {
+    background: #f2f5fe;
+    min-height: 100vh;
+    --van-field-background: #f9faff;
+    --van-cell-background: #f9faff;
 
-    .van-tab {
-      padding-left: 0;
-    }
-
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.3rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
+    :deep(.van-nav-bar) { background: transparent !important; }
+    :deep(.van-nav-bar__title) { font-size: 16px; font-weight: 600; color: #000; }
+    :deep(.van-nav-bar .van-icon) { color: #000 !important; }
+    :deep(.nav-back-button .van-icon) { color: #000 !important; }
+    :deep(.page-wrap) { background: transparent; }
   }
 
-  .register-page__phone-row {
-    display: flex;
-    align-items: center;
-    margin-top: 0.25rem;
-    background: var(--van-cell-background);
-    border-radius: 0.08rem;
-    overflow: hidden;
+  .bind-phone-page__field {
+    background: #f9faff !important;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
+
+    :deep(.van-field__control) { color: #000; }
+    :deep(.van-field__control::placeholder) { color: #bbb; }
+    :deep(.van-field__left-icon) { color: #333; }
   }
 
-  .register-page__country-code {
-    display: flex;
-    align-items: center;
-    gap: 0.06rem;
-    padding: 0 0.2rem;
-    color: var(--van-text-color);
-    font-size: 0.3rem;
-    white-space: nowrap;
-    flex-shrink: 0;
+  .bind-phone-page__send-btn {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: #fff !important;
   }
 
-  .register-page__phone-field {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .register-page__phone-field :deep(.van-field__body) {
-    padding-left: 0;
+  .bind-phone-page__submit-btn {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%) !important;
+    border: none !important;
+    color: #fff !important;
   }
 </style>

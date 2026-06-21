@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="renderer" content="webkit" />
   <meta name="force-rendering" content="webkit" />
-  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico?v=<%= assetVersion %>" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -16,18 +16,90 @@
   <meta http-equiv="expires" content="-1" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="wap-font-scale" content="no" />
-  <meta name="keywords" content="BGAI" />
-  <meta name="theme-color" content="transparent" />
+  <meta name="keywords" content="BWAI" />
+  <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="app-mobile-web-app-capable" content="yes" />
   <meta name="screen-orientation" content="portrait" />
   <meta name="x5-orientation" content="portrait" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/icons/Icon-192.png" />
+  <link rel="manifest" href="/manifest.json?v=<%= assetVersion %>" />
+  <link rel="apple-touch-icon" href="/icons/Icon-192.png?v=<%= assetVersion %>" />
   <title>
     <%= title %>
   </title>
+  <style id="cap-ios-paint-fix">
+    html.cap-native,
+    html.cap-native body,
+    html.cap-native #app,
+    html.cap-native .van-config-provider {
+      min-height: var(--app-height, 100vh);
+      height: var(--app-height, 100vh);
+    }
+  </style>
+  <style id="page-shell-splash-style">
+    #page-shell-splash {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 22vh;
+      pointer-events: none;
+      z-index: 24001;
+    }
+
+    #page-shell-splash img {
+      width: 2.8rem;
+      max-width: 46vw;
+      height: auto;
+      object-fit: contain;
+    }
+  </style>
+  <script>
+    (function () {
+      var p = location.protocol || '';
+      if (p !== 'capacitor:' && p !== 'ionic:') return;
+      document.documentElement.classList.add('cap-native');
+      function setAppHeight() {
+        var h = Math.max(window.innerHeight || 0, 1);
+        var px = h + 'px';
+        document.documentElement.style.setProperty('--app-height', px);
+        document.documentElement.style.height = px;
+        if (document.body) document.body.style.height = px;
+      }
+      setAppHeight();
+      window.addEventListener('resize', setAppHeight, { passive: true });
+      window.addEventListener('orientationchange', setAppHeight, { passive: true });
+    })();
+  </script>
+  <script>
+    (function () {
+      var shellSplashPaths = ['/Login', '/Register', '/ForgotPassword'];
+      var path = (location.pathname || '').replace(/\/$/, '') || '/';
+
+      function applyShellSplash() {
+        if (document.getElementById('page-shell-splash')) return;
+        var splash = document.createElement('div');
+        splash.id = 'page-shell-splash';
+        var img = document.createElement('img');
+        img.src = '/images/logo_bitgo.png';
+        img.alt = '';
+        splash.appendChild(img);
+        document.body.appendChild(splash);
+      }
+
+      function initShellFirstPaint() {
+        if (shellSplashPaths.indexOf(path) !== -1) applyShellSplash();
+      }
+
+      if (document.body) initShellFirstPaint();
+      else document.addEventListener('DOMContentLoaded', initShellFirstPaint);
+    })();
+  </script>
   <script>
     !(function (window) {
       var docWidth = 750,
@@ -43,6 +115,9 @@
       if (!doc.addEventListener) return;
       window.addEventListener(resizeEvt, recalc, false);
       doc.addEventListener('DOMContentLoaded', recalc, false);
+      window.addEventListener('load', recalc, false);
+      setTimeout(recalc, 100);
+      setTimeout(recalc, 500);
     })(window);
 
     (function () {
@@ -75,8 +150,8 @@
 </head>
 
 <body ontouchstart="" style="background: var(--van-background)" translate="no">
-  <div id="app">
-    <script type="module" src="/src/main.ts"></script>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

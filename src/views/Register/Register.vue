@@ -1,23 +1,24 @@
 <template>
+  <div class="page-shell">
   <NavBar :title="t('register_button_text')">
     <template #right>
       <Icon
         class-prefix="exchange-icon"
         name="locale"
         :size="25"
-        color="var(--van-text-color)"
+        color="rgb(24 12 12)"
         @click="emitEvent('ShowLocales')"
       />
     </template>
   </NavBar>
   <PageWrap>
-    <div class="text-center mt-1">
+    <div class="page-shell__logo-wrap">
       <VanImage :src="Logo" width="2rem" />
       <!-- <div class="text-[0.6rem] font-bold">{{ SiteName }}</div> -->
-      <div class="text-[0.3rem]">{{ t('register_welcome_text') }}</div>
+      <div class="page-shell__welcome text-[0.3rem]">{{ t('register_welcome_text') }}</div>
     </div>
     <div class="p-1 pb-3">
-      <Tabs v-model:active="ActiveTab" :line-height="0" :swipeable="iosNativeTabsSwipeable()" :animated="iosNativeTabsAnimated()" shrink :border="false">
+      <Tabs v-model:active="ActiveTab" :line-height="0" swipeable shrink :border="false">
         <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
       </Tabs>
       <div class="mt-1">
@@ -33,8 +34,8 @@
           type="text"
           :placeholder="t('login_email_placeholder')"
         />
-        <div v-else class="register-page__phone-row">
-          <div class="register-page__country-code" @click="showCountryPicker = true">
+        <div v-else class="page-shell__phone-row">
+          <div class="page-shell__country-code" @click="showCountryPicker = true">
             <span
               >{{
                 currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
@@ -49,7 +50,7 @@
             size="large"
             autocomplete="off"
             :border="false"
-            class="register-page__phone-field rounded-sm overflow-hidden"
+            class="page-shell__phone-field rounded-sm overflow-hidden"
             type="tel"
             :placeholder="t('login_phone_placeholder')"
             :formatter="(v) => (v || '').replace(/\D/g, '')"
@@ -57,8 +58,12 @@
             :maxlength="11"
           />
         </div>
-        <CountryPicker v-model:show="showCountryPicker" @select="onCountrySelect" />
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <CountryPicker
+          v-model:show="showCountryPicker"
+          :selected-area-code="selectedCountry.areaCode"
+          @select="onCountrySelect"
+        />
+        <div class="page-shell__label mt-1 text-[0.3rem]">
           {{ t('register_verify_code_title') }}
         </div>
         <Field
@@ -79,9 +84,7 @@
             <Button
               type="primary"
               size="small"
-              block
-              round
-              class="rounded-sm overflow-hidden min-w-[1rem]"
+              class="page-shell__send-code-btn"
               :disabled="countdown > 0"
               @click="onSendVerifyCode"
             >
@@ -89,7 +92,7 @@
             </Button>
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">{{
+        <div class="page-shell__label mt-1 text-[0.3rem]">{{
           t('login_password_title')
         }}</div>
         <Field
@@ -104,15 +107,10 @@
           :placeholder="t('login_password_error')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowPassword = !ShowPassword"
-            />
+            <PasswordEyeToggle :visible="ShowPassword" @click="ShowPassword = !ShowPassword" />
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="page-shell__label mt-1 text-[0.3rem]">
           {{ t('register_confirm_pwd_title') }}
         </div>
         <Field
@@ -127,15 +125,13 @@
           :placeholder="t('login_password_error')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowConfirmPassword ? 'eye-o' : 'closed-eye'"
+            <PasswordEyeToggle
+              :visible="ShowConfirmPassword"
               @click="ShowConfirmPassword = !ShowConfirmPassword"
             />
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="page-shell__label mt-1 text-[0.3rem]">
           {{ t('register_invite_code_title') }}
         </div>
         <Field
@@ -152,29 +148,29 @@
         />
       </div>
       <div class="mt-2">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
+        <Button class="page-shell__submit-btn" type="primary" block round :loading="loading" @click="onSubmit">
           {{ t('register_button_text') }}
         </Button>
       </div>
-      <div class="mt-1 text-center text-[0.27rem] text-[var(--van-text-color-2)]">
+      <div class="page-shell__footer mt-1 text-center text-[0.27rem]">
         {{ t('register_no_account') }}
-        <span class="text-[var(--van-tab-active-text-color)]" @click="$router.push('/Login')">{{
+        <span class="page-shell__accent" @click="$router.push('/Login')">{{
           t('register_login')
         }}</span>
       </div>
       <div
-        class="mt-1 flex items-center justify-center text-[0.27rem] text-[var(--van-text-color-2)]"
+        class="page-shell__footer mt-1 flex items-center justify-center text-[0.27rem]"
       >
         <Checkbox v-model="Agree" :icon-size="14">
           {{ t('register_agree_text') }}
           <span
-            class="text-[var(--van-tab-active-text-color)]"
+            class="page-shell__accent"
             @click="$router.push('/ArticleDetail?urlName=agreement')"
             >{{ t('register_agree_text_link') }}</span
           >
           {{ t('register_agree_text_link_text') }}
           <span
-            class="text-[var(--van-tab-active-text-color)]"
+            class="page-shell__accent"
             @click="$router.push('/ArticleDetail?urlName=privacy')"
             >{{ t('register_agree_text_link_text_2') }}</span
           >
@@ -182,6 +178,7 @@
       </div>
     </div>
   </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -192,12 +189,11 @@
   import { isPassword, isEmail } from '/@/utils/is';
   // import Logo from '/@/assets/images/header_logo.png';
   import { useMessage } from '/@/hooks/web/useMessage';
-  import { NavBar, PageWrap, CountryPicker } from '/@/components';
+  import { NavBar, PageWrap, CountryPicker, PasswordEyeToggle } from '/@/components';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { RegisterByPhone, RegisterByEmail, sendSmsCode } from '/@/service/Auth';
   import { Image as VanImage, Tab, Tabs, Field, Button, Icon, Checkbox } from 'vant';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 
@@ -559,53 +555,3 @@
     { immediate: true, deep: true }
   );
 </script>
-
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
-
-    .van-tab {
-      padding-left: 0;
-    }
-
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.3rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
-  }
-
-  .register-page__phone-row {
-    display: flex;
-    align-items: center;
-    margin-top: 0.25rem;
-    background: var(--van-cell-background);
-    border-radius: 0.08rem;
-    overflow: hidden;
-  }
-
-  .register-page__country-code {
-    display: flex;
-    align-items: center;
-    gap: 0.06rem;
-    padding: 0 0.2rem;
-    color: var(--van-text-color);
-    font-size: 0.28rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .register-page__phone-field {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .register-page__phone-field :deep(.van-field__body) {
-    padding-left: 0;
-  }
-</style>

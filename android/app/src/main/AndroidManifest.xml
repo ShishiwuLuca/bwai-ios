@@ -58,4 +58,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+      勿声明 REQUEST_INSTALL_PACKAGES：Google Play 需单独声明且审核严格。
+      Play 渠道安装包更新走 @capawesome/capacitor-app-update；资源热更走 Capgo OTA。
+    -->
 </manifest>

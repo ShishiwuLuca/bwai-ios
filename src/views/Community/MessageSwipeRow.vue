@@ -252,7 +252,7 @@
 <style scoped lang="less">
   /* 已读 / 删除双按钮或仅删除；前景为 slot */
 
-  @bg-row: #060b19;
+  @bg-row: transparent;
 
   .msw-row {
     position: relative;

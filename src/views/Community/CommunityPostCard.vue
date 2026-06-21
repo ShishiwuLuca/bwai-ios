@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <div class="community-post-card__head">
       <div class="community-post-card__avatar">
-        <VanImage :src="post.userAvatar" width="100%" height="100%" round />
+        <VanImage :src="post.userAvatar || DefaultAvatar" width="100%" height="100%" round />
       </div>
       <div class="community-post-card__meta">
         <div class="community-post-card__meta-row">
@@ -90,7 +90,7 @@
       <div v-else class="community-post-card__foot-cell"></div>
       <div class="community-post-card__foot-cell">
         <span class="community-post-card__stat">
-          <Icon name="chat-o" :size="16" />
+          <Icon name="chat-o" :size="16" color="#999" />
           <span>{{ post.commentCount }}</span>
         </span>
       </div>
@@ -99,7 +99,7 @@
           class="community-post-card__stat"
           :class="{ 'community-post-card__stat--liked': liked }"
         >
-          <Icon :name="liked ? 'like' : 'like-o'" :size="16" />
+          <Icon :name="liked ? 'like' : 'like-o'" :size="16" :color="liked ? '#3366ff' : '#999'" />
           <span>{{ likeCount }}</span>
         </span>
       </div>
@@ -114,6 +114,7 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useI18n } from '/@/hooks/web/useI18n';
   import { isApiSuccess } from '/@/utils/apiResult';
+  import DefaultAvatar from '/@/assets/images/avatar_default.png';
   import type { CommunityPostItem } from './communityPostDisplay';
 
   /** 视频区域带此类名，onCardClick 用 closest 判断是否点封面（避免只靠子元素 stop 在部分机型上不可靠） */
@@ -375,16 +376,18 @@
 </script>
 
 <style scoped lang="less">
-  /* 卡片：头 / 标签 / 正文 / 媒体区 / 底栏，与 communityPostDisplay 映射字段对应 */
-
-  @bg-card: #0c1428;
+  @primary-blue: #3366ff;
+  @text-muted: #999999;
+  @tag-bg: #f0f5ff;
+  @vip-bg: #f2efff;
+  @vip-text: #9b63ff;
 
   .community-post-card {
     padding: 0.29rem 0.28rem;
-    border-radius: 0.2rem;
-    background: @bg-card;
-    box-shadow: 0 0.06rem 0.18rem rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 0.32rem;
+    background: #fff;
+    box-shadow: 0 0.08rem 0.4rem rgba(160, 175, 255, 0.2);
+    border: none;
   }
 
   .community-post-card__head {
@@ -400,7 +403,7 @@
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .community-post-card__meta {
@@ -410,39 +413,41 @@
 
   .community-post-card__meta-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 0.16rem;
   }
 
   .community-post-card__name {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.08rem;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.1rem;
     min-width: 0;
   }
 
   .community-post-card__name-text {
     font-size: 0.28rem;
-    font-weight: 600;
-    color: #fff;
+    font-weight: 700;
+    color: #000;
     line-height: 1.3;
   }
 
   .community-post-card__badge {
-    font-size: 0.22rem;
+    font-size: 0.2rem;
     padding: 0.02rem 0.1rem;
     border-radius: 0.06rem;
-    background: linear-gradient(90deg, #1e5a9e, #0a7ee8);
-    color: #fff;
+    background: @vip-bg;
+    color: @vip-text;
     font-weight: 600;
+    line-height: 1.4;
   }
 
   .community-post-card__time {
     flex-shrink: 0;
     font-size: 0.22rem;
-    color: rgba(255, 255, 255, 0.45);
+    color: @text-muted;
   }
 
   .community-post-card__tags {
@@ -454,22 +459,17 @@
 
   .community-post-card__tag {
     font-size: 0.22rem;
-    padding: 0.06rem 0.14rem;
-    border-radius: 0.08rem;
-    background: rgba(15, 75, 85, 0.75);
-    color: #5eead4;
+    padding: 0.06rem 0.16rem;
+    border-radius: 999px;
+    background: @tag-bg;
+    color: @primary-blue;
     font-weight: 500;
-  }
-
-  .community-post-card__tag:nth-child(2) {
-    background: rgba(65, 45, 110, 0.65);
-    color: #c4b5fd;
   }
 
   .community-post-card__body {
     font-size: 0.3rem;
     font-weight: 600;
-    color: #fff;
+    color: #000;
     line-height: 1.45;
     margin-bottom: 0.16rem;
   }
@@ -477,13 +477,13 @@
   .community-post-card__media {
     position: relative;
     height: 2.52rem;
-    border-radius: 0.16rem;
+    border-radius: 0.24rem;
     margin-bottom: 0.16rem;
     overflow: hidden;
   }
 
   .community-post-card__media--dark {
-    background: #050810;
+    background: #f5f7fa;
   }
 
   .community-post-card__media--gallery {
@@ -506,9 +506,9 @@
   .community-post-card__gallery-cell {
     position: relative;
     aspect-ratio: 1;
-    border-radius: 0.08rem;
+    border-radius: 0.12rem;
     overflow: hidden;
-    background: #050810;
+    background: #f5f7fa;
     cursor: pointer;
   }
 
@@ -547,7 +547,7 @@
     position: relative;
     z-index: 0;
     object-fit: cover;
-    background: #000;
+    background: #f5f7fa;
     vertical-align: top;
     cursor: pointer;
   }
@@ -570,7 +570,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0.08rem 0.24rem rgba(0, 0, 0, 0.35);
+    box-shadow: 0 0.08rem 0.24rem rgba(0, 0, 0, 0.15);
     cursor: pointer;
     pointer-events: auto;
   }
@@ -581,7 +581,7 @@
     height: 0;
     border-style: solid;
     border-width: 0.14rem 0 0.14rem 0.22rem;
-    border-color: transparent transparent transparent #1a2338;
+    border-color: transparent transparent transparent @primary-blue;
     margin-left: 0.05rem;
   }
 
@@ -591,8 +591,8 @@
     width: 100%;
     font-size: 0.24rem;
     margin-top: 0.2rem;
-    padding-top: 0.24rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 0.2rem;
+    border-top: 1px solid #f0f0f0;
     box-sizing: border-box;
   }
 
@@ -619,7 +619,7 @@
   }
 
   .community-post-card__report-text {
-    color: rgba(255, 255, 255, 0.55);
+    color: @text-muted;
   }
 
   .community-post-card__stat {
@@ -627,11 +627,11 @@
     align-items: center;
     justify-content: center;
     gap: 0.08rem;
-    color: rgba(255, 255, 255, 0.88);
+    color: @text-muted;
   }
 
   .community-post-card__stat--liked {
-    color: #ff6b9d;
+    color: @primary-blue;
   }
 
   .community-post-card__foot-cell:active .community-post-card__stat {

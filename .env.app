@@ -2,7 +2,7 @@
 NODE_ENV = 'production'
 
 # 网站标题
-VITE_GLOB_APP_TITLE = BGAI
+VITE_GLOB_APP_TITLE = BWAI
 
 # 简称，用于配置文件名字 不要出现空格、数字开头等特殊字符
 VITE_GLOB_APP_SHORT_NAME = exchange_bwai
@@ -11,12 +11,15 @@ VITE_GLOB_APP_SHORT_NAME = exchange_bwai
 VITE_PUBLIC_PATH = ./
 
 # 版本号
-VITE_GLOB_SYSTEM_VERSION = '1.0.3'
+VITE_GLOB_SYSTEM_VERSION = '1.0.7'
 
 # 打包是否输出gz｜br文件
 # 可选: gzip | brotli | none
 # 也可以有多个, 例如 ‘gzip’|'brotli',这样会同时生成 .gz和.br文件
 VITE_BUILD_COMPRESS = 'none'
+
+# Capacitor 等原生包：WebSocket 固定根地址
+VITE_WS_FIXED_ORIGIN = wss://forwhale.com
 
 # 接口地址 可以由nginx做转发或者直接写实际地址
 VITE_GLOB_API_URL = https://forwhale.com

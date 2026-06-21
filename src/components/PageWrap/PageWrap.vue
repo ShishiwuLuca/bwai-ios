@@ -20,8 +20,7 @@
 
 <style scoped lang="less">
   .page-wrap {
-    // min-height: 100vh;
-    background: var(--van-background);
+    background: transparent;
     color: var(--van-text-color);
   }
 </style>

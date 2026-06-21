@@ -17,7 +17,7 @@
         v-model="nickname"
         :title="t('nickname_label')"
         :placeholder="t('edit_nickname_placeholder')"
-        class="!rounded-sm"
+        class="edit-nickname-page__field !rounded-sm"
       />
       <div v-else>
         <Popover v-model:show="ShowSexPopover" :offset="[0, 8]" placement="bottom">
@@ -29,10 +29,10 @@
               :border="false"
               is-link
               :title="UserInfo.sex === 1 ? t('sex_male') : t('sex_female')"
-              class="!rounded-sm"
+              class="edit-nickname-page__field !rounded-sm"
             />
           </template>
-          <div class="w-29 h-17 overflow-auto p-0.5 bg-[var(--van-background)]">
+          <div class="w-29 h-17 overflow-auto p-0.5 bg-[#f2f5fe]">
             <Cell
               v-for="item in SexList"
               :key="item.value"
@@ -43,14 +43,14 @@
               is-link
               :title="item.label"
               class="!rounded-sm mb-0.5"
-              :class="[{ '!bg-[var(--van-primary-color)]': UserInfo.sex === item.value }]"
+              :class="[{ '!bg-[#2071f8] !text-white': UserInfo.sex === item.value }]"
               @click="onSelectSex(item)"
             />
           </div>
         </Popover>
       </div>
       <div class="mt-1">
-        <Button type="primary" block round @click="onSubmit">{{ t('confirm') }}</Button>
+        <Button type="primary" block round class="edit-nickname-page__btn-submit" @click="onSubmit">{{ t('confirm') }}</Button>
       </div>
     </div>
   </PageWrap>
@@ -137,16 +137,47 @@
 
 <style scoped lang="less">
   .edit-nickname-page {
-    color: var(--van-text-color);
+    background: #f2f5fe;
+    min-height: 100vh;
+    --van-field-background: #f9faff;
+    --van-cell-background: #f9faff;
+
+    :deep(.van-nav-bar) {
+      background: transparent !important;
+    }
+
+    :deep(.van-nav-bar__title) {
+      font-size: 16px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    :deep(.van-nav-bar .van-icon) {
+      color: #000000 !important;
+    }
+
+    :deep(.page-wrap) {
+      background: transparent;
+    }
   }
 
   .edit-nickname-page__body {
     padding: 0.32rem;
   }
 
-  .edit-nickname-page__btn {
-    margin-top: 0.4rem;
-    height: 0.88rem;
+  .edit-nickname-page__field {
+    background: #f9faff !important;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
+
+    :deep(.van-field__control) {
+      color: #000000;
+    }
+  }
+
+  .edit-nickname-page__btn-submit.van-button--primary {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%);
+    border: none;
+    color: #ffffff;
   }
 
   :deep(.van-popover__wrapper) {

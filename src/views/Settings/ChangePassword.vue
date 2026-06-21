@@ -1,4 +1,5 @@
 <template>
+  <div class="change-pwd-page">
   <NavBar :title="t('change_password_title')" />
   <PageWrap>
     <div class="p-1">
@@ -6,8 +7,7 @@
         v-if="UserInfo.mobile"
         v-model:active="ActiveTab"
         :line-height="0"
-        :swipeable="iosNativeTabsSwipeable()"
-        :animated="iosNativeTabsAnimated()"
+        swipeable
         shrink
         :border="false"
       >
@@ -21,7 +21,7 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden"
+          class="change-pwd-page__field rounded-sm overflow-hidden"
           autocomplete="off"
           type="text"
           :placeholder="t('login_email_placeholder')"
@@ -52,7 +52,7 @@
             :maxlength="11"
           />
         </div>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('register_verify_code_title') }}
         </div>
         <Field
@@ -61,7 +61,7 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="change-pwd-page__field rounded-sm overflow-hidden mt-1"
           type="digit"
           maxlength="6"
           autocomplete="off"
@@ -75,7 +75,7 @@
               size="small"
               block
               round
-              class="rounded-sm overflow-hidden min-w-[1rem]"
+              class="rounded-sm overflow-hidden min-w-[1rem] change-pwd-page__send-btn"
               :disabled="countdown > 0"
               @click="onSendVerifyCode"
             >
@@ -83,7 +83,7 @@
             </Button>
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">{{
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">{{
           t('old_password_title')
         }}</div>
         <Field
@@ -94,19 +94,14 @@
           :type="ShowOldPassword ? 'text' : 'password'"
           autocomplete="off"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="change-pwd-page__field rounded-sm overflow-hidden mt-1"
           :placeholder="t('login_password_error')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowOldPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowOldPassword = !ShowOldPassword"
-            />
+            <PasswordEyeToggle :visible="ShowOldPassword" @click="ShowOldPassword = !ShowOldPassword" />
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">{{
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">{{
           t('new_password_title')
         }}</div>
         <Field
@@ -117,19 +112,14 @@
           :type="ShowPassword ? 'text' : 'password'"
           autocomplete="off"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="change-pwd-page__field rounded-sm overflow-hidden mt-1"
           :placeholder="t('login_password_error')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowPassword = !ShowPassword"
-            />
+            <PasswordEyeToggle :visible="ShowPassword" @click="ShowPassword = !ShowPassword" />
           </template>
         </Field>
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('register_confirm_pwd_title') }}
         </div>
         <Field
@@ -140,41 +130,44 @@
           :type="ShowConfirmPassword ? 'text' : 'password'"
           autocomplete="off"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="change-pwd-page__field rounded-sm overflow-hidden mt-1"
           :placeholder="t('register_confirm_pwd_placeholder')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowConfirmPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowConfirmPassword = !ShowConfirmPassword"
-            />
+            <PasswordEyeToggle :visible="ShowConfirmPassword" @click="ShowConfirmPassword = !ShowConfirmPassword" />
           </template>
         </Field>
       </div>
       <div class="mt-2">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
+        <Button
+          type="primary"
+          block
+          round
+          :loading="loading"
+          class="change-pwd-page__submit-btn"
+          @click="onSubmit"
+        >
           {{ t('confirm') }}
         </Button>
       </div>
     </div>
   </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
   import { useI18n } from 'vue-i18n';
   import { useRouter } from 'vue-router';
   import { changePassword } from '/@/service/User';
-  import { NavBar, PageWrap } from '/@/components';
+  import { NavBar, PageWrap, PasswordEyeToggle } from '/@/components';
   import { isPassword, isEmail } from '/@/utils/is';
   import { sendLoginSmsCode } from '/@/service/Auth';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { Tab, Tabs, Field, Button, Icon } from 'vant';
+  // Icon 保留用于 arrow-down
   import { ref, computed, watch, onBeforeMount } from 'vue';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   // 国际化、路由与全局消息
 
@@ -474,31 +467,79 @@
   });
 </script>
 
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
+<style lang="less" scoped>
+  .change-pwd-page {
+    background: #f2f5fe;
+    min-height: 100vh;
+    --van-field-background: #f9faff;
+    --van-cell-background: #f9faff;
 
-    .van-tab {
-      padding-left: 0;
+    :deep(.van-nav-bar) {
+      background: transparent !important;
     }
 
-    .van-tab--active {
-      .van-tab__text {
+    :deep(.van-nav-bar__title) {
+      font-size: 16px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    :deep(.van-nav-bar .van-icon) {
+      color: #000000 !important;
+    }
+
+    :deep(.page-wrap) {
+      background: transparent;
+    }
+
+    :deep(.van-tabs__nav) {
+      padding-left: 0;
+      padding-right: 0;
+      background: transparent;
+
+      .van-tab {
+        padding-left: 0;
+      }
+
+      .van-tab--active .van-tab__text {
         font-size: 0.3rem !important;
+        color: #2071f8;
+      }
+
+      .van-tab__text {
+        font-size: 0.27rem;
+        color: #8c8c8c;
       }
     }
+  }
 
-    .van-tab__text {
-      font-size: 0.27rem;
+  .change-pwd-page__field {
+    background: #f9faff !important;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
+
+    :deep(.van-field__control) {
+      color: #000000;
     }
+  }
+
+  .change-pwd-page__submit-btn.van-button--primary {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%);
+    border: none;
+    color: #ffffff;
+  }
+
+  .change-pwd-page__send-btn.van-button--primary {
+    background: linear-gradient(180deg, #6ca9ff 0%, #2071f8 100%);
+    border: none;
+    border-radius: 4px !important;
   }
 
   .register-page__phone-row {
     display: flex;
     align-items: center;
     margin-top: 0.25rem;
-    background: var(--van-cell-background);
+    background: #f9faff;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
     border-radius: 0.08rem;
     overflow: hidden;
   }
@@ -508,7 +549,7 @@
     align-items: center;
     gap: 0.06rem;
     padding: 0 0.2rem;
-    color: var(--van-text-color);
+    color: #000000;
     font-size: 0.3rem;
     white-space: nowrap;
     flex-shrink: 0;

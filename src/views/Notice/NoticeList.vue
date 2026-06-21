@@ -1,7 +1,8 @@
 <template>
+  <div class="page-shell notice-page">
   <NavBar :title="t('notice_list_title')" fixed placeholder :border="false" />
   <PageWrap class="notice-list-page">
-    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="noticeTabsAnimated" :swipeable="iosNativeTabsSwipeable()">
+    <Tabs v-model:active="ActiveNoticeType" shrink :line-height="0" :animated="!isRTL" swipeable>
       <Tab
         :show-zero-badge="false"
         v-for="(item, index) in NoticeTypeList"
@@ -14,7 +15,7 @@
           v-model="refreshing"
           @refresh="onRefresh"
           class="!overflow-auto"
-          :style="{ height: 'calc(100vh - var(--van-nav-bar-height) - 50px)' }"
+          :style="{ height: 'calc(100vh - var(--van-nav-bar-height) - 43px)' }"
         >
           <List v-model:loading="loading" :finished="finished" @load="onLoad">
             <template #finished>
@@ -24,7 +25,7 @@
             <AppCardLinear
               v-for="(child, keys) in item.children"
               :key="keys"
-              class="m-1 border-1 border-solid border-[var(--van-border-color)]"
+              class="notice-page__card"
             >
               <Cell
                 v-if="ActiveNoticeType === 0"
@@ -32,7 +33,7 @@
                 clickable
                 :border="false"
                 :title="child.title"
-                title-class="!text-[0.31rem]"
+                title-class="notice-page__card-title"
                 class="!bg-transparent"
               >
                 <template #value>
@@ -41,29 +42,29 @@
                   </template>
                   <template v-else>
                     <Badge position="top-right" :dot="!child.isRead" :offset="[-5, 4]">
-                      <div class="text-[0.25rem]">{{ TimeToFormat(child.publishTime) }}</div>
+                      <div class="notice-page__card-date">{{ TimeToFormat(child.publishTime) }}</div>
                     </Badge>
                   </template>
                 </template>
               </Cell>
-              <div class="p-1" :class="{ '!pl-1': ActiveNoticeType === 1 }">
+              <div class="notice-page__card-body">
                 <template v-if="ActiveNoticeType === 0">
                   <div
                     class="text-[0.27rem] text-gray-500 h-2 overflow-hidden"
                     v-html="child.content"
                   ></div>
-                  <Divider dashed class="!mt-0.5 !mb-0.5" />
+                  <Divider dashed class="notice-page__divider" />
                   <div class="flex items-center justify-between">
-                    <div class="text-[0.27rem] flex-auto">{{
+                    <div class="notice-page__card-date flex-auto">{{
                       TimeToFormat(child.publishTime)
                     }}</div>
                     <Cell
-                      class="rounded-sm !p-0.5 !w-7 overflow-hidden"
+                      class="notice-page__detail-btn flex-shrink-0"
                       center
                       clickable
                       :border="false"
                       :title="t('notice_detail_button_title')"
-                      title-class="!text-[0.27rem]"
+                      title-class="notice-page__detail-btn-text"
                       is-link
                       @click="goDetail(child)"
                     />
@@ -83,6 +84,7 @@
       </Tab>
     </Tabs>
   </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -95,13 +97,15 @@
   import { ref, computed, onBeforeMount, watch } from 'vue';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { Tab, Tabs, Cell, Badge, Divider, PullRefresh, List, Empty, BackTop } from 'vant';
+  import { syncAppIconBadgeWithUnreadCount } from '/@/utils/appIconBadge';
+  import { applyAppIconBadgeFromMessageUnreadCount } from '/@/utils/appNativeNotify';
   import {
     getNoticePage,
     getMyMessage,
     updateMessageReadStatus,
+    getMyMessageUnreadCount,
     updateNoticeReadStatus
   } from '/@/service/Notice';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
 
   /** 从 useI18n 解构的文案与能力 */
   const { t } = useI18n();
@@ -165,8 +169,6 @@
   const isRTL = computed(() => {
     return SystemStore.localInfo.isRTL;
   });
-
-  const noticeTabsAnimated = computed(() => !isRTL.value && iosNativeTabsAnimated());
 
   // 监听Tab切换
 
@@ -321,7 +323,12 @@
       return;
     }
 
-    updateMessageReadStatus({ ids: ShowData }).then(() => {});
+    updateMessageReadStatus({ ids: ShowData }).then((res) => {
+      const { code } = res;
+      if (Number(code) === 0) {
+        void syncAppIconBadgeWithUnreadCount();
+      }
+    });
   };
 
   // 更新公告已读状态
@@ -344,25 +351,28 @@
     });
   };
 
+  // 获取我的消息未读数量
+
+  /** 提示与弹窗：getMyMessageUnreadCountData */
+  const getMyMessageUnreadCountData = (): void => {
+    if (!UserStore.getToken) return;
+    getMyMessageUnreadCount().then((res) => {
+      const { code, data } = res;
+      if (Number(code) === 0) {
+        NoticeTypeList.value[1].badge = data;
+        void applyAppIconBadgeFromMessageUnreadCount(data);
+      }
+    });
+  };
+
   // 初始化
   onBeforeMount((): void => {
     getNoticeList();
+    getMyMessageUnreadCountData();
   });
 </script>
 
 <style lang="less" scoped>
-  :deep(.van-tabs__nav) {
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.3rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
-  }
-
   :deep(.van-cell__title) {
     flex: auto;
   }

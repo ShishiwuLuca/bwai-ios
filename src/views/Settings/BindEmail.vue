@@ -1,24 +1,25 @@
 <template>
+  <div class="bind-email-page">
   <NavBar :title="t('bind_email_title')" />
   <PageWrap>
     <div class="p-1">
       <div class="mt-1">
         <!-- <template v-if="UserInfo.email">
-          <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+          <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
             {{ t('old_email_verify_code_title') }}
           </div>
           <Field v-model="inputParams.old_verify_code" center clearable size="large" :border="false"
-            class="rounded-sm overflow-hidden mt-1" type="digit" maxlength="6" autocomplete="off"
+            class="bind-email-page__field rounded-sm overflow-hidden mt-1" type="digit" maxlength="6" autocomplete="off"
             :placeholder="t('old_email_verify_code_placeholder')">
             <template #button>
-              <Button type="primary" size="small" block round class="rounded-sm overflow-hidden min-w-[1rem]"
+              <Button size="small" block class="bind-email-page__send-btn min-w-[1rem]"
                 :disabled="oldEmailCountdown > 0" @click="onSendOldVerifyCode">
                 {{ oldEmailCountdown > 0 ? `${oldEmailCountdown}s` : t('register_verify_code_button_text') }}
               </Button>
             </template>
 </Field>
 </template> -->
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('new_email_title') }}
         </div>
         <Field
@@ -27,12 +28,12 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="bind-email-page__field rounded-sm overflow-hidden mt-1"
           autocomplete="off"
           type="text"
           :placeholder="t('new_email_placeholder')"
         />
-        <div class="mt-1 text-[0.3rem] text-[var(--van-tab-active-text-color)]">
+        <div class="mt-1 text-[0.3rem] text-[#000] font-medium">
           {{ t('new_email_verify_code_title') }}
         </div>
         <Field
@@ -41,7 +42,7 @@
           clearable
           size="large"
           :border="false"
-          class="rounded-sm overflow-hidden mt-1"
+          class="bind-email-page__field rounded-sm overflow-hidden mt-1"
           type="digit"
           maxlength="6"
           autocomplete="off"
@@ -51,11 +52,9 @@
         >
           <template #button>
             <Button
-              type="primary"
               size="small"
               block
-              round
-              class="rounded-sm overflow-hidden min-w-[1rem]"
+              class="bind-email-page__send-btn min-w-[1rem]"
               :disabled="newEmailCountdown > 0"
               @click="onSendNewVerifyCode"
             >
@@ -69,12 +68,13 @@
         </Field>
       </div>
       <div class="mt-2">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
+        <Button block round class="bind-email-page__submit-btn" :loading="loading" @click="onSubmit">
           {{ t('confirm') }}
         </Button>
       </div>
     </div>
   </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -256,52 +256,38 @@
   };
 </script>
 
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
+<style lang="less" scoped>
+  .bind-email-page {
+    background: #f2f5fe;
+    min-height: 100vh;
+    --van-field-background: #f9faff;
+    --van-cell-background: #f9faff;
 
-    .van-tab {
-      padding-left: 0;
-    }
-
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.3rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
+    :deep(.van-nav-bar) { background: transparent !important; }
+    :deep(.van-nav-bar__title) { font-size: 16px; font-weight: 600; color: #000; }
+    :deep(.van-nav-bar .van-icon) { color: #000 !important; }
+    :deep(.nav-back-button .van-icon) { color: #000 !important; }
+    :deep(.page-wrap) { background: transparent; }
   }
 
-  .register-page__phone-row {
-    display: flex;
-    align-items: center;
-    margin-top: 0.25rem;
-    background: var(--van-cell-background);
-    border-radius: 0.08rem;
-    overflow: hidden;
+  .bind-email-page__field {
+    background: #f9faff !important;
+    box-shadow: 0 0 2px rgba(87, 119, 251, 0.25);
+
+    :deep(.van-field__control) { color: #000; }
+    :deep(.van-field__control::placeholder) { color: #bbb; }
   }
 
-  .register-page__country-code {
-    display: flex;
-    align-items: center;
-    gap: 0.06rem;
-    padding: 0 0.2rem;
-    color: var(--van-text-color);
-    font-size: 0.3rem;
-    white-space: nowrap;
-    flex-shrink: 0;
+  .bind-email-page__send-btn {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%) !important;
+    border: none !important;
+    border-radius: 4px !important;
+    color: #fff !important;
   }
 
-  .register-page__phone-field {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .register-page__phone-field :deep(.van-field__body) {
-    padding-left: 0;
+  .bind-email-page__submit-btn {
+    background: linear-gradient(180deg, #92b6ff 0%, #2a61f9 100%) !important;
+    border: none !important;
+    color: #fff !important;
   }
 </style>

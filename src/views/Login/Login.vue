@@ -1,23 +1,24 @@
 <template>
+  <div class="page-shell">
   <NavBar :title="t('login_button_text')">
     <template #right>
       <Icon
         class-prefix="exchange-icon"
         name="locale"
         :size="25"
-        color="var(--van-text-color)"
+        color="rgb(24 12 12)"
         @click="emitEvent('ShowLocales')"
       />
     </template>
   </NavBar>
   <PageWrap>
-    <div class="text-center mt-1">
+    <div class="page-shell__logo-wrap">
       <VanImage :src="Logo" width="3rem" />
       <!-- <div class="text-[0.55rem] font-bold">{{ SiteName }}</div> -->
-      <div class="text-[0.26rem]">{{ t('login_welcome_text') }}</div>
+      <div class="page-shell__welcome">{{ t('login_welcome_text') }}</div>
     </div>
     <div class="p-1">
-      <Tabs v-model:active="ActiveTab" :line-height="0" :swipeable="iosNativeTabsSwipeable()" :animated="iosNativeTabsAnimated()" shrink :border="false">
+      <Tabs v-model:active="ActiveTab" :line-height="0" swipeable shrink :border="false">
         <Tab v-for="(item, index) in LoginOptions" :key="index" :title="t(item.title)" />
       </Tabs>
       <div class="mt-1">
@@ -33,8 +34,8 @@
           autocomplete="off"
           :placeholder="t('login_email_placeholder')"
         />
-        <div v-else class="login-page__phone-row">
-          <div class="login-page__country-code" @click="showCountryPicker = true">
+        <div v-else class="page-shell__phone-row">
+          <div class="page-shell__country-code" @click="showCountryPicker = true">
             <span
               >{{
                 currentLanguage === 'zh_CN' ? selectedCountry.name : selectedCountry.nameEn
@@ -49,7 +50,7 @@
             size="large"
             autocomplete="off"
             :border="false"
-            class="login-page__phone-field rounded-sm overflow-hidden"
+            class="page-shell__phone-field rounded-sm overflow-hidden"
             type="tel"
             :placeholder="t('login_phone_placeholder')"
             :formatter="(v) => (v || '').replace(/\D/g, '')"
@@ -57,8 +58,12 @@
             :maxlength="11"
           />
         </div>
-        <CountryPicker v-model:show="showCountryPicker" @select="onCountrySelect" />
-        <div class="mt-1 text-[0.29rem] text-[var(--van-tab-active-text-color)]">{{
+        <CountryPicker
+          v-model:show="showCountryPicker"
+          :selected-area-code="selectedCountry.areaCode"
+          @select="onCountrySelect"
+        />
+        <div class="page-shell__label mt-1 text-[0.29rem]">{{
           t('login_password_title')
         }}</div>
         <Field
@@ -73,18 +78,13 @@
           :placeholder="t('login_password_error')"
         >
           <template #button>
-            <Icon
-              color="var(--van-tab-active-text-color)"
-              size="0.35rem"
-              :name="ShowPassword ? 'eye-o' : 'closed-eye'"
-              @click="ShowPassword = !ShowPassword"
-            />
+            <PasswordEyeToggle :visible="ShowPassword" @click="ShowPassword = !ShowPassword" />
           </template>
         </Field>
       </div>
       <div class="mt-1 flex justify-between items-center">
         <div
-          class="text-[var(--van-tab-active-text-color)] text-[0.23rem]"
+          class="page-shell__accent text-[0.23rem]"
           @click="$router.push('/ForgotPassword')"
           >{{ t('login_forgot_password') }}</div
         >
@@ -95,18 +95,26 @@
         </div>
       </div>
       <div class="mt-6">
-        <Button type="primary" block round :loading="loading" @click="onSubmit">
+        <Button
+          class="page-shell__submit-btn"
+          type="primary"
+          block
+          round
+          :loading="loading"
+          @click="onSubmit"
+        >
           {{ t('login_button_text') }}
         </Button>
       </div>
-      <div class="mt-1 text-center text-[0.27rem] text-[var(--van-text-color-2)]">
+      <div class="page-shell__footer mt-1 text-center text-[0.27rem]">
         {{ t('login_no_account') }}
-        <span class="text-[var(--van-tab-active-text-color)]" @click="$router.push('/Register')">{{
+        <span class="page-shell__accent" @click="$router.push('/Register')">{{
           t('login_register')
         }}</span>
       </div>
     </div>
   </PageWrap>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -118,14 +126,11 @@
   import { useMessage } from '/@/hooks/web/useMessage';
   import { login, loginByEmail } from '/@/service/Auth';
   import { ref, onMounted, computed, watch } from 'vue';
-  import { NavBar, PageWrap, CountryPicker } from '/@/components';
+  import { NavBar, PageWrap, CountryPicker, PasswordEyeToggle } from '/@/components';
   import { useUserStoreWithOut } from '/@/stores/modules/UserConfig';
   import { useSystemStoreWithOut } from '/@/stores/modules/SystemConfig';
   import { Image as VanImage, Tab, Tabs, Field, Button, Icon, Checkbox } from 'vant';
   import type { NormalizedCountryItem } from '/@/components/CountryPicker/CountryPicker.vue';
-  import { iosNativeTabsAnimated, iosNativeTabsSwipeable } from '/@/utils/iosUiAnimations';
-
-  // 国际化与路由实例
 
   /** 从 useI18n 解构的文案与能力 */
   const { t } = useI18n();
@@ -348,53 +353,3 @@
     }
   });
 </script>
-
-<style lang="css" scoped>
-  :deep(.van-tabs__nav) {
-    padding-left: 0;
-    padding-right: 0;
-
-    .van-tab {
-      padding-left: 0;
-    }
-
-    .van-tab--active {
-      .van-tab__text {
-        font-size: 0.29rem !important;
-      }
-    }
-
-    .van-tab__text {
-      font-size: 0.27rem;
-    }
-  }
-
-  .login-page__phone-row {
-    display: flex;
-    align-items: center;
-    margin-top: 0.25rem;
-    background: var(--van-cell-background);
-    border-radius: 0.08rem;
-    overflow: hidden;
-  }
-
-  .login-page__country-code {
-    display: flex;
-    align-items: center;
-    gap: 0.06rem;
-    padding: 0 0.2rem;
-    color: var(--van-text-color);
-    font-size: 0.28rem;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .login-page__phone-field {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .login-page__phone-field :deep(.van-field__body) {
-    padding-left: 0;
-  }
-</style>
