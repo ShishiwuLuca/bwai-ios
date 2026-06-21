@@ -13,15 +13,14 @@ const config: CapacitorConfig = {
     // 允许混合内容（HTTP和HTTPS）
     allowMixedContent: true,
     // 启用硬件加速
-    webContentsDebuggingEnabled: true
+    webContentsDebuggingEnabled: false
   },
   // iOS WebView 配置（allowsInlineMediaPlayback 等为原生支持的扩展项，类型中未声明，用断言保留）
   ios: {
     // 允许内联媒体播放
     allowsInlineMediaPlayback: true,
-    // 上架包关闭 WebView 远程调试（Debug 需排查时可在本地临时改为 true 后勿提交）
-    // 调试白屏时用 Safari「开发」→ 模拟器 → 检查 DOM；上架前改回 false
-    webContentsDebuggingEnabled: true
+    // 正式包关闭 WebView 远程调试（本地排查白屏时可临时改为 true，勿提交）
+    webContentsDebuggingEnabled: false
   } as CapacitorConfig['ios'],
   plugins: {
     /**

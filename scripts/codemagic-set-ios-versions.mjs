@@ -27,6 +27,26 @@ function setPbxprojVersions(marketing, build) {
   fs.writeFileSync(pbxprojPath, content, 'utf8');
 }
 
+/** 与原生 MARKETING_VERSION 对齐，供 build-only:app 打入 dist（服务端 OTA / version-check 用） */
+function syncEnvAppVersion(marketing) {
+  const envPath = path.join(buildDir, '.env.app');
+  if (!fs.existsSync(envPath)) {
+    console.warn('[ios-version] .env.app not found, skip sync');
+    return;
+  }
+  let content = fs.readFileSync(envPath, 'utf8');
+  if (/VITE_GLOB_SYSTEM_VERSION\s*=/.test(content)) {
+    content = content.replace(
+      /VITE_GLOB_SYSTEM_VERSION\s*=\s*['"]?[^'"\n]+['"]?/,
+      `VITE_GLOB_SYSTEM_VERSION = '${marketing}'`
+    );
+  } else {
+    content += `\nVITE_GLOB_SYSTEM_VERSION = '${marketing}'\n`;
+  }
+  fs.writeFileSync(envPath, content, 'utf8');
+  console.log(`[ios-version] Synced .env.app VITE_GLOB_SYSTEM_VERSION → ${marketing}`);
+}
+
 function bumpPatch(input) {
   const parts = String(input).trim().split('.').map((s) => parseInt(s, 10) || 0);
   while (parts.length < 3) parts.push(0);
@@ -184,3 +204,4 @@ if (buildNumberOverride && /^\d+$/.test(buildNumberOverride)) {
 const nextBuild = latestBuild + 1;
 console.log(`[ios-version] Build number → ${nextBuild} (marketing ${newMarketing}, latest seen ${latestBuild})`);
 setPbxprojVersions(newMarketing, String(nextBuild));
+syncEnvAppVersion(newMarketing);

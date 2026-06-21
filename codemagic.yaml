@@ -35,6 +35,10 @@ workflows:
           corepack prepare pnpm@10.33.0 --activate
           pnpm install --frozen-lockfile
 
+      # 须在 build-only:app 之前：递增 iOS 版本并同步 .env.app，保证原生包与资源版本一致、可 OTA/整包更新
+      - name: Set iOS marketing version and build number
+        script: node scripts/codemagic-set-ios-versions.mjs
+
       - name: Build web (app mode)
         script: pnpm run build-only:app
 
@@ -74,10 +78,6 @@ workflows:
           xcode-project use-profiles \
             --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
             --archive-method app-store
-
-      # 营销版本：ASC 最高版本与工程取 max 后 patch +0.0.1；Build 在该版本下 +1（见 scripts/codemagic-set-ios-versions.sh）
-      - name: Set iOS marketing version and build number
-        script: node scripts/codemagic-set-ios-versions.mjs
 
       - name: Build ipa
         script: |
