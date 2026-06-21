@@ -77,10 +77,7 @@ workflows:
 
       # 营销版本：ASC 最高版本与工程取 max 后 patch +0.0.1；Build 在该版本下 +1（见 scripts/codemagic-set-ios-versions.sh）
       - name: Set iOS marketing version and build number
-        script: |
-          set -e
-          chmod +x scripts/codemagic-set-ios-versions.sh
-          ./scripts/codemagic-set-ios-versions.sh
+        script: node scripts/codemagic-set-ios-versions.mjs
 
       - name: Build ipa
         script: |
